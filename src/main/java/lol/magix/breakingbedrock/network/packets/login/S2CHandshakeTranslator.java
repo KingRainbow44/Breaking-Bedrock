@@ -7,9 +7,10 @@ import com.nukkitx.protocol.bedrock.util.EncryptionUtils;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.network.translation.Translator;
+import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.utils.EncodingUtils;
 
-@Translate
+@Translate(PacketType.BEDROCK)
 public final class S2CHandshakeTranslator extends Translator<ServerToClientHandshakePacket> {
     @Override
     public Class<ServerToClientHandshakePacket> getPacketClass() {
@@ -29,7 +30,7 @@ public final class S2CHandshakeTranslator extends Translator<ServerToClientHands
 
             // Create an encryption key from the payload.
             var salt = EncodingUtils.base64Decode(payloadObject.get("salt").getAsString());
-            var privateKey = this.client.getAuthentication().getPrivateKey();
+            var privateKey = this.bedrockClient.getAuthentication().getPrivateKey();
             var publicKey = EncryptionUtils.generateKey(headerObject.get("x5u").getAsString());
             var secretKey = EncryptionUtils.getSecretKey(privateKey, publicKey, salt.getBytes());
             // Set the encryption key.
@@ -43,6 +44,6 @@ public final class S2CHandshakeTranslator extends Translator<ServerToClientHands
 
         // Send handshake response packet.
         var response = new ClientToServerHandshakePacket();
-        this.client.sendPacket(response, true);
+        this.bedrockClient.sendPacket(response, true);
     }
 }

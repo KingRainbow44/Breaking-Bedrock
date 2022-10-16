@@ -52,7 +52,7 @@ public final class BedrockNetworkClient {
     @Getter private Authentication authentication = null;
     @Getter private ConnectionDetails connectionDetails = null;
 
-    private JavaNetworkClient javaNetworkClient = null;
+    @Getter private JavaNetworkClient javaNetworkClient = null;
 
     /**
      * Initializes a connection with a server.
@@ -152,7 +152,7 @@ public final class BedrockNetworkClient {
      * @return True if logging should be performed.
      */
     public boolean shouldLog() {
-        return this.client != null && this.client.getSession() != null && this.client.getSession().isLogging();
+        return BreakingBedrock.isDebugEnabled() || this.client.getSession().isLogging();
     }
 
     /*

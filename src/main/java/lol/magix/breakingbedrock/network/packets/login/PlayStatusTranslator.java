@@ -3,8 +3,9 @@ package lol.magix.breakingbedrock.network.packets.login;
 import com.nukkitx.protocol.bedrock.packet.PlayStatusPacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
+import lol.magix.breakingbedrock.objects.absolute.PacketType;
 
-@Translate
+@Translate(PacketType.BEDROCK)
 public final class PlayStatusTranslator extends Translator<PlayStatusPacket> {
     @Override
     public Class<PlayStatusPacket> getPacketClass() {

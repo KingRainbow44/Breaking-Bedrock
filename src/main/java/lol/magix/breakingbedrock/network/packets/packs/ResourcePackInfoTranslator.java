@@ -6,8 +6,9 @@ import com.nukkitx.protocol.bedrock.packet.ResourcePackClientResponsePacket.Stat
 import com.nukkitx.protocol.bedrock.packet.ResourcePacksInfoPacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
+import lol.magix.breakingbedrock.objects.absolute.PacketType;
 
-@Translate
+@Translate(PacketType.BEDROCK)
 public final class ResourcePackInfoTranslator extends Translator<ResourcePacksInfoPacket> {
     @Override
     public Class<ResourcePacksInfoPacket> getPacketClass() {
@@ -16,13 +17,13 @@ public final class ResourcePackInfoTranslator extends Translator<ResourcePacksIn
 
     @Override
     public void translate(ResourcePacksInfoPacket packet) {
-        this.client.sendPacket(new ClientCacheStatusPacket(), true);
+        this.bedrockClient.sendPacket(new ClientCacheStatusPacket(), true);
 
         // Create resource pack response.
         // TODO: Download & convert server resource packs.
         var response = new ResourcePackClientResponsePacket();
         response.setStatus(Status.HAVE_ALL_PACKS);
         // Send resource pack response.
-        this.client.sendPacket(response, true);
+        this.bedrockClient.sendPacket(response, true);
     }
 }

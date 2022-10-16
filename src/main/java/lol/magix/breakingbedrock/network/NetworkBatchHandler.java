@@ -24,7 +24,7 @@ public final class NetworkBatchHandler implements BatchHandler {
             }
 
             // Handle the packet.
-            PacketTranslator.getInstance().translatePacket(packet);
+            PacketTranslator.getBedrockTranslator().translatePacket(packet);
         }
     }
 }

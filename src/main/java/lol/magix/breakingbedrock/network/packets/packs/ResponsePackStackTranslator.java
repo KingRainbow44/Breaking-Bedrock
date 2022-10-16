@@ -5,8 +5,9 @@ import com.nukkitx.protocol.bedrock.packet.ResourcePackClientResponsePacket.Stat
 import com.nukkitx.protocol.bedrock.packet.ResourcePackStackPacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
+import lol.magix.breakingbedrock.objects.absolute.PacketType;
 
-@Translate
+@Translate(PacketType.BEDROCK)
 public final class ResponsePackStackTranslator extends Translator<ResourcePackStackPacket> {
     @Override
     public Class<ResourcePackStackPacket> getPacketClass() {
@@ -19,6 +20,6 @@ public final class ResponsePackStackTranslator extends Translator<ResourcePackSt
         var response = new ResourcePackClientResponsePacket();
         response.setStatus(Status.COMPLETED);
         // Send resource pack response.
-        this.client.sendPacket(response, true);
+        this.bedrockClient.sendPacket(response, true);
     }
 }
