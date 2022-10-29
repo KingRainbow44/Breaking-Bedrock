@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "lol.magix.breakingbedrock.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+  ],
+  "client": [
+    "MixinMinecraftClient",
+    "MixinMultiplayerScreen"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

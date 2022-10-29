@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+
+  "id": "breaking-bedrock",
+  "version": "${version}",
+  "name": "Breaking Bedrock",
+  "description": "Connect to Minecraft: Bedrock servers using a Minecraft: Java client running Fabric.",
+  "authors": ["KingRainbow44"],
+
+  "contact": {
+    "homepage": "https://magix.lol/",
+    "sources": "https://github.com/KingRainbow44/Breaking-Bedrock"
+  },
+
+  "mixins": [
+    "breakingbedrock.mixin.json"
+  ],
+  "depends": {
+    "minecraft": "1.19.2",
+    "fabricloader": ">=0.14.10"
+  }
+}
