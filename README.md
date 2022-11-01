@@ -10,7 +10,10 @@ Connect to Minecraft: Bedrock servers from Minecraft: Java!\
   - [ ] Chat Messages
   - [ ] Skins
   - [ ] Other Entities
-- [ ] Offline Authentication
+- [ ] Authentication
+  - [ ] Online Authentication
+    - [ ] Prompt for Xbox Sign-in
+  - [ ] Offline Authentication
 - [ ] Feature Parity
   - [ ] Commands
   - [ ] Server Forms

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
 
   "id": "breaking-bedrock",
-  "version": "${version}",
+  "version": "1.0-SNAPSHOT",
   "name": "Breaking Bedrock",
   "description": "Connect to Minecraft: Bedrock servers using a Minecraft: Java client running Fabric.",
   "authors": ["KingRainbow44"],

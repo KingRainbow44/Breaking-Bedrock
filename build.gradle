@@ -36,15 +36,11 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // Minecraft: Bedrock protocol libraries.
-    modImplementation ('com.nukkitx.protocol:bedrock-v557:2.9.14-SNAPSHOT') {
-        // Exclude unneeded dependencies.
-        exclude group: 'com.nukkitx.fastutil'
-        exclude group: 'io.netty'
-    }
+    modImplementation 'com.nukkitx.protocol:bedrock-v557:2.9.14-SNAPSHOT'
 
     // Developer tools. (Reflection + access wideners)
     modImplementation 'org.reflections:reflections:0.10.2'
-    modCompileOnly 'org.projectlombok:lombok:1.18.24'
+    modImplementation 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
