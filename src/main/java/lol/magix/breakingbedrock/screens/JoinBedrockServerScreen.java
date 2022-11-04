@@ -1,5 +1,7 @@
 package lol.magix.breakingbedrock.screens;
 
+import lol.magix.breakingbedrock.network.BedrockNetworkClient;
+import lol.magix.breakingbedrock.objects.ConnectionDetails;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -31,8 +33,9 @@ public final class JoinBedrockServerScreen extends Screen {
      * @param button The button.
      */
     private void joinServer(ButtonWidget button) {
-        var addressField = this.addressField.getText();
-        if (addressField.isEmpty()) return;
+        // Get the address, port, and authentication method.
+        var address = this.addressField.getText();
+        if (address.isEmpty()) return;
 
         var portField = this.portField.getText();
         int port; try {
@@ -42,8 +45,11 @@ public final class JoinBedrockServerScreen extends Screen {
             port = 19132;
         }
 
+        var online = this.onlineCheckbox.isChecked();
+
         // Connect to the server.
-        // TODO: Send a connection request to the server.
+        var connectTo = new ConnectionDetails(address, port, online);
+        BedrockNetworkClient.getInstance().connect(connectTo);
     }
 
     /**
