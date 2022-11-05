@@ -35,6 +35,9 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+    // Debug library for Web Sockets.
+    modImplementation 'org.java-websocket:Java-WebSocket:1.5.3'
+
     // Minecraft: Bedrock protocol libraries.
     modImplementation 'com.nukkitx.protocol:bedrock-v557:2.9.14-SNAPSHOT'
 
