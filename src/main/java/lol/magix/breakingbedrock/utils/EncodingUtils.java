@@ -50,6 +50,15 @@ public interface EncodingUtils {
     }
 
     /**
+     * Decodes a Base64-encoded string.
+     * @param data The Base64-encoded data.
+     * @return The decoded data.
+     */
+    static String base64Decode(String data) {
+        return new String(Base64.getDecoder().decode(data));
+    }
+
+    /**
      * Encodes an object into a JSON object.
      * @param object The object.
      * @return The JSON object.

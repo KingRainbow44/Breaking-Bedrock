@@ -2,6 +2,8 @@ package lol.magix.breakingbedrock;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lol.magix.breakingbedrock.network.translation.PacketTranslator;
+import lol.magix.breakingbedrock.objects.PacketVisualizer;
 import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import org.reflections.Reflections;
@@ -24,7 +26,13 @@ public final class BreakingBedrock {
         var accessToken = System.getProperty("XboxAccessToken");
         if (accessToken == null || accessToken.isEmpty()) {
             logger.error("Xbox access token not found. Please set the XboxAccessToken system property.");
+        } else {
+            logger.info("Xbox access token found. Xbox authentication is enabled.");
         }
+
+        // Initialize separate systems.
+        PacketTranslator.initialize();
+        PacketVisualizer.initialize();
 
         logger.info("Initialized!");
     }

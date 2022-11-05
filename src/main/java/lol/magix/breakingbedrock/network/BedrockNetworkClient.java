@@ -2,15 +2,18 @@ package lol.magix.breakingbedrock.network;
 
 import com.nukkitx.network.util.DisconnectReason;
 import com.nukkitx.protocol.bedrock.BedrockClient;
+import com.nukkitx.protocol.bedrock.BedrockClientSession;
 import com.nukkitx.protocol.bedrock.BedrockPacket;
 import com.nukkitx.protocol.bedrock.BedrockSession;
 import com.nukkitx.protocol.bedrock.packet.LoginPacket;
+import com.nukkitx.protocol.bedrock.v557.Bedrock_v557;
 import io.netty.util.AsciiString;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.network.auth.Authentication;
 import lol.magix.breakingbedrock.objects.ConnectionDetails;
+import lol.magix.breakingbedrock.objects.PacketVisualizer;
 import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
-import lol.magix.breakingbedrock.utils.EncodingUtils;
+import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizerData;
 import lol.magix.breakingbedrock.utils.NetworkUtils;
 import lol.magix.breakingbedrock.utils.ScreenUtils;
 import lol.magix.breakingbedrock.utils.SkinUtils;
@@ -28,6 +31,22 @@ import java.net.InetSocketAddress;
 public final class BedrockNetworkClient {
     @Getter private static BedrockNetworkClient instance = new BedrockNetworkClient();
     @Getter private final Logger logger = LoggerFactory.getLogger("Bedrock Client");
+
+    /**
+     * Returns the {@link BedrockClient} handle.
+     * @return A {@link BedrockClient} instance.
+     */
+    public static BedrockClient getHandle() {
+        return BedrockNetworkClient.getInstance().client;
+    }
+
+    /**
+     * Returns the {@link BedrockClientSession} for the client handle.
+     * @return A {@link BedrockClientSession} instance.
+     */
+    public static BedrockClientSession getSession() {
+        return BedrockNetworkClient.getHandle().getSession();
+    }
 
     private BedrockClient client = null;
     @Getter private Authentication authentication = null;
@@ -128,6 +147,14 @@ public final class BedrockNetworkClient {
         } catch (Exception ignored) { }
     }
 
+    /**
+     * Checks if the client session supports logging.
+     * @return True if logging should be performed.
+     */
+    public boolean shouldLog() {
+        return this.client != null && this.client.getSession() != null && this.client.getSession().isLogging();
+    }
+
     /*
      * General networking methods.
      */
@@ -159,6 +186,10 @@ public final class BedrockNetworkClient {
      * @param immediate Whether to send the packet immediately.
      */
     public void sendPacket(BedrockPacket packet, boolean immediate) {
+        // Set the packet's ID.
+        packet.setPacketId(NetworkConstants.PACKET_CODEC
+                .getId(packet.getClass()));
+
         var session = this.client.getSession();
         if (immediate)
             session.sendPacketImmediately(packet);
@@ -167,8 +198,9 @@ public final class BedrockNetworkClient {
 
         // Log packet if needed.
         if (session.isLogging()) {
-            var packetDump = EncodingUtils.encodePacket(packet);
-            this.logger.info("[->] {}: {}", session.getAddress().toString(), packetDump);
+            // Visualize outbound packet.
+            PacketVisualizer.getInstance().sendMessage(
+                    PacketVisualizerData.toMessage(packet, true));
         }
     }
 }
