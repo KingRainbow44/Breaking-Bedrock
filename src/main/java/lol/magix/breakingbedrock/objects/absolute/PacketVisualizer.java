@@ -1,9 +1,10 @@
-package lol.magix.breakingbedrock.objects;
+package lol.magix.breakingbedrock.objects.absolute;
 
 import com.google.gson.Gson;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizerMessage;
 import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizerMessage.PacketIds;
+import lol.magix.breakingbedrock.utils.EncodingUtils;
 import lombok.Getter;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -62,7 +63,9 @@ public final class  PacketVisualizer extends WebSocketServer {
         if (this.relayClient == null)
             throw new IllegalStateException("No relay client connected.");
 
-        this.relayClient.send(this.gson.toJson(object));
+        var data = this.gson.toJson(object);
+        var compressedData = EncodingUtils.compress(data);
+        this.relayClient.send(compressedData);
     }
 
     /*
@@ -98,9 +101,12 @@ public final class  PacketVisualizer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+        // De-compress the message.
+        var decompressedMessage = EncodingUtils.decompress(message);
+
         try {
             var parsed = BreakingBedrock.getGson().fromJson(
-                    message, PacketVisualizerMessage.class);
+                    decompressedMessage, PacketVisualizerMessage.class);
 
             switch (parsed.getPacketId()) {
                 default -> throw new IllegalArgumentException("Unknown packet ID: " + parsed.getPacketId());

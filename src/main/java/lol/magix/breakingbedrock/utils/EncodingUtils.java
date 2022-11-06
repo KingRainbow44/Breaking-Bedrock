@@ -4,13 +4,13 @@ import com.nukkitx.protocol.bedrock.BedrockPacket;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.objects.absolute.AlgorithmType;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 import java.util.Base64;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Utility class for encoding and decoding data.
@@ -74,6 +74,49 @@ public interface EncodingUtils {
      */
     static <T> T jsonDecode(String json, Class<T> type) {
         return BreakingBedrock.getGson().fromJson(json, type);
+    }
+
+    /**
+     * Compresses data using GZIP.
+     * @param data The data.
+     * @return The compressed data.
+     */
+    static String compress(String data) {
+        try {
+            // Create output streams for data & GZIP.
+            var outputStream = new ByteArrayOutputStream();
+            var gzip = new GZIPOutputStream(outputStream);
+            // Write data to GZIP.
+            gzip.write(data.getBytes());
+            gzip.close();
+            // Return compressed data.
+            return outputStream.toString(StandardCharsets.UTF_8);
+        } catch (IOException ignored) {
+            return data;
+        }
+    }
+
+    /**
+     * Decompresses data using GZIP.
+     * @param data The data.
+     * @return The decompressed data.
+     */
+    static String decompress(String data) {
+        try {
+            // Create input streams for data & GZIP.
+            var inputStream = new ByteArrayInputStream(data.getBytes());
+            var gzip = new GZIPInputStream(inputStream);
+            // Read from GZIP.
+            var builder = new StringBuilder();
+            var reader = new BufferedReader(new InputStreamReader(gzip));
+            String line; while ((line = reader.readLine()) != null) {
+                builder.append(line);
+            }
+            // Return decompressed data.
+            return builder.toString();
+        } catch (IOException ignored) {
+            return data;
+        }
     }
 
     /**
