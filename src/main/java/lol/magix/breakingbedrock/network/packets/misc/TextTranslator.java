@@ -4,6 +4,7 @@ import com.nukkitx.protocol.bedrock.packet.TextPacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
+import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.text.Text;
 
@@ -30,8 +31,17 @@ public final class TextTranslator extends Translator<TextPacket> {
                 this.javaClient().processPacket(messagePacket);
             }
             case TRANSLATION -> {
-                // TODO: Handle translation messages.
-                this.logger.warn("Un-handled translation message: {}", packet.getMessage());
+                // Parse translation data.
+                var translationKey = packet.getMessage();
+                var parameters = packet.getParameters().toArray();
+                // Check if the translation key is valid.
+                if (!TranslationStorage.getInstance().hasTranslation(translationKey)) {
+                    this.logger.warn("Unknown translation key: {}", translationKey);
+                } else {
+                    var textContainer = Text.translatable(translationKey, parameters);
+                    var messagePacket = new GameMessageS2CPacket(textContainer, false);
+                    this.javaClient().processPacket(messagePacket);
+                }
             }
         }
     }

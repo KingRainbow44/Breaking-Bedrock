@@ -15,7 +15,6 @@ import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
 import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizerData;
 import lol.magix.breakingbedrock.objects.game.SessionData;
-import lol.magix.breakingbedrock.utils.EncodingUtils;
 import lol.magix.breakingbedrock.utils.NetworkUtils;
 import lol.magix.breakingbedrock.utils.ScreenUtils;
 import lol.magix.breakingbedrock.utils.SkinUtils;
@@ -98,8 +97,9 @@ public final class BedrockNetworkClient {
      */
     private void onDisconnect(DisconnectReason reason) {
         // Display a client disconnect screen.
-        MinecraftClient.getInstance().execute(() ->
-                ScreenUtils.disconnect(NetworkUtils.getDisconnectReason(reason)));
+        if (this.data.isInitialized())
+            MinecraftClient.getInstance().execute(() ->
+                    ScreenUtils.disconnect(NetworkUtils.getDisconnectReason(reason)));
 
         // Invalidate client properties.
         this.hasLoggedIn = false;

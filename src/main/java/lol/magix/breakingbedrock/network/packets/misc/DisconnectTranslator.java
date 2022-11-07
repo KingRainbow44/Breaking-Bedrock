@@ -24,5 +24,7 @@ public final class DisconnectTranslator extends Translator<DisconnectPacket> {
         // Show disconnect screen.
         MinecraftClient.getInstance().execute(() -> ScreenUtils.disconnect(
                 Text.of(packet.getKickMessage())));
+        // Set the player as disconnected.
+        this.data().setInitialized(false);
     }
 }
