@@ -27,6 +27,11 @@ public final class PacketVisualizerData {
      */
     public static PacketVisualizerMessage toMessage(BedrockPacket packet, boolean isOutbound) {
         var encoded = EncodingUtils.jsonEncode(packet);
+        if (encoded.length() > 10000 && !isOutbound) {
+            var truncated = new TruncatedPacketData(encoded.substring(0, 10000));
+            encoded = EncodingUtils.jsonEncode(truncated);
+        }
+
         var packetData = PacketVisualizerData.builder()
                 .source(isOutbound ? "client" : "server").packetId(packet.getPacketId())
                 .packetName(packet.getClass().getSimpleName())
