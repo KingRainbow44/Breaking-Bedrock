@@ -54,25 +54,24 @@ public final class Authentication {
         var ecdsa256KeyPair = KEY_PAIR_GENERATOR.generateKeyPair();
         this.publicKey = (ECPublicKey) ecdsa256KeyPair.getPublic();
         this.privateKey = (ECPrivateKey) ecdsa256KeyPair.getPrivate();
-        // Get Xbox information.
-        var xbox = new Xbox(System.getProperty("XboxAccessToken"));
-        var userToken = xbox.getUserToken(this.publicKey, this.privateKey);
-        var deviceToken = xbox.getDeviceToken(this.publicKey, this.privateKey);
-        var titleToken = xbox.getTitleToken(deviceToken, this.publicKey, this.privateKey);
-        var xsts = xbox.getXSTSToken(userToken, deviceToken, titleToken, this.publicKey, this.privateKey);
+
+        // Perform Xbox Live authentication to get a Minecraft JWT chain.
+        var xboxV2 = new XboxV2(System.getProperty("XboxAccessToken"), this.publicKey, this.privateKey);
+        xboxV2.obtainDeviceToken(); // Obtain a device token.
+        xboxV2.obtainAuthToken("https://multiplayer.minecraft.net/"); // Obtain an auth token.
+        var chainData = xboxV2.getChainData(); // Obtain chain data.
 
         // Generate a key pair for the Bedrock server.
         var ecdsa384KeyPair = EncryptionUtils.createKeyPair();
         this.publicKey = (ECPublicKey) ecdsa384KeyPair.getPublic();
         this.privateKey = (ECPrivateKey) ecdsa384KeyPair.getPrivate();
         // Get Minecraft information.
-        var chainData = xbox.requestMinecraftChain(xsts, this.publicKey);
         var chainDataJson = gson.fromJson(chainData, JsonObject.class);
         // Extract chain data.
         var networkChain = chainDataJson.getAsJsonArray("chain");
         var chainHeader = networkChain.get(0).getAsString();
         chainHeader = chainHeader.split("\\.")[0]; // Get the JWT header. (Base64-encoded)
-        chainHeader = EncodingUtils.base64Decode(chainHeader.getBytes());
+        chainHeader = EncodingUtils.base64Decode(chainHeader);
         var x5uKey = gson.fromJson(chainHeader, JsonObject.class).get("x5u").getAsString();
 
         // Create a replacement chain.
@@ -111,6 +110,7 @@ public final class Authentication {
             // Extract extra data.
             var payloadObject = gson.fromJson(lastPayload, JsonObject.class);
             var extraData = payloadObject.getAsJsonObject("extraData");
+
             // Extract remaining data.
             this.xuid = extraData.get("XUID").getAsString();
             this.identity = UUID.fromString(extraData.get("identity").getAsString());
