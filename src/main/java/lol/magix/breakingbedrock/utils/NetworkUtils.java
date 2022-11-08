@@ -1,14 +1,23 @@
 package lol.magix.breakingbedrock.utils;
 
 import com.nukkitx.network.util.DisconnectReason;
+import com.sun.net.httpserver.HttpServer;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.objects.Pair;
+import lombok.SneakyThrows;
 import net.minecraft.text.Text;
+import tech.xigam.express.Express;
+import tech.xigam.express.Router;
 
 import javax.net.ssl.HttpsURLConnection;
+import java.awt.*;
+import java.awt.Desktop.Action;
+import java.net.InetSocketAddress;
+import java.net.URI;
 import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.function.Consumer;
 
 /**
  * Utility class for network-related functions.
@@ -93,5 +102,43 @@ public interface NetworkUtils {
         } catch (Exception ignored) {
             BreakingBedrock.getLogger().warn("Unable to check response");
         }
+    }
+
+    /**
+     * Directs the browser to go to a URL.
+     * When the URL is visited, it waits for a callback on the local machine.
+     * The callback parameter is then passed to the provided consumer.
+     * @param url The URL to visit.
+     * @param callback The callback parameter.
+     */
+    @SneakyThrows
+    static void awaitCallback(String url, int port, Consumer<String> callback) {
+        // Start a basic HTTP server.
+        var httpServer = HttpServer.create();
+        var express = new Express(new InetSocketAddress(port));
+        var router = new Router();
+        router.get("/callback", request -> {
+            // Get the callback parameter.
+            var callbackParam = request.getArgument("callback");
+            // Call the consumer.
+            callback.accept(callbackParam);
+
+            // Return a response.
+            request.respond("You can close this window now.");
+            // Stop the server.
+            httpServer.stop(0);
+        });
+
+        express.router(router);
+        express.hook(httpServer);
+        express.listen();
+
+        // Direct the browser to the URL.
+        if (!Desktop.isDesktopSupported()) return;
+
+        var desktop = Desktop.getDesktop();
+        if (!desktop.isSupported(Action.BROWSE)) return;
+
+        desktop.browse(new URI(url));
     }
 }

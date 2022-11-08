@@ -37,6 +37,9 @@ dependencies {
 
     // Debug library for Web Sockets.
     modImplementation 'org.java-websocket:Java-WebSocket:1.5.3'
+    // Library for handling HTTP requests.
+    modImplementation 'tech.xigam:Express.Java:1.2.2'
+    modImplementation 'com.squareup.okhttp3:okhttp:4.10.0'
 
     // Minecraft: Bedrock protocol libraries.
     modImplementation 'com.nukkitx.protocol:bedrock-v557:2.9.14-SNAPSHOT'
