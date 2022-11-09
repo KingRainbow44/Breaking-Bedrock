@@ -36,7 +36,7 @@ public interface SkinUtils {
         // Create a JWT header.
         var jwtHeader = new JsonObject();
         jwtHeader.addProperty("alg", "ES384");
-        jwtHeader.addProperty("typ", publicKey);
+        jwtHeader.addProperty("x5u", publicKey);
         // Create a skin.
         var skin = Skin.builder()
                 .serverAddress(serverAddress)

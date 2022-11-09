@@ -1,12 +1,23 @@
 package lol.magix.breakingbedrock.utils;
 
+import com.nukkitx.protocol.bedrock.data.GameRuleData;
 import com.nukkitx.protocol.bedrock.data.GameType;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.registry.DynamicRegistryManager;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.World;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.dimension.DimensionTypes;
+
+import java.util.List;
 
 /**
  * Code which converts format A -> format B.
  */
-public interface ConversionsUtils {
+public interface ConversionUtils {
     /**
      * Converts a Bedrock {@link GameType} to a Java {@link GameMode}.
      * @param type The Bedrock game type.
@@ -19,5 +30,56 @@ public interface ConversionsUtils {
             case ADVENTURE -> GameMode.ADVENTURE;
             case SPECTATOR -> GameMode.SPECTATOR;
         };
+    }
+
+    /**
+     * Converts a Bedrock dimension ID to a Java dimension type.
+     * @param dimensionId The Bedrock dimension ID.
+     * @return The Java dimension type.
+     */
+    static RegistryKey<DimensionType> convertBedrockDimension(int dimensionId) {
+        var registryManager = DynamicRegistryManager.createAndLoad();
+        var dimensionRegistry = registryManager.get(Registry.DIMENSION_TYPE_KEY);
+
+        return (switch (dimensionId) {
+            default -> dimensionRegistry.getOrCreateEntry(DimensionTypes.OVERWORLD);
+            case 1 -> dimensionRegistry.getOrCreateEntry(DimensionTypes.THE_NETHER);
+            case 2 -> dimensionRegistry.getOrCreateEntry(DimensionTypes.THE_END);
+        }).getKey().orElseThrow(RuntimeException::new);
+    }
+
+    /**
+     * Converts a Bedrock dimension ID to a Java {@link RegistryKey}.
+     * @param dimensionId The Bedrock dimension ID.
+     * @return The Java registry key.
+     */
+    static RegistryKey<World> convertBedrockWorld(int dimensionId) {
+        return switch (dimensionId) {
+            default -> World.OVERWORLD;
+            case 1 -> World.NETHER;
+            case 2 -> World.END;
+        };
+    }
+
+    /**
+     * Updates the server's gamerules on the client.
+     * @param gamerules The server gamerules to update.
+     */
+    static void updateGameRules(List<GameRuleData<?>> gamerules) {
+        var client = MinecraftClient.getInstance();
+        var player = client.player;
+        var world = client.world;
+
+        // Check if the client world and player is valid.
+        if (world == null || player == null) return;
+
+        // Update gamerules.
+        for (var gamerule : gamerules) {
+            var value = gamerule.getValue();
+            switch (gamerule.getName()) {
+                case "dodaylightcycle" -> world.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set((Boolean) value, null);
+                case "doimmediaterespawn" -> player.setShowsDeathScreen(!((Boolean) value));
+            }
+        }
     }
 }

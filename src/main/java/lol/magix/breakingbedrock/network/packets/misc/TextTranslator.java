@@ -21,13 +21,17 @@ public final class TextTranslator extends Translator<TextPacket> {
             case RAW -> {
                 var messagePacket = new GameMessageS2CPacket(
                         Text.of(packet.getMessage()), false);
-                this.javaClient.processPacket(messagePacket);
+                this.javaClient().processPacket(messagePacket);
             }
             case CHAT -> {
                 var formatted = "<" + packet.getSourceName() + "> " + packet.getMessage();
                 var messagePacket = new GameMessageS2CPacket(
                         Text.of(formatted), false);
-                this.javaClient.processPacket(messagePacket);
+                this.javaClient().processPacket(messagePacket);
+            }
+            case TRANSLATION -> {
+                // TODO: Handle translation messages.
+                this.logger.warn("Un-handled translation message: {}", packet.getMessage());
             }
         }
     }

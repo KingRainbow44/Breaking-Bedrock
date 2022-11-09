@@ -16,6 +16,9 @@ import java.util.UUID;
  */
 @Builder
 public final class Skin {
+    @SerializedName("AnimatedImageData")
+    @Builder.Default public List<Object> animatedImageData = new ArrayList<>();
+
     @SerializedName("ArmSize")
     @Builder.Default public String armSize = "";
 
@@ -57,6 +60,9 @@ public final class Skin {
 
     @SerializedName("GuiScale")
     @Builder.Default public int guiScale = 0;
+
+    @SerializedName("IsEditorMode")
+    @Builder.Default public boolean isEditorMode = false;
 
     @SerializedName("LanguageCode")
     @Builder.Default public String languageCode = "en_US";
@@ -100,6 +106,9 @@ public final class Skin {
     @SerializedName("SkinGeometryData")
     @Builder.Default public String skinGeometryData = EncodingUtils.base64Encode(SkinUtils.SKIN_GEOMETRY_DATA.getBytes());
 
+    @SerializedName("SkinGeometryDataEngineVersion")
+    @Builder.Default public String skinGeometryDataEngineVersion = "MQ";
+
     @SerializedName("SkinId")
     @Builder.Default public String skinId = UUID.randomUUID() + ".Custom" + UUID.randomUUID();
 
@@ -118,7 +127,9 @@ public final class Skin {
     @SerializedName("ThirdPartyNameOnly")
     @Builder.Default public boolean thirdPartyNameOnly = false;
 
+    @SerializedName("TrustedSkin")
+    @Builder.Default public boolean trustedSkin = false;
+
     @SerializedName("UIProfile")
     @Builder.Default public int uIProfile = 0;
-
 }

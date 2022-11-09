@@ -6,14 +6,15 @@ import com.nukkitx.protocol.bedrock.BedrockClientSession;
 import com.nukkitx.protocol.bedrock.BedrockPacket;
 import com.nukkitx.protocol.bedrock.BedrockSession;
 import com.nukkitx.protocol.bedrock.packet.LoginPacket;
-import com.nukkitx.protocol.bedrock.v557.Bedrock_v557;
+import com.nukkitx.protocol.bedrock.packet.RequestNetworkSettingsPacket;
 import io.netty.util.AsciiString;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.network.auth.Authentication;
 import lol.magix.breakingbedrock.objects.ConnectionDetails;
-import lol.magix.breakingbedrock.objects.PacketVisualizer;
+import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
 import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizerData;
+import lol.magix.breakingbedrock.objects.game.SessionData;
 import lol.magix.breakingbedrock.utils.NetworkUtils;
 import lol.magix.breakingbedrock.utils.ScreenUtils;
 import lol.magix.breakingbedrock.utils.SkinUtils;
@@ -29,7 +30,7 @@ import java.net.InetSocketAddress;
  * Handles network connections to a Bedrock server.
  */
 public final class BedrockNetworkClient {
-    @Getter private static BedrockNetworkClient instance = new BedrockNetworkClient();
+    @Getter private static final BedrockNetworkClient instance = new BedrockNetworkClient();
     @Getter private final Logger logger = LoggerFactory.getLogger("Bedrock Client");
 
     /**
@@ -48,7 +49,11 @@ public final class BedrockNetworkClient {
         return BedrockNetworkClient.getHandle().getSession();
     }
 
+    private boolean hasLoggedIn = false;
+
     private BedrockClient client = null;
+    private BedrockSession session = null;
+    @Getter private SessionData data = null;
     @Getter private Authentication authentication = null;
     @Getter private ConnectionDetails connectionDetails = null;
 
@@ -59,6 +64,9 @@ public final class BedrockNetworkClient {
      */
     public void connect(ConnectionDetails connectTo) {
         this.connectionDetails = connectTo;
+
+        // Update screen.
+        // ScreenUtils.connect();
 
         // Create a client & bind to a port.
         this.bindToClient();
@@ -88,14 +96,26 @@ public final class BedrockNetworkClient {
      * @param reason The reason for disconnection.
      */
     private void onDisconnect(DisconnectReason reason) {
+        // Display a client disconnect screen.
         MinecraftClient.getInstance().execute(() ->
                 ScreenUtils.disconnect(NetworkUtils.getDisconnectReason(reason)));
+
+        // Invalidate client properties.
+        this.hasLoggedIn = false;
+        this.data = null;
+        this.client = null;
+        this.session = null;
+        this.authentication = null;
+        this.connectionDetails = null;
+        this.javaNetworkClient = null;
     }
 
     /**
      * Invoked when the client has successfully connected to the server.
      */
     private void onSessionInitialized(BedrockSession session) {
+        this.session = session;
+
         // Set session properties.
         session.setLogging(BreakingBedrock.isDebugEnabled());
         session.setPacketCodec(NetworkConstants.PACKET_CODEC);
@@ -103,27 +123,14 @@ public final class BedrockNetworkClient {
         session.setBatchHandler(new NetworkBatchHandler());
         session.addDisconnectHandler(this::onDisconnect);
 
+        // Create a session flags instance.
+        this.data = new SessionData();
+
         try {
-            // Attempt to log into server.
-            var loginPacket = new LoginPacket();
-
-            // Attempt to authenticate.
-            this.authentication = new Authentication();
-            var chainData = this.connectionDetails.online() ?
-                    this.authentication.getOnlineChainData() :
-                    this.authentication.getOfflineChainData(BreakingBedrock.getUsername());
-            // Pull skin data.
-            var skinData = SkinUtils.getSkinData(this);
-            if (skinData == null) skinData = SkinUtils.SKIN_DATA_BASE_64;
-
-            // Set the login properties.
-            loginPacket.setProtocolVersion(session.getPacketCodec().getProtocolVersion());
-            loginPacket.setChainData(new AsciiString(chainData));
-            loginPacket.setSkinData(new AsciiString(skinData));
-
-            // Send the packet & update connection.
-            this.sendPacket(loginPacket, true);
-            this.javaNetworkClient = new JavaNetworkClient();
+            // Request protocol version from server.
+            var requestPacket = new RequestNetworkSettingsPacket();
+            requestPacket.setProtocolVersion(session.getPacketCodec().getProtocolVersion());
+            this.sendPacket(requestPacket, true);
         } catch (Exception exception) {
             this.logger.error("An error occurred while logging in.", exception);
             this.client.close();
@@ -145,6 +152,47 @@ public final class BedrockNetworkClient {
             this.client.bind().join();
             success = true;
         } catch (Exception ignored) { }
+    }
+
+    /**
+     * Attempts to send a {@link LoginPacket} to the server.
+     * This will start a client login if successful.
+     */
+    public void loginToServer() {
+        // Validate that we haven't already logged in.
+        if (this.hasLoggedIn) return;
+        this.hasLoggedIn = true;
+
+        try {
+            // Attempt to log into server.
+            var loginPacket = new LoginPacket();
+
+            // Attempt to authenticate.
+            this.authentication = new Authentication();
+            var chainData = this.connectionDetails.online() ?
+                    this.authentication.getOnlineChainData() :
+                    this.authentication.getOfflineChainData(BreakingBedrock.getUsername());
+            // Pull skin data.
+            var skinData = SkinUtils.getSkinData(this);
+            if (skinData == null) skinData = SkinUtils.SKIN_DATA_BASE_64;
+
+            // Set session data.
+            this.data.setDisplayName(this.authentication.getDisplayName());
+            this.data.setIdentity(this.authentication.getIdentity());
+            this.data.setXuid(this.authentication.getXuid());
+
+            // Set the login properties.
+            loginPacket.setProtocolVersion(this.session.getPacketCodec().getProtocolVersion());
+            loginPacket.setChainData(new AsciiString(chainData));
+            loginPacket.setSkinData(new AsciiString(skinData));
+
+            // Send the packet & update connection.
+            this.sendPacket(loginPacket, true);
+            this.javaNetworkClient = new JavaNetworkClient();
+        } catch (Exception exception) {
+            this.logger.error("An error occurred while logging in.", exception);
+            this.client.close();
+        }
     }
 
     /**
@@ -202,5 +250,18 @@ public final class BedrockNetworkClient {
             PacketVisualizer.getInstance().sendMessage(
                     PacketVisualizerData.toMessage(packet, true));
         }
+    }
+
+    /*
+     * Event methods.
+     */
+
+    /**
+     * Invoked when the Java player is ready to play.
+     */
+    public void onPlayerInitialization() {
+        // TODO: Initialize container manager.
+        // TODO: Initialize block entity cache.
+        // TODO: Set the open container.
     }
 }

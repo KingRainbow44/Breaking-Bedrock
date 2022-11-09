@@ -4,6 +4,7 @@
   "package": "lol.magix.breakingbedrock.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "MixinClientConnection"
   ],
   "client": [
     "MixinMinecraftClient",

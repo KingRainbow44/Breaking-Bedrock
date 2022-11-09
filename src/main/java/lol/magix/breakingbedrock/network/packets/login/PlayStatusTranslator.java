@@ -1,6 +1,8 @@
 package lol.magix.breakingbedrock.network.packets.login;
 
 import com.nukkitx.protocol.bedrock.packet.PlayStatusPacket;
+import com.nukkitx.protocol.bedrock.packet.SetLocalPlayerAsInitializedPacket;
+import com.nukkitx.protocol.bedrock.packet.TickSyncPacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
@@ -27,6 +29,22 @@ public final class PlayStatusTranslator extends Translator<PlayStatusPacket> {
             case PLAYER_SPAWN -> {
                 if (this.shouldLog)
                     this.logger.info("Attempting to spawn player...");
+
+                // Wait for the player to initialize.
+                while (!this.data().isInitialized()) {
+                    try {
+                        this.logger.info("Waiting 3s for player to initialize...");
+                        Thread.sleep(3000);
+                    } catch (InterruptedException ignored) { }
+                }
+
+                // Complete server-side initialization.
+                var tickPacket = new TickSyncPacket();
+                this.bedrockClient.sendPacket(tickPacket, true);
+
+                var completePacket = new SetLocalPlayerAsInitializedPacket();
+                completePacket.setRuntimeEntityId(this.data().getRuntimeId());
+                this.bedrockClient.sendPacket(completePacket, true);
             }
         }
     }
