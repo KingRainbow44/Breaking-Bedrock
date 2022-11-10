@@ -15,6 +15,7 @@ import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
 import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizerData;
 import lol.magix.breakingbedrock.objects.game.SessionData;
+import lol.magix.breakingbedrock.utils.EncodingUtils;
 import lol.magix.breakingbedrock.utils.NetworkUtils;
 import lol.magix.breakingbedrock.utils.ScreenUtils;
 import lol.magix.breakingbedrock.utils.SkinUtils;

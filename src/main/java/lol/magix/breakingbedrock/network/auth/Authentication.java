@@ -2,10 +2,12 @@ package lol.magix.breakingbedrock.network.auth;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.nukkitx.protocol.bedrock.util.EncryptionUtils;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.objects.absolute.AlgorithmType;
 import lol.magix.breakingbedrock.utils.EncodingUtils;
+import lol.magix.breakingbedrock.utils.CryptoUtils;
 import lombok.Getter;
 
 import java.security.KeyPairGenerator;
@@ -36,88 +38,100 @@ public final class Authentication {
 
     @Getter private ECPrivateKey privateKey;
     @Getter private ECPublicKey publicKey;
+    @Getter private ECPrivateKey xblPrivateKey;
+    @Getter private ECPublicKey xblPublicKey;
 
     @Getter private String xuid;
     @Getter private String displayName;
     @Getter private UUID identity;
 
+    /*
+     * Key utility methods.
+     */
+
+    /**
+     * Returns the Xbox Live private key, or the Bedrock private key if Xbox Live is not enabled.
+     * @return A private key.
+     */
+    public ECPrivateKey getPreferredPrivateKey() {
+        return this.xblPrivateKey == null ? this.privateKey : this.xblPrivateKey;
+    }
+
+    /**
+     * Returns the Xbox Live public key, or the Bedrock public key if Xbox Live is not enabled.
+     * @return A public key.
+     */
+    public ECPublicKey getPreferredPublicKey() {
+        return this.xblPublicKey == null ? this.publicKey : this.xblPublicKey;
+    }
+
     /**
      * Generates data for online authentication.
-     * Makes requests to the Xbox Live API.
      * @return Authentication data. (JSON-encoded)
-     * @throws Exception If a cryptographic error occurs.
      */
-    public String getOnlineChainData() throws Exception {
+    public String getOnlineChainData() {
         var gson = BreakingBedrock.getGson();
 
-        // Generate a key pair for Xbox Live.
+        // Generate an Xbox Live keypair.
         var ecdsa256KeyPair = KEY_PAIR_GENERATOR.generateKeyPair();
-        this.publicKey = (ECPublicKey) ecdsa256KeyPair.getPublic();
-        this.privateKey = (ECPrivateKey) ecdsa256KeyPair.getPrivate();
+        this.xblPublicKey = (ECPublicKey) ecdsa256KeyPair.getPublic();
+        this.xblPrivateKey = (ECPrivateKey) ecdsa256KeyPair.getPrivate();
 
-        // Perform Xbox Live authentication to get a Minecraft JWT chain.
-        var xboxV2 = new XboxV2(System.getProperty("XboxAccessToken"), this.publicKey, this.privateKey);
-        xboxV2.obtainDeviceToken(); // Obtain a device token.
-        xboxV2.obtainAuthToken("https://multiplayer.minecraft.net/"); // Obtain an auth token.
-        var chainData = xboxV2.getChainData(); // Obtain chain data.
+        // Get login chain data from Minecraft's authentication API.
+        var xboxAuth = new XboxV2(System.getProperty("XboxAccessToken"), xblPublicKey, xblPrivateKey);
+        xboxAuth.obtainDeviceToken(); // Obtain a device token.
+        xboxAuth.obtainAuthToken("https://multiplayer.minecraft.net/"); // Obtain an auth token.
+        var chainData = xboxAuth.getChainData(); // Obtain chain data.
 
-        // Generate a key pair for the Bedrock server.
+        // Generate a Minecraft: Bedrock keypair.
         var ecdsa384KeyPair = EncryptionUtils.createKeyPair();
         this.publicKey = (ECPublicKey) ecdsa384KeyPair.getPublic();
         this.privateKey = (ECPrivateKey) ecdsa384KeyPair.getPrivate();
-        // Get Minecraft information.
-        var chainDataJson = gson.fromJson(chainData, JsonObject.class);
-        // Extract chain data.
-        var networkChain = chainDataJson.getAsJsonArray("chain");
-        var chainHeader = networkChain.get(0).getAsString();
-        chainHeader = chainHeader.split("\\.")[0]; // Get the JWT header. (Base64-encoded)
-        chainHeader = EncodingUtils.base64Decode(chainHeader);
-        var x5uKey = gson.fromJson(chainHeader, JsonObject.class).get("x5u").getAsString();
 
-        // Create a replacement chain.
-        var newChain = new JsonObject();
-        newChain.addProperty("certificateAuthority", true);
-        newChain.addProperty("exp", Instant.now().getEpochSecond() + TimeUnit.HOURS.toSeconds(6));
-        newChain.addProperty("identityPublicKey", x5uKey);
-        newChain.addProperty("nbf", Instant.now().getEpochSecond() - TimeUnit.HOURS.toSeconds(6));
+        // Decode the chain data.
+        var chainDataJson = gson.fromJson(chainData, JsonObject.class);
+        var chains = chainDataJson.getAsJsonArray("chain");
+
+        // Parse the first chain.
+        var firstChain = chains.get(0).getAsString();
+        var firstChainData = firstChain.split("\\.");
+        var firstChainHeader = EncodingUtils.base64Decode(firstChainData[0]);
+
+        // Extract the public key (x5u) from the first chain.
+        var firstChainHeaderJson = gson.fromJson(firstChainHeader, JsonObject.class);
+        var x5uKey = firstChainHeaderJson.get("x5u").getAsString();
 
         {
-            // Encode the public key.
-            var encodedPublicKey = EncodingUtils.base64Encode(this.publicKey.getEncoded());
-            // Create a JWT header.
-            var jwtHeader = new JsonObject();
-            jwtHeader.addProperty("alg", "ES384");
-            jwtHeader.addProperty("x5u", encodedPublicKey);
-            // Create a JWT payload.
-            var encoder = Base64.getUrlEncoder().withoutPadding();
-            var header = encoder.encodeToString(gson.toJson(jwtHeader).getBytes());
-            var payload = encoder.encodeToString(gson.toJson(newChain).getBytes());
+            // Create a chain.
+            var newChain = new JsonObject();
+            var currentTime = Instant.now().getEpochSecond();
+            var newTime = TimeUnit.HOURS.toSeconds(6);
 
-            // Sign the payload & header.
-            var dataToSign = (header + "." + payload).getBytes();
-            var signature = this.signBytes(dataToSign);
-            var jwt = header + "." + payload + "." + signature;
+            newChain.addProperty("exp", currentTime + newTime);
+            newChain.addProperty("nbf", currentTime - newTime);
+            newChain.addProperty("identityPublicKey", x5uKey);
+            newChain.addProperty("certificateAuthority", true);
+            // Sign the newly created chain.
+            var signedChain = CryptoUtils.signJwt(newChain, this.publicKey, this.privateKey);
 
-            // Add the JWT to the chain.
-            chainDataJson.add("chain", this.prependChain(networkChain, jwt));
+            // Create a new chain link.
+            chains = EncodingUtils.prepend(chains, new JsonPrimitive(signedChain));
+            chainDataJson.add("chain", chains);
         }
 
         {
-            // Extract chain data.
-            var lastChain = networkChain.get(networkChain.size() - 1).getAsString();
-            var lastPayload = lastChain.split("\\.")[1]; // Get the JWT payload. (Base64-encoded)
-            lastPayload = EncodingUtils.base64Decode(lastPayload.getBytes()); // Decode the payload.
-            // Extract extra data.
-            var payloadObject = gson.fromJson(lastPayload, JsonObject.class);
-            var extraData = payloadObject.getAsJsonObject("extraData");
+            // Extract player information.
+            var playerInfoChain = chains.get(chains.size() - 1).getAsString();
+            var playerInfoChainData = CryptoUtils.parseJwt(playerInfoChain);
+            var playerInfoPayload = playerInfoChainData.b();
 
-            // Extract remaining data.
+            var extraData = playerInfoPayload.getAsJsonObject("extraData");
             this.xuid = extraData.get("XUID").getAsString();
             this.identity = UUID.fromString(extraData.get("identity").getAsString());
             this.displayName = extraData.get("displayName").getAsString();
         }
 
-        return gson.toJson(chainDataJson);
+        return gson.toJson(chainDataJson); // Return the updated chain data.
     }
 
     /**
@@ -191,9 +205,18 @@ public final class Authentication {
      * @return Signed bytes.
      */
     public String signBytes(byte[] bytes) throws Exception {
+        return this.signBytes(bytes, this.privateKey);
+    }
+
+    /**
+     * Signs bytes using the specified private key.
+     * @param bytes Bytes to sign.
+     * @return Signed bytes.
+     */
+    public String signBytes(byte[] bytes, ECPrivateKey privateKey) throws Exception {
         // Create a signature.
         var signature = Signature.getInstance("SHA384withECDSA");
-        signature.initSign(this.privateKey);
+        signature.initSign(privateKey);
         signature.update(bytes);
 
         // Sign & encode the data.

@@ -1,5 +1,7 @@
 package lol.magix.breakingbedrock.utils;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.objects.absolute.AlgorithmType;
 
@@ -134,5 +136,18 @@ public interface EncodingUtils {
         System.arraycopy(signature, offset + Math.max(-sPadding, 0), joseSignature, algorithmType.ecNumberSize + Math.max(sPadding, 0), sLength + Math.min(sPadding, 0));
 
         return joseSignature;
+    }
+
+    /**
+     * Prepends the additional data to the message.
+     * @param source The source.
+     * @param additional The additional data.
+     * @return The prepended data.
+     */
+    static JsonArray prepend(JsonArray source, JsonElement additional) {
+        var result = new JsonArray();
+        result.add(additional);
+        result.addAll(source);
+        return result;
     }
 }

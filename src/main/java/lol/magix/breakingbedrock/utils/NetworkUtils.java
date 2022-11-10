@@ -83,28 +83,6 @@ public interface NetworkUtils {
     }
 
     /**
-     * Parses and validates a response.
-     * @param request The request to send.
-     */
-    static void checkResponse(HttpsURLConnection request) {
-        try {
-            // Check the response code.
-            var responseCode = request.getResponseCode();
-            if (responseCode != 200) {
-                // Throw an exception.
-                System.out.println("Response code: " + responseCode);
-                // throw new RuntimeException("Invalid response code: " + responseCode);
-            }
-
-            // Check the response message.
-            var responseMessage = request.getResponseMessage();
-            System.out.println(responseMessage);
-        } catch (Exception ignored) {
-            BreakingBedrock.getLogger().warn("Unable to check response");
-        }
-    }
-
-    /**
      * Directs the browser to go to a URL.
      * When the URL is visited, it waits for a callback on the local machine.
      * The callback parameter is then passed to the provided consumer.

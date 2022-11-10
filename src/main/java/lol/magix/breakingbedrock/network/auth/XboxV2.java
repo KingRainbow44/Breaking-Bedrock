@@ -16,7 +16,6 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import okhttp3.*;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.security.Signature;
@@ -121,18 +120,6 @@ public final class XboxV2 {
         this.accessToken = accessToken;
         this.publicKey = publicKey;
         this.privateKey = privateKey;
-    }
-
-    /**
-     * Adds the "Authorization" header to the request.
-     * @param request The HTTPS request.
-     * @param headers The headers to add. (user hash, token)
-     */
-    private void setAuthHeader(HttpsURLConnection request, Pair<String, String> headers) {
-        var userHash = headers.a();
-        var token = headers.b();
-
-        request.setRequestProperty("Authorization", "XBL3.0 x=" + userHash + ";" + token);
     }
 
     /**
@@ -242,7 +229,6 @@ public final class XboxV2 {
     /**
      * Obtains an Xbox Live token.
      * @param relyingParty The endpoint which requires this token.
-     * @return A JWT string.
      */
     @SneakyThrows
     public void obtainAuthToken(String relyingParty) {

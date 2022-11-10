@@ -20,8 +20,6 @@ public final class NetworkSettingsTranslator extends Translator<NetworkSettingsP
         session.setCompressionLevel(packet.getCompressionThreshold());
         session.setCompression(packet.getCompressionAlgorithm());
 
-        this.logger.info("enabled compression");
-
         // Log in to sever.
         this.bedrockClient.loginToServer();
     }
