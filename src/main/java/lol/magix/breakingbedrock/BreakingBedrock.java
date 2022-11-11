@@ -5,6 +5,9 @@ import com.google.gson.GsonBuilder;
 import lol.magix.breakingbedrock.network.auth.XboxV2;
 import lol.magix.breakingbedrock.network.translation.PacketTranslator;
 import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
+import lol.magix.breakingbedrock.translators.BlockPaletteTranslator;
+import lol.magix.breakingbedrock.translators.BlockStateTranslator;
+import lol.magix.breakingbedrock.translators.LegacyBlockPaletteTranslator;
 import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import org.reflections.Reflections;
@@ -23,6 +26,14 @@ public final class BreakingBedrock {
      * Initializes high-level mod systems.
      */
     public static void initialize() {
+        // Initialize separate systems.
+        PacketTranslator.initialize();
+        PacketVisualizer.initialize();
+        // Load resources.
+        BlockStateTranslator.loadMappings();
+        BlockPaletteTranslator.loadMappings();
+        LegacyBlockPaletteTranslator.loadMappings();
+
         // Check for an Xbox access token.
         var accessToken = System.getProperty("XboxAccessToken");
         if (accessToken == null || accessToken.isEmpty()) {
@@ -30,10 +41,6 @@ public final class BreakingBedrock {
         } else {
             logger.info("Xbox access token found. Xbox authentication is enabled.");
         }
-
-        // Initialize separate systems.
-        PacketTranslator.initialize();
-        PacketVisualizer.initialize();
 
         logger.info("Initialized!");
     }

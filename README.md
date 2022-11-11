@@ -23,5 +23,6 @@ Connect to Minecraft: Bedrock servers from Minecraft: Java!\
 # Dependencies
 - [Java 17](https://adoptium.net/?variant=openjdk17&jvmVariant=hotspot) - Java Runtime Environment
 - [Cloudburst Nukkit](https://github.com/CloudburstMC/Nukkit) - Minecraft: Bedrock Protocol
+- [GeyserMC](https://github.com/GeyserMC/Geyser) - Minecraft: Bedrock -> Minecraft: Java Translator
 - [Fabric Loader](https://fabricmc.net/use/) - Minecraft: Java Mod Loader
 - [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api) - Essential Fabric Loader Hooks

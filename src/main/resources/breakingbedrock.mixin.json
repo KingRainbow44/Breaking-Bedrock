@@ -8,7 +8,8 @@
   ],
   "client": [
     "MixinMinecraftClient",
-    "MixinMultiplayerScreen"
+    "MixinMultiplayerScreen",
+    "MixinWorldRenderer"
   ],
   "injectors": {
     "defaultRequire": 1
