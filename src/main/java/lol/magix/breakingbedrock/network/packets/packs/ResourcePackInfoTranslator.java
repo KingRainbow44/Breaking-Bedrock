@@ -1,9 +1,9 @@
 package lol.magix.breakingbedrock.network.packets.packs;
 
-import com.nukkitx.protocol.bedrock.packet.ClientCacheStatusPacket;
-import com.nukkitx.protocol.bedrock.packet.ResourcePackClientResponsePacket;
-import com.nukkitx.protocol.bedrock.packet.ResourcePackClientResponsePacket.Status;
-import com.nukkitx.protocol.bedrock.packet.ResourcePacksInfoPacket;
+import org.cloudburstmc.protocol.bedrock.packet.ClientCacheStatusPacket;
+import org.cloudburstmc.protocol.bedrock.packet.ResourcePackClientResponsePacket;
+import org.cloudburstmc.protocol.bedrock.packet.ResourcePackClientResponsePacket.Status;
+import org.cloudburstmc.protocol.bedrock.packet.ResourcePacksInfoPacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
@@ -18,6 +18,9 @@ public final class ResourcePackInfoTranslator extends Translator<ResourcePacksIn
     @Override
     public void translate(ResourcePacksInfoPacket packet) {
         this.bedrockClient.sendPacket(new ClientCacheStatusPacket(), true);
+
+        packet.getResourcePackInfos().forEach(pack ->
+                System.out.println(EncodingUtils.jsonEncode(pack)));
 
         // Create resource pack response.
         // TODO: Download & convert server resource packs.

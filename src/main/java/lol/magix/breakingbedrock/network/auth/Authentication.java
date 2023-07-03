@@ -3,12 +3,12 @@ package lol.magix.breakingbedrock.network.auth;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.nukkitx.protocol.bedrock.util.EncryptionUtils;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.objects.absolute.AlgorithmType;
 import lol.magix.breakingbedrock.utils.EncodingUtils;
 import lol.magix.breakingbedrock.utils.CryptoUtils;
 import lombok.Getter;
+import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils;
 
 import java.security.KeyPairGenerator;
 import java.security.Signature;
@@ -78,7 +78,7 @@ public final class Authentication {
         this.xblPrivateKey = (ECPrivateKey) ecdsa256KeyPair.getPrivate();
 
         // Get login chain data from Minecraft's authentication API.
-        var xboxAuth = new XboxV2(System.getProperty("XboxAccessToken"), xblPublicKey, xblPrivateKey);
+        var xboxAuth = new XboxV2(System.getProperty("XboxAccessToken"), this.xblPublicKey, this.xblPrivateKey);
         xboxAuth.obtainDeviceToken(); // Obtain a device token.
         xboxAuth.obtainAuthToken("https://multiplayer.minecraft.net/"); // Obtain an auth token.
         var chainData = xboxAuth.getChainData(); // Obtain chain data.
@@ -87,6 +87,11 @@ public final class Authentication {
         var ecdsa384KeyPair = EncryptionUtils.createKeyPair();
         this.publicKey = (ECPublicKey) ecdsa384KeyPair.getPublic();
         this.privateKey = (ECPrivateKey) ecdsa384KeyPair.getPrivate();
+
+        System.out.println("PRIVATE");
+        System.out.println(EncodingUtils.base64Encode(this.privateKey.getEncoded()));
+        System.out.println("PUBLIC");
+        System.out.println(EncodingUtils.base64Encode(this.publicKey.getEncoded()));
 
         // Decode the chain data.
         var chainDataJson = gson.fromJson(chainData, JsonObject.class);

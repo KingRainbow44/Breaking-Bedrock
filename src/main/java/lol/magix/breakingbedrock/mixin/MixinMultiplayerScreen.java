@@ -18,8 +18,11 @@ public final class MixinMultiplayerScreen extends Screen {
 
     @Inject(method = "init", at = @At(value = "RETURN"))
     public void init(CallbackInfo callback) {
-        this.addDrawableChild(new ButtonWidget(5, 5, 150, 20,
-                Text.of("Connect To Bedrock Server"), this::bedrockConnect));
+        this.addDrawableChild(ButtonWidget.builder(
+                Text.of("Connect To Bedrock Server"),
+                this::bedrockConnect)
+                .size(150, 20)
+                .position(5, 5).build());
     }
 
     /**

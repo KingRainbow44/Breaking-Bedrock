@@ -1,6 +1,6 @@
 package lol.magix.breakingbedrock.network.packets.player;
 
-import com.nukkitx.protocol.bedrock.packet.UpdatePlayerGameTypePacket;
+import org.cloudburstmc.protocol.bedrock.packet.UpdatePlayerGameTypePacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;

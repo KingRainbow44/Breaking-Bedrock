@@ -8,9 +8,9 @@ import lol.magix.breakingbedrock.objects.game.BedrockBlockState;
 import lol.magix.breakingbedrock.utils.ResourceUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.registry.Registries;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -85,7 +85,7 @@ public final class BlockStateTranslator {
                 state.substring(0, identifierEnd);
 
         // Get a block from the identifier.
-        var block = Registry.BLOCK.get(new Identifier(identifier));
+        var block = Registries.BLOCK.get(new Identifier(identifier));
         if (block == Blocks.AIR && !identifier.equals("minecraft:air")) {
             BreakingBedrock.getLogger().warn("Unknown block identifier: " + identifier);
             return null;

@@ -20,4 +20,11 @@ public record ConnectionDetails(
     public InetSocketAddress toSocketAddress() {
         return new InetSocketAddress(this.address, this.port);
     }
+
+    /**
+     * @return The Java address of the server.
+     */
+    public String javaAddress() {
+        return this.address + ":" + this.port;
+    }
 }

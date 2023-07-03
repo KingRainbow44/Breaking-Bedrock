@@ -3,7 +3,7 @@ package lol.magix.breakingbedrock.objects.game;
 import com.google.gson.annotations.SerializedName;
 import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.utils.EncodingUtils;
-import lol.magix.breakingbedrock.utils.SkinUtils;
+import lol.magix.breakingbedrock.utils.ProfileUtils;
 import lombok.Builder;
 
 import java.util.ArrayList;
@@ -101,10 +101,10 @@ public final class Skin {
     @Builder.Default public String skinColor = "#0";
 
     @SerializedName("SkinData")
-    @Builder.Default public String skinData = SkinUtils.SKIN_DATA_BASE_64;
+    @Builder.Default public String skinData = ProfileUtils.SKIN_DATA_BASE_64;
 
     @SerializedName("SkinGeometryData")
-    @Builder.Default public String skinGeometryData = EncodingUtils.base64Encode(SkinUtils.SKIN_GEOMETRY_DATA.getBytes());
+    @Builder.Default public String skinGeometryData = EncodingUtils.base64Encode(ProfileUtils.SKIN_GEOMETRY_DATA.getBytes());
 
     @SerializedName("SkinGeometryDataEngineVersion")
     @Builder.Default public String skinGeometryDataEngineVersion = "MQ";

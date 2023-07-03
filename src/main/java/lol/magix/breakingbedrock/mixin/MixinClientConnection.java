@@ -2,12 +2,11 @@ package lol.magix.breakingbedrock.mixin;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.concurrent.GenericFutureListener;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.network.translation.PacketTranslator;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketCallbacks;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.network.packet.s2c.query.QueryPongS2CPacket;
 import net.minecraft.network.packet.s2c.query.QueryResponseS2CPacket;
@@ -69,7 +68,7 @@ public final class MixinClientConnection {
     @Inject(method = "disconnect", at = @At("HEAD"), cancellable = true)
     public void disconnect(Text disconnectReason, CallbackInfo callback) {
         if (MixinClientConnection.client.isConnected()) {
-            BedrockNetworkClient.getHandle().close(true);
+            BedrockNetworkClient.getHandle().close("Client closed peer connection");
             this.disconnectReason = disconnectReason;
             callback.cancel();
         }

@@ -1,14 +1,15 @@
 package lol.magix.breakingbedrock.objects.absolute;
 
-import com.nukkitx.protocol.bedrock.BedrockPacketCodec;
-import com.nukkitx.protocol.bedrock.v557.Bedrock_v557;
+
+import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
+import org.cloudburstmc.protocol.bedrock.codec.v589.Bedrock_v589;
 
 /**
  * Constants related to networking.
  */
 public interface NetworkConstants {
     /* This will be the latest supported version. */
-    BedrockPacketCodec PACKET_CODEC = Bedrock_v557.V557_CODEC;
+    BedrockCodec PACKET_CODEC = Bedrock_v589.CODEC;
 
     // Constants for Xbox Live authentication.
     String XBOX_ANDROID_CID = "0000000048183522";

@@ -1,7 +1,5 @@
 package lol.magix.breakingbedrock.network.packets.game;
 
-import com.nukkitx.protocol.bedrock.packet.RequestChunkRadiusPacket;
-import com.nukkitx.protocol.bedrock.packet.StartGamePacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
@@ -9,14 +7,18 @@ import lol.magix.breakingbedrock.utils.ConversionUtils;
 import net.minecraft.network.packet.s2c.play.ChunkRenderDistanceCenterS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
+import org.cloudburstmc.protocol.bedrock.packet.RequestChunkRadiusPacket;
+import org.cloudburstmc.protocol.bedrock.packet.StartGamePacket;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Translate(PacketType.BEDROCK)
 public final class StartGameTranslator extends Translator<StartGamePacket> {
@@ -30,7 +32,6 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
         // Initial boilerplate start game code.
         var entityId = (int) packet.getRuntimeEntityId();
         var hashSeed = packet.getSeed();
-        var registryManager = DynamicRegistryManager.BUILTIN.get();
 
         // TODO: Convert item entries.
 
@@ -52,17 +53,21 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
         boolean reducedDebugInfo = false, showDeathScreen = true,
                 debugWorld = false, flatWorld = false;
 
-        for (var gamerule : packet.getGamerules())
-            if (gamerule.getName().equals("doimmediaterespawn")) {
-                showDeathScreen = !((Boolean) gamerule.getValue()); break;
+        for (var gamerule : packet.getGamerules()) {
+            switch (gamerule.getName()) {
+                case "doimmediaterespawn" ->
+                        showDeathScreen = !((Boolean) gamerule.getValue());
             }
+        }
 
         // Connect on the local network.
         var gameJoinPacket = new GameJoinS2CPacket(
-                entityId, hardcore, currentGameMode, previousGameMode,
-                dimensionIds, registryManager, dimensionType, dimensionId,
-                hashSeed, maxPlayers, chunkLoadDistance, chunkLoadDistance,
-                reducedDebugInfo, showDeathScreen, debugWorld, flatWorld, null);
+                entityId, hardcore, previousGameMode, currentGameMode,
+                dimensionIds, DynamicRegistryManager.EMPTY, dimensionType,
+                dimensionId, hashSeed, maxPlayers, chunkLoadDistance, chunkLoadDistance,
+                reducedDebugInfo, showDeathScreen, debugWorld, flatWorld,
+                Optional.empty(), 0
+        );
         this.javaClient().processPacket(gameJoinPacket);
 
         // Initialize the Bedrock client.
@@ -81,9 +86,9 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
         var zPos = playerPosition.getZ();
         var pitch = playerRotation.getX();
         var yaw = playerRotation.getY();
-        
+
         var positionPacket = new PlayerPositionLookS2CPacket(xPos, yPos, zPos, yaw, pitch,
-                Collections.emptySet(), 0, false);
+                Collections.emptySet(), 0);
         this.javaClient().processPacket(positionPacket);
 
         // Set the render center.

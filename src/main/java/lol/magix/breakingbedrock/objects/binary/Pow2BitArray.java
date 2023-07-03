@@ -1,7 +1,7 @@
 package lol.magix.breakingbedrock.objects.binary;
 
-import com.nukkitx.network.util.Preconditions;
 import net.minecraft.util.math.MathHelper;
+import org.cloudburstmc.protocol.common.util.Preconditions;
 
 import java.util.Arrays;
 

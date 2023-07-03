@@ -1,8 +1,8 @@
 package lol.magix.breakingbedrock.network.packets.packs;
 
-import com.nukkitx.protocol.bedrock.packet.ResourcePackClientResponsePacket;
-import com.nukkitx.protocol.bedrock.packet.ResourcePackClientResponsePacket.Status;
-import com.nukkitx.protocol.bedrock.packet.ResourcePackStackPacket;
+import org.cloudburstmc.protocol.bedrock.packet.ResourcePackClientResponsePacket;
+import org.cloudburstmc.protocol.bedrock.packet.ResourcePackClientResponsePacket.Status;
+import org.cloudburstmc.protocol.bedrock.packet.ResourcePackStackPacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;

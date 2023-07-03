@@ -1,16 +1,15 @@
 package lol.magix.breakingbedrock.utils;
 
-import com.nukkitx.protocol.bedrock.data.GameRuleData;
-import com.nukkitx.protocol.bedrock.data.GameType;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.registry.DynamicRegistryManager;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.DimensionTypes;
+import org.cloudburstmc.protocol.bedrock.data.GameRuleData;
+import org.cloudburstmc.protocol.bedrock.data.GameType;
 
 import java.util.List;
 
@@ -38,14 +37,11 @@ public interface ConversionUtils {
      * @return The Java dimension type.
      */
     static RegistryKey<DimensionType> convertBedrockDimension(int dimensionId) {
-        var registryManager = DynamicRegistryManager.createAndLoad();
-        var dimensionRegistry = registryManager.get(Registry.DIMENSION_TYPE_KEY);
-
-        return (switch (dimensionId) {
-            default -> dimensionRegistry.getOrCreateEntry(DimensionTypes.OVERWORLD);
-            case 1 -> dimensionRegistry.getOrCreateEntry(DimensionTypes.THE_NETHER);
-            case 2 -> dimensionRegistry.getOrCreateEntry(DimensionTypes.THE_END);
-        }).getKey().orElseThrow(RuntimeException::new);
+        return switch (dimensionId) {
+            default -> DimensionTypes.OVERWORLD;
+            case 1 -> DimensionTypes.THE_NETHER;
+            case 2 -> DimensionTypes.THE_END;
+        };
     }
 
     /**

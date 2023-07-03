@@ -1,15 +1,13 @@
 package lol.magix.breakingbedrock.utils;
 
-import com.nukkitx.network.util.DisconnectReason;
 import com.sun.net.httpserver.HttpServer;
-import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.objects.Pair;
 import lombok.SneakyThrows;
 import net.minecraft.text.Text;
+import org.cloudburstmc.netty.channel.raknet.RakDisconnectReason;
 import tech.xigam.express.Express;
 import tech.xigam.express.Router;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.awt.*;
 import java.awt.Desktop.Action;
 import java.net.InetSocketAddress;
@@ -34,11 +32,11 @@ public interface NetworkUtils {
     }
 
     /**
-     * Converts a {@link DisconnectReason} to a text object.
+     * Converts a {@link RakDisconnectReason} to a text object.
      * @param reason The reason to convert.
      * @return A friendly reason for disconnecting.
      */
-    static Text getDisconnectReason(DisconnectReason reason) {
+    static Text getDisconnectReason(RakDisconnectReason reason) {
         return switch (reason) {
             case CLOSED_BY_REMOTE_PEER -> Text.translatable("disconnect.genericReason", "Connection closed by remote peer");
             case SHUTTING_DOWN -> Text.translatable("disconnect.genericReason", "Server closed");

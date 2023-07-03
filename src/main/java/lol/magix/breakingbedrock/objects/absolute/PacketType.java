@@ -1,7 +1,7 @@
 package lol.magix.breakingbedrock.objects.absolute;
 
-import com.nukkitx.protocol.bedrock.BedrockPacket;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
+import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 
 /**
  * Types of translatable packets.

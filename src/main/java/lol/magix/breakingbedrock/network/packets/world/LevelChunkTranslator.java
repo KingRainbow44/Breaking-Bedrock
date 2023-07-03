@@ -1,10 +1,10 @@
 package lol.magix.breakingbedrock.network.packets.world;
 
-import com.nukkitx.nbt.NBTInputStream;
-import com.nukkitx.nbt.NbtMap;
-import com.nukkitx.nbt.util.stream.NetworkDataInputStream;
-import com.nukkitx.network.VarInts;
-import com.nukkitx.protocol.bedrock.packet.LevelChunkPacket;
+import net.minecraft.registry.RegistryKeys;
+import org.cloudburstmc.nbt.NBTInputStream;
+import org.cloudburstmc.nbt.NbtMap;
+import org.cloudburstmc.nbt.util.stream.NetworkDataInputStream;
+import org.cloudburstmc.protocol.bedrock.packet.LevelChunkPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
@@ -15,26 +15,20 @@ import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.objects.binary.BitArrayVersion;
 import lol.magix.breakingbedrock.translators.BlockPaletteTranslator;
 import lol.magix.breakingbedrock.translators.LegacyBlockPaletteTranslator;
-import lol.magix.breakingbedrock.utils.EncodingUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
-import net.minecraft.util.collection.IndexedIterable;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.DynamicRegistryManager;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
+import org.cloudburstmc.protocol.common.util.VarInts;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Translate(PacketType.BEDROCK)
-/// Taken from THEREALWWEFAN231/tunnelmc.
+// Taken from THEREALWWEFAN231/tunnelmc.
 public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
-    private static final IndexedIterable<Biome> BIOME_REGISTRY =
-            DynamicRegistryManager.createAndLoad().get(Registry.BIOME_KEY);
-
     @Override
     public Class<LevelChunkPacket> getPacketClass() {
         return LevelChunkPacket.class;
@@ -50,16 +44,19 @@ public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
         if (!this.shouldRender(chunkX, chunkZ)) {
             return;
         }
-        
+
+        // Fetch the world.
+        var world = MinecraftClient.getInstance().world;
+        Objects.requireNonNull(world, "World is null");
+
         // Perform chunk rendering.
-        var biomeRegistry = DynamicRegistryManager
-                .createAndLoad().get(Registry.BIOME_KEY);
+        var biomeRegistry = world.getRegistryManager().get(RegistryKeys.BIOME);
         var sections = new ChunkSection[24];
         var buffer = Unpooled.buffer();
         buffer.writeBytes(packet.getData());
 
         for (var i = 0; i < packet.getSubChunksLength(); i++) {
-            sections[i] = new ChunkSection(i, biomeRegistry);
+            sections[i] = new ChunkSection(biomeRegistry);
             var chunkVersion = buffer.readByte();
             if (chunkVersion != 1 && chunkVersion != 8) {
                 System.out.println("handling legacy chunk");
@@ -155,12 +152,11 @@ public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
         // }
 
         // Create a world chunk.
-        var world = MinecraftClient.getInstance().world;
         var worldChunk = new WorldChunk(world, new ChunkPos(chunkX, chunkZ));
 
         // Apply chunk data.
         for (var i = 0; i < worldChunk.getSectionArray().length; i++) {
-            if (sections[i] == null) sections[i] = new ChunkSection(i, biomeRegistry);
+            if (sections[i] == null) sections[i] = new ChunkSection(biomeRegistry);
             worldChunk.getSectionArray()[i] = sections[i];
         }
 
@@ -169,8 +165,8 @@ public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
 
         // Send chunk packet.
         var lightProvider = world.getChunkManager().getLightingProvider();
-        var chunkPacket = new ChunkDataS2CPacket(worldChunk, lightProvider,
-                null, null, true);
+        var chunkPacket = new ChunkDataS2CPacket(
+                worldChunk, lightProvider, null, null);
         this.javaClient().processPacket(chunkPacket);
     }
 
@@ -195,8 +191,8 @@ public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
         var playerChunkZ = MathHelper.floor(player.getZ()) >> 4;
         // Get the player's render distance.
         var renderDistance = options.getViewDistance().getValue();
-        
-        return Math.abs(chunkX - playerChunkX) <= renderDistance && 
+
+        return Math.abs(chunkX - playerChunkX) <= renderDistance &&
                 Math.abs(chunkZ - playerChunkZ) <= renderDistance;
     }
 

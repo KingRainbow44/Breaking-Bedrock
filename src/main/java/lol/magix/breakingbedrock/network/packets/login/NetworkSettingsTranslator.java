@@ -1,6 +1,6 @@
 package lol.magix.breakingbedrock.network.packets.login;
 
-import com.nukkitx.protocol.bedrock.packet.NetworkSettingsPacket;
+import org.cloudburstmc.protocol.bedrock.packet.NetworkSettingsPacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.network.translation.Translator;
@@ -14,7 +14,7 @@ public final class NetworkSettingsTranslator extends Translator<NetworkSettingsP
 
     @Override
     public void translate(NetworkSettingsPacket packet) {
-        var session = BedrockNetworkClient.getSession();
+        var session = BedrockNetworkClient.getHandle();
 
         // Set compression values.
         session.setCompressionLevel(packet.getCompressionThreshold());

@@ -1,8 +1,5 @@
 package lol.magix.breakingbedrock.network.packets.login;
 
-import com.nukkitx.protocol.bedrock.packet.ClientToServerHandshakePacket;
-import com.nukkitx.protocol.bedrock.packet.ServerToClientHandshakePacket;
-import com.nukkitx.protocol.bedrock.util.EncryptionUtils;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.network.translation.Translator;
@@ -10,6 +7,9 @@ import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.objects.definitions.HandshakeHeader;
 import lol.magix.breakingbedrock.objects.definitions.HandshakePayload;
 import lol.magix.breakingbedrock.utils.EncodingUtils;
+import org.cloudburstmc.protocol.bedrock.packet.ClientToServerHandshakePacket;
+import org.cloudburstmc.protocol.bedrock.packet.ServerToClientHandshakePacket;
+import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils;
 
 @Translate(PacketType.BEDROCK)
 public final class S2CHandshakeTranslator extends Translator<ServerToClientHandshakePacket> {
@@ -32,10 +32,10 @@ public final class S2CHandshakeTranslator extends Translator<ServerToClientHands
             // Create an encryption key from the payload.
             var salt = EncodingUtils.base64DecodeToBytes(payloadObject.getSalt());
             var privateKey = this.bedrockClient.getAuthentication().getPrivateKey();
-            var publicKey = EncryptionUtils.generateKey(headerObject.getPublicKey());
+            var publicKey = EncryptionUtils.parseKey(headerObject.getPublicKey());
             var secretKey = EncryptionUtils.getSecretKey(privateKey, publicKey, salt);
             // Set the encryption key.
-            BedrockNetworkClient.getSession().enableEncryption(secretKey);
+            BedrockNetworkClient.getHandle().enableEncryption(secretKey);
 
             if (this.shouldLog)
                 this.logger.info("Handshake with server successful.");

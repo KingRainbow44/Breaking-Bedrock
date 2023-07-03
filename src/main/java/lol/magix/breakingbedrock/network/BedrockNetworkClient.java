@@ -1,13 +1,9 @@
 package lol.magix.breakingbedrock.network;
 
-import com.nukkitx.network.util.DisconnectReason;
-import com.nukkitx.protocol.bedrock.BedrockClient;
-import com.nukkitx.protocol.bedrock.BedrockClientSession;
-import com.nukkitx.protocol.bedrock.BedrockPacket;
-import com.nukkitx.protocol.bedrock.BedrockSession;
-import com.nukkitx.protocol.bedrock.packet.LoginPacket;
-import com.nukkitx.protocol.bedrock.packet.RequestNetworkSettingsPacket;
-import io.netty.util.AsciiString;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.util.concurrent.Promise;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.network.auth.Authentication;
 import lol.magix.breakingbedrock.objects.ConnectionDetails;
@@ -15,16 +11,25 @@ import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
 import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizerData;
 import lol.magix.breakingbedrock.objects.game.SessionData;
+import lol.magix.breakingbedrock.utils.IntervalUtils;
 import lol.magix.breakingbedrock.utils.NetworkUtils;
 import lol.magix.breakingbedrock.utils.ScreenUtils;
-import lol.magix.breakingbedrock.utils.SkinUtils;
+import lol.magix.breakingbedrock.utils.ProfileUtils;
 import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
+import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
+import org.cloudburstmc.netty.channel.raknet.RakDisconnectReason;
+import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
+import org.cloudburstmc.protocol.bedrock.BedrockClientSession;
+import org.cloudburstmc.protocol.bedrock.BedrockSession;
+import org.cloudburstmc.protocol.bedrock.data.PacketCompressionAlgorithm;
+import org.cloudburstmc.protocol.bedrock.netty.initializer.BedrockClientInitializer;
+import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
+import org.cloudburstmc.protocol.bedrock.packet.LoginPacket;
+import org.cloudburstmc.protocol.bedrock.packet.RequestNetworkSettingsPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
 
 /**
  * Handles network connections to a Bedrock server.
@@ -34,24 +39,16 @@ public final class BedrockNetworkClient {
     @Getter private final Logger logger = LoggerFactory.getLogger("Bedrock Client");
 
     /**
-     * Returns the {@link BedrockClient} handle.
-     * @return A {@link BedrockClient} instance.
-     */
-    public static BedrockClient getHandle() {
-        return BedrockNetworkClient.getInstance().client;
-    }
-
-    /**
-     * Returns the {@link BedrockClientSession} for the client handle.
+     * Returns the {@link BedrockClientSession} handle.
      * @return A {@link BedrockClientSession} instance.
      */
-    public static BedrockClientSession getSession() {
-        return BedrockNetworkClient.getHandle().getSession();
+    public static BedrockClientSession getHandle() {
+        return BedrockNetworkClient.getInstance().client;
     }
 
     private boolean hasLoggedIn = false;
 
-    private BedrockClient client = null;
+    private BedrockClientSession client = null;
     private BedrockSession session = null;
     @Getter private SessionData data = null;
     @Getter private Authentication authentication = null;
@@ -68,34 +65,68 @@ public final class BedrockNetworkClient {
         // Update screen.
         // ScreenUtils.connect();
 
-        // Create a client & bind to a port.
-        this.bindToClient();
-        // Update client properties.
-        this.client.setRakNetVersion(NetworkConstants.PACKET_CODEC.getRaknetProtocolVersion());
         // Connect to the server.
-        this.client.connect(connectTo.toSocketAddress()).whenComplete(this::onConnect);
+        this.connect().addListener((Promise<BedrockClientSession> promise) -> {
+            if (!promise.isSuccess()) {
+                var throwable = promise.cause();
+                this.getLogger().warn("Unable to connect to server.", throwable);
+                MinecraftClient.getInstance().execute(() ->
+                        ScreenUtils.disconnect(Text.of(throwable.getMessage())));
+            } else {
+                this.client = promise.getNow();
+                this.onSessionInitialized();
+            }
+        });
     }
 
     /**
-     * Invoked when the client connects to the server.
+     * Attempts to log in to the server.
      */
-    private void onConnect(BedrockSession session, Throwable throwable) {
-        // Check if there was a connection error.
-        if (throwable != null) {
-            MinecraftClient.getInstance().execute(() ->
-                    ScreenUtils.disconnect(Text.of(throwable.getMessage())));
-            return;
-        }
+    private Promise<BedrockClientSession> connect() {
+        // Fetch a backend event loop.
+        var loop = BreakingBedrock.getEventGroup().next();
+        Promise<BedrockClientSession> promise = loop.newPromise();
 
-        // Create a new session handler.
-        this.onSessionInitialized(session);
+        // Create a new bootstrap.
+        new Bootstrap()
+                .group(loop)
+                .option(RakChannelOption.RAK_MTU, 1400)
+                .option(RakChannelOption.RAK_ORDERING_CHANNELS, 1)
+                .option(RakChannelOption.RAK_SESSION_TIMEOUT, 10000L)
+                .option(RakChannelOption.RAK_CONNECT_TIMEOUT, 25 * 1000L)
+                .option(RakChannelOption.RAK_PROTOCOL_VERSION,
+                        NetworkConstants.PACKET_CODEC.getRaknetProtocolVersion())
+                .channelFactory(RakChannelFactory.client(NioDatagramChannel.class))
+                .handler(new BedrockClientInitializer() {
+                    @Override
+                    protected void initSession(BedrockClientSession session) {
+                        var instance = BedrockNetworkClient.this;
+                        instance.getLogger().info("RakNet session initialized.");
+
+                        // Set session properties.
+                        session.setCodec(NetworkConstants.PACKET_CODEC);
+                        session.setPacketHandler(new BedrockPacketHandler(instance));
+
+                        // Fulfill the promise.
+                        promise.trySuccess(session);
+                    }
+                })
+                .connect(this.connectionDetails.toSocketAddress())
+                .addListener((ChannelFuture future) -> {
+                    if (!future.isSuccess()) {
+                        promise.tryFailure(future.cause());
+                        future.channel().close();
+                    }
+                });
+
+        return promise;
     }
 
     /**
      * Invoked when the client is disconnected.
      * @param reason The reason for disconnection.
      */
-    private void onDisconnect(DisconnectReason reason) {
+    private void onDisconnect(RakDisconnectReason reason) {
         // Display a client disconnect screen.
         if (this.data.isInitialized())
             MinecraftClient.getInstance().execute(() ->
@@ -114,15 +145,9 @@ public final class BedrockNetworkClient {
     /**
      * Invoked when the client has successfully connected to the server.
      */
-    private void onSessionInitialized(BedrockSession session) {
-        this.session = session;
-
+    private void onSessionInitialized() {
         // Set session properties.
-        session.setLogging(BreakingBedrock.isDebugEnabled());
-        session.setPacketCodec(NetworkConstants.PACKET_CODEC);
-        // Register session handlers.
-        session.setBatchHandler(new NetworkBatchHandler());
-        session.addDisconnectHandler(this::onDisconnect);
+        this.client.setLogging(BreakingBedrock.isDebugEnabled());
 
         // Create a session flags instance.
         this.data = new SessionData();
@@ -130,30 +155,24 @@ public final class BedrockNetworkClient {
         try {
             // Request protocol version from server.
             var requestPacket = new RequestNetworkSettingsPacket();
-            requestPacket.setProtocolVersion(session.getPacketCodec().getProtocolVersion());
+            requestPacket.setProtocolVersion(this.client.getCodec().getProtocolVersion());
             this.sendPacket(requestPacket, true);
+
+            // Apply compression properties.
+            this.client.setCompression(PacketCompressionAlgorithm.ZLIB);
+            this.client.setCompressionLevel(-1);
+
+            // Wait 2s, then send login packet.
+            IntervalUtils.runAfter(this::loginToServer, 2000);
         } catch (Exception exception) {
             this.logger.error("An error occurred while logging in.", exception);
-            this.client.close();
+            this.client.close("Login error");
         }
     }
 
     /*
      * Internal utility methods.
      */
-
-    /**
-     * Attempts to bind to a port.
-     */
-    private void bindToClient() {
-        var success = false;
-        while (!success) try {
-            var bindAddress = new InetSocketAddress("0.0.0.0", NetworkUtils.getOpenPort());
-            this.client = new BedrockClient(bindAddress);
-            this.client.bind().join();
-            success = true;
-        } catch (Exception ignored) { }
-    }
 
     /**
      * Attempts to send a {@link LoginPacket} to the server.
@@ -173,9 +192,9 @@ public final class BedrockNetworkClient {
             var chainData = this.connectionDetails.online() ?
                     this.authentication.getOnlineChainData() :
                     this.authentication.getOfflineChainData(BreakingBedrock.getUsername());
-            // Pull skin data.
-            var skinData = SkinUtils.getSkinData(this);
-            if (skinData == null) skinData = SkinUtils.SKIN_DATA_BASE_64;
+            // Pull profile data.
+            var profile = ProfileUtils.getProfileData(this);
+            if (profile == null) profile = ProfileUtils.SKIN_DATA_BASE_64;
 
             // Set session data.
             this.data.setDisplayName(this.authentication.getDisplayName());
@@ -183,16 +202,16 @@ public final class BedrockNetworkClient {
             this.data.setXuid(this.authentication.getXuid());
 
             // Set the login properties.
-            loginPacket.setProtocolVersion(this.session.getPacketCodec().getProtocolVersion());
-            loginPacket.setChainData(new AsciiString(chainData));
-            loginPacket.setSkinData(new AsciiString(skinData));
+            loginPacket.setProtocolVersion(this.client.getCodec().getProtocolVersion());
+            loginPacket.getChain().add(chainData);
+            loginPacket.setExtra(profile);
 
             // Send the packet & update connection.
             this.sendPacket(loginPacket, true);
             this.javaNetworkClient = new JavaNetworkClient();
         } catch (Exception exception) {
             this.logger.error("An error occurred while logging in.", exception);
-            this.client.close();
+            this.client.close("Login error");
         }
     }
 
@@ -201,7 +220,7 @@ public final class BedrockNetworkClient {
      * @return True if logging should be performed.
      */
     public boolean shouldLog() {
-        return BreakingBedrock.isDebugEnabled() || this.client.getSession().isLogging();
+        return BreakingBedrock.isDebugEnabled() || this.client.isLogging();
     }
 
     /*
@@ -215,9 +234,8 @@ public final class BedrockNetworkClient {
     public boolean isConnected() {
         return
                 this.client != null && // Check if the client has been initialized.
-                this.client.getSession() != null && // Check if the session has been initialized.
-                this.client.getRakNet() != null && // Check if the RakNet client has been initialized.
-                this.client.getRakNet().isRunning(); // Check if the RakNet client is running.
+                this.client.isConnected() && // Check if the client is connected.
+                this.client.getPeer().isConnected(); // Check if the peer is connected.
     }
 
     /**
@@ -236,17 +254,13 @@ public final class BedrockNetworkClient {
      */
     public void sendPacket(BedrockPacket packet, boolean immediate) {
         // Set the packet's ID.
-        packet.setPacketId(NetworkConstants.PACKET_CODEC
-                .getId(packet.getClass()));
-
-        var session = this.client.getSession();
         if (immediate)
-            session.sendPacketImmediately(packet);
+            this.client.sendPacketImmediately(packet);
         else
-            session.sendPacket(packet);
+            this.client.sendPacket(packet);
 
         // Log packet if needed.
-        if (session.isLogging()) {
+        if (this.client.isLogging()) {
             // Visualize outbound packet.
             PacketVisualizer.getInstance().sendMessage(
                     PacketVisualizerData.toMessage(packet, true));

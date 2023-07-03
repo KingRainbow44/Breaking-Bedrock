@@ -1,12 +1,13 @@
 package lol.magix.breakingbedrock.network.translation;
 
-import com.nukkitx.protocol.bedrock.BedrockPacket;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.utils.ReflectionUtils;
 import lombok.Getter;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
+import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
+import org.cloudburstmc.protocol.common.PacketSignal;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,11 +57,16 @@ public final class PacketTranslator {
 
     /**
      * Translates the specified packet.
+     *
      * @param inboundPacket The packet to translate.
+     * @return The packet signal.
      */
     @SuppressWarnings("unchecked")
-    public <T> void translatePacket(T inboundPacket) {
+    public <T> PacketSignal translatePacket(T inboundPacket) {
         var translator = (Translator<T>) this.translators.get(inboundPacket.getClass());
-        if (translator != null) translator.translate(inboundPacket);
+        if (translator != null) {
+            translator.translate(inboundPacket);
+            return PacketSignal.HANDLED;
+        } else return PacketSignal.UNHANDLED;
     }
 }

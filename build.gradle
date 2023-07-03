@@ -15,14 +15,20 @@ repositories {
 
     mavenCentral()
 
-    // NukkitX Maven repositories.
+    // CloudBurstMC Maven repositories.
     maven {
         name = 'nukkitx-repo-release'
-        url = 'https://repo.nukkitx.com/maven-releases/'
+        url = 'https://repo.opencollab.dev/maven-releases/'
     }
     maven {
         name = 'nukkitx-repo-snapshot'
-        url = 'https://repo.nukkitx.com/maven-snapshots/'
+        url = 'https://repo.opencollab.dev/maven-snapshots/'
+    }
+
+    // Waterdog Maven repository.
+    maven {
+        name = 'waterdog'
+        url = 'https://repo.waterdog.dev/artifactory/main/'
     }
 }
 
@@ -36,18 +42,20 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // Debug library for Web Sockets.
-    modImplementation 'org.java-websocket:Java-WebSocket:1.5.3'
+    modImplementation "org.java-websocket:Java-WebSocket:1.5.3"
     // Library for handling HTTP requests.
-    modImplementation 'tech.xigam:Express.Java:1.2.2'
-    modImplementation 'com.squareup.okhttp3:okhttp:4.10.0'
+    modImplementation "tech.xigam:Express.Java:1.2.2"
+    modImplementation "com.squareup.okhttp3:okhttp:4.10.0"
 
     // Minecraft: Bedrock protocol libraries.
-    modImplementation 'com.nukkitx.protocol:bedrock-v557:2.9.14-SNAPSHOT'
+    modImplementation "org.cloudburstmc.protocol:common:${project.protocol_version}"
+    modImplementation "org.cloudburstmc.protocol:bedrock-codec:${project.protocol_version}"
+    modImplementation "org.cloudburstmc.protocol:bedrock-connection:${project.protocol_version}"
 
     // Developer tools. (Reflection + access wideners)
-    modImplementation 'org.reflections:reflections:0.10.2'
-    modImplementation 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    modImplementation "org.reflections:reflections:0.10.2"
+    modImplementation "org.projectlombok:lombok:1.18.24"
+    annotationProcessor "org.projectlombok:lombok:1.18.24"
 }
 
 processResources {

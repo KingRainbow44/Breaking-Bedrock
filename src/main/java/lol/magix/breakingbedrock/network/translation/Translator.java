@@ -1,12 +1,12 @@
 package lol.magix.breakingbedrock.network.translation;
 
 import com.google.gson.Gson;
-import com.nukkitx.protocol.bedrock.BedrockPacket;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.network.JavaNetworkClient;
 import lol.magix.breakingbedrock.objects.game.SessionData;
 import net.minecraft.client.MinecraftClient;
+import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.slf4j.Logger;
 
 /**

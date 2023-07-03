@@ -1,9 +1,9 @@
 package lol.magix.breakingbedrock.objects.definitions.visualizer;
 
-import com.nukkitx.protocol.bedrock.BedrockPacket;
 import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizerMessage.PacketIds;
 import lol.magix.breakingbedrock.utils.EncodingUtils;
 import lombok.Builder;
+import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 
 @Builder
 public final class PacketVisualizerData {
@@ -33,7 +33,8 @@ public final class PacketVisualizerData {
         }
 
         var packetData = PacketVisualizerData.builder()
-                .source(isOutbound ? "client" : "server").packetId(packet.getPacketId())
+                .source(isOutbound ? "client" : "server")
+                .packetId(-1) // Packet IDs (as numbers) do not exist.
                 .packetName(packet.getClass().getSimpleName())
                 .length(encoded.length()).data(encoded).build();
         return PacketVisualizerMessage.builder()

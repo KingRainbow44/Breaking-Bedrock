@@ -5,6 +5,7 @@ import lol.magix.breakingbedrock.objects.ConnectionDetails;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CheckboxWidget;
@@ -78,9 +79,12 @@ public final class JoinBedrockServerScreen extends Screen {
             return;
 
         // Configure the screen.
-        this.client.keyboard.setRepeatEvents(true);
-        this.joinServerButton = new ButtonWidget(this.width / 2 - 102, this.height / 4 + 100 + 12,
-                204, 20, Text.translatable("selectServer.select"), this::joinServer);
+        this.joinServerButton = ButtonWidget.builder(
+                Text.translatable("selectServer.select"),
+                this::joinServer)
+                .size(204, 20)
+                .position(this.width / 2 - 102, this.height / 4 + 100 + 12)
+                .build();
         this.addressField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, (this.height / 4) + 16,
                 200, 20, Text.of("Enter Address"));
         this.portField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, (this.height / 4) + 52,
@@ -88,17 +92,21 @@ public final class JoinBedrockServerScreen extends Screen {
         this.onlineCheckbox = new CheckboxWidget(this.width / 2 - 100, (this.height / 4) + 80,
                 200, 20, Text.of("Use XBox Authentication?"), true);
 
-        var cancelButton = new ButtonWidget(this.width / 2 - 102, this.height / 4 + 100 + 36,
-                204, 20, ScreenTexts.CANCEL, button -> this.close());
+        var cancelButton = ButtonWidget.builder(
+                ScreenTexts.CANCEL,
+                button -> this.close())
+                .size(204, 20)
+                .position(this.width / 2 - 102, this.height / 4 + 100 + 36)
+                .build();
 
         // Modify data for each widget.
         this.addressField.setMaxLength(128);
-        this.addressField.setTextFieldFocused(true);
+        this.addressField.setFocused(true);
         this.addressField.setText("127.0.0.1");
         this.addressField.setChangedListener(text -> this.modifyAddress());
 
         this.portField.setMaxLength(6);
-        this.portField.setTextFieldFocused(false);
+        this.portField.setFocused(false);
         this.portField.setText("19132");
         this.portField.setChangedListener(text -> this.modifyAddress());
 
@@ -120,20 +128,20 @@ public final class JoinBedrockServerScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderBackground(matrices); // Render the background.
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderBackground(context); // Render the background.
 
         // Draw text with shadows.
-        JoinBedrockServerScreen.drawCenteredText(matrices, this.textRenderer, this.title,
+        context.drawCenteredTextWithShadow(this.textRenderer, this.title,
                 this.width / 2, 20, 16777215);
-        JoinBedrockServerScreen.drawTextWithShadow(matrices, this.textRenderer, Text.of("Server Address and Port"),
+        context.drawTextWithShadow(this.textRenderer, Text.of("Server Address and Port"),
                 this.width / 2 - 100, this.height / 4, 10526880);
 
         // Draw widgets to the screen.
-        this.addressField.render(matrices, mouseX, mouseY, delta);
-        this.portField.render(matrices, mouseX, mouseY, delta);
-        this.onlineCheckbox.render(matrices, mouseX, mouseY, delta);
-        super.render(matrices, mouseX, mouseY, delta);
+        this.addressField.render(context, mouseX, mouseY, delta);
+        this.portField.render(context, mouseX, mouseY, delta);
+        this.onlineCheckbox.render(context, mouseX, mouseY, delta);
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
@@ -186,7 +194,6 @@ public final class JoinBedrockServerScreen extends Screen {
         if (this.client == null)
             return;
 
-        this.client.keyboard.setRepeatEvents(false);
         this.client.options.write();
     }
 }
