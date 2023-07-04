@@ -42,19 +42,19 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // Debug library for Web Sockets.
-    modImplementation "org.java-websocket:Java-WebSocket:1.5.3"
+    implementation "org.java-websocket:Java-WebSocket:1.5.3"
     // Library for handling HTTP requests.
-    modImplementation "tech.xigam:Express.Java:1.2.2"
-    modImplementation "com.squareup.okhttp3:okhttp:4.10.0"
+    implementation "tech.xigam:Express.Java:1.2.2"
+    implementation "com.squareup.okhttp3:okhttp:4.10.0"
 
     // Minecraft: Bedrock protocol libraries.
-    modImplementation "org.cloudburstmc.protocol:common:${project.protocol_version}"
-    modImplementation "org.cloudburstmc.protocol:bedrock-codec:${project.protocol_version}"
-    modImplementation "org.cloudburstmc.protocol:bedrock-connection:${project.protocol_version}"
+    implementation "org.cloudburstmc.protocol:common:${project.protocol_version}"
+    implementation "org.cloudburstmc.protocol:bedrock-codec:${project.protocol_version}"
+    implementation "org.cloudburstmc.protocol:bedrock-connection:${project.protocol_version}"
 
     // Developer tools. (Reflection + access wideners)
-    modImplementation "org.reflections:reflections:0.10.2"
-    modImplementation "org.projectlombok:lombok:1.18.24"
+    implementation "org.reflections:reflections:0.10.2"
+    implementation "org.projectlombok:lombok:1.18.24"
     annotationProcessor "org.projectlombok:lombok:1.18.24"
 }
 
