@@ -7,9 +7,13 @@
     "MixinClientConnection"
   ],
   "client": [
+    "MixinClientPlayerEntity",
+    "MixinClientPlayNetworkHandler",
     "MixinMinecraftClient",
     "MixinMultiplayerScreen",
-    "MixinWorldRenderer"
+    "MixinWorldRenderer",
+    "interfaces.IMixinClientPlayerInteractionManager",
+    "interfaces.IMixinWorldRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -12,6 +12,7 @@ import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
 import lol.magix.breakingbedrock.translators.BlockPaletteTranslator;
 import lol.magix.breakingbedrock.translators.BlockStateTranslator;
 import lol.magix.breakingbedrock.translators.LegacyBlockPaletteTranslator;
+import lol.magix.breakingbedrock.translators.blockentity.BlockEntityRegistry;
 import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import org.reflections.Reflections;
@@ -41,6 +42,7 @@ public final class BreakingBedrock {
         PacketVisualizer.initialize();
         // Load resources.
         GameConstants.loadRegistry();
+        BlockEntityRegistry.loadRegistry();
 
         BlockPaletteTranslator.loadMappings();
         BlockStateTranslator.loadMappings();

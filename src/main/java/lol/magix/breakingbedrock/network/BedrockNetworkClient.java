@@ -5,12 +5,15 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.Promise;
 import lol.magix.breakingbedrock.BreakingBedrock;
+import lol.magix.breakingbedrock.events.EventManager;
 import lol.magix.breakingbedrock.network.auth.Authentication;
 import lol.magix.breakingbedrock.objects.ConnectionDetails;
 import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
 import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizerData;
+import lol.magix.breakingbedrock.objects.game.AuthInputHandler;
 import lol.magix.breakingbedrock.objects.game.SessionData;
+import lol.magix.breakingbedrock.objects.game.caches.BlockEntityDataCache;
 import lol.magix.breakingbedrock.utils.IntervalUtils;
 import lol.magix.breakingbedrock.utils.ProfileUtils;
 import lol.magix.breakingbedrock.utils.ScreenUtils;
@@ -20,6 +23,8 @@ import net.minecraft.text.Text;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.cloudburstmc.protocol.bedrock.BedrockClientSession;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.data.PlayerBlockActionData;
 import org.cloudburstmc.protocol.bedrock.netty.initializer.BedrockClientInitializer;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.LoginPacket;
@@ -27,12 +32,16 @@ import org.cloudburstmc.protocol.bedrock.packet.RequestNetworkSettingsPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
+
 /**
  * Handles network connections to a Bedrock server.
  */
 public final class BedrockNetworkClient {
     @Getter private static final BedrockNetworkClient instance = new BedrockNetworkClient();
+
     @Getter private final Logger logger = LoggerFactory.getLogger("Bedrock Client");
+    @Getter private final EventManager eventManager = new EventManager();
 
     /**
      * Returns the {@link BedrockClientSession} handle.
@@ -50,6 +59,10 @@ public final class BedrockNetworkClient {
     @Getter private ConnectionDetails connectionDetails = null;
 
     @Getter private JavaNetworkClient javaNetworkClient = null;
+
+    @Getter private AuthInputHandler inputHandler = null;
+    @Getter private BlockEntityDataCache blockEntityDataCache = null;
+    @Getter private List<PlayerBlockActionData> blockActions = null;
 
     /**
      * Initializes a connection with a server.
@@ -148,6 +161,13 @@ public final class BedrockNetworkClient {
     /*
      * Internal utility methods.
      */
+
+    /**
+     * @param data The input data.
+     */
+    public void addInputData(PlayerAuthInputData data) {
+        this.getInputHandler().getInputData().add(data);
+    }
 
     /**
      * Invoked when the client is disconnected.
@@ -271,8 +291,10 @@ public final class BedrockNetworkClient {
      * Invoked when the Java player is ready to play.
      */
     public void onPlayerInitialization() {
+        this.blockActions = new LinkedList<>();
         // TODO: Initialize container manager.
-        // TODO: Initialize block entity cache.
+        this.blockEntityDataCache = new BlockEntityDataCache();
         // TODO: Set the open container.
+        this.inputHandler = new AuthInputHandler(this);
     }
 }

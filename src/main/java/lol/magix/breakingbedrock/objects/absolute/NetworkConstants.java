@@ -21,6 +21,10 @@ public interface NetworkConstants {
         this.add("SetTimePacket");
         this.add("LevelChunkPacket");
         this.add("NetworkChunkPublisherUpdatePacket");
+
+        this.add("Full");
+        this.add("LookAndOnGround");
+        this.add("PositionAndOnGround");
     }};
 
     // Constants for Xbox Live authentication.

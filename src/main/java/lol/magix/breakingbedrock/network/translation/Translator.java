@@ -6,6 +6,7 @@ import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.network.JavaNetworkClient;
 import lol.magix.breakingbedrock.objects.game.SessionData;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.slf4j.Logger;
 
@@ -34,6 +35,20 @@ public abstract class Translator<P> {
      */
     protected final SessionData data() {
         return this.bedrockClient.getData();
+    }
+
+    /**
+     * @return The Minecraft client.
+     */
+    protected final MinecraftClient client() {
+        return MinecraftClient.getInstance();
+    }
+
+    /**
+     * @return The player.
+     */
+    protected final ClientPlayerEntity player() {
+        return this.client().player;
     }
 
     /**
