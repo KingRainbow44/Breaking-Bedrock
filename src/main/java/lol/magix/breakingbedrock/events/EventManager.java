@@ -21,6 +21,19 @@ public final class EventManager {
     }
 
     /**
+     * Removes an event listener.
+     *
+     * @param event The event to remove the listener from.
+     * @param handler The handler to remove.
+     */
+    public <T extends Event> void removeListener(Class<T> event, EventHandler<T> handler) {
+        var listeners = this.listeners.get(event);
+        if (listeners == null) return;
+
+        listeners.remove(handler);
+    }
+
+    /**
      * Invokes all listeners for the given event.
      *
      * @param event The event to invoke.
