@@ -1,12 +1,13 @@
 package lol.magix.breakingbedrock.network.auth;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.objects.absolute.AlgorithmType;
-import lol.magix.breakingbedrock.utils.EncodingUtils;
 import lol.magix.breakingbedrock.utils.CryptoUtils;
+import lol.magix.breakingbedrock.utils.EncodingUtils;
 import lombok.Getter;
 import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils;
 
@@ -17,6 +18,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -69,7 +71,7 @@ public final class Authentication {
      * Generates data for online authentication.
      * @return Authentication data. (JSON-encoded)
      */
-    public String getOnlineChainData() {
+    public List<String> getOnlineChainData() {
         var gson = BreakingBedrock.getGson();
 
         // Generate an Xbox Live keypair.
@@ -136,7 +138,10 @@ public final class Authentication {
             this.displayName = extraData.get("displayName").getAsString();
         }
 
-        return gson.toJson(chainDataJson); // Return the updated chain data.
+        // Return the updated chain data.
+        return chains.asList().stream()
+                .map(JsonElement::toString)
+                .toList();
     }
 
     /**
@@ -145,7 +150,7 @@ public final class Authentication {
      * @param username The username to use.
      * @return Authentication data. (JSON-encoded)
      */
-    public String getOfflineChainData(String username) throws Exception {
+    public List<String> getOfflineChainData(String username) throws Exception {
         var gson = BreakingBedrock.getGson();
 
         // Generate a UUID & XUID.
@@ -189,15 +194,16 @@ public final class Authentication {
         // Create a chain.
         var chainArray = new JsonArray();
         chainArray.add(jwt);
-        var chain = new JsonObject();
-        chain.add("chain", chainArray);
 
         // Set the identity & XUID.
         this.xuid = xuid;
         this.identity = uuid;
         this.displayName = username;
 
-        return gson.toJson(chain);
+        return chainArray.asList().stream()
+                .map(JsonElement::toString)
+                .map(s -> s.replace("\"", ""))
+                .toList();
     }
 
     /*

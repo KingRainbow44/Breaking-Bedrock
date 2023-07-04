@@ -1,14 +1,14 @@
 package lol.magix.breakingbedrock.network.packets.misc;
 
+import lol.magix.breakingbedrock.annotations.Translate;
+import lol.magix.breakingbedrock.network.translation.Translator;
+import lol.magix.breakingbedrock.objects.absolute.PacketType;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import org.cloudburstmc.protocol.bedrock.data.command.CommandOriginData;
 import org.cloudburstmc.protocol.bedrock.data.command.CommandOriginType;
 import org.cloudburstmc.protocol.bedrock.packet.CommandRequestPacket;
 import org.cloudburstmc.protocol.bedrock.packet.TextPacket;
 import org.cloudburstmc.protocol.bedrock.packet.TextPacket.Type;
-import lol.magix.breakingbedrock.annotations.Translate;
-import lol.magix.breakingbedrock.network.translation.Translator;
-import lol.magix.breakingbedrock.objects.absolute.PacketType;
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 
 @Translate(PacketType.JAVA)
 public final class ChatMessageTranslator extends Translator<ChatMessageC2SPacket> {

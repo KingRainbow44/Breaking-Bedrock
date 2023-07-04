@@ -11,11 +11,16 @@ import net.minecraft.network.NetworkSide;
 import net.minecraft.network.OffThreadException;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles packet processing on the Java (local) client.
  */
 public final class JavaNetworkClient {
+    private final Logger logger
+            = LoggerFactory.getLogger("Java Client");
+
     private final ClientConnection local;
     private final ClientPlayNetworkHandler localNetwork;
 
@@ -46,6 +51,9 @@ public final class JavaNetworkClient {
             packet.apply(this.localNetwork);
         } catch (OffThreadException ignored) {
             // Ignore.
+        } catch (Exception exception) {
+            this.logger.warn("Failed to process packet: " +
+                    packet.getClass().getSimpleName(), exception);
         }
     }
 }

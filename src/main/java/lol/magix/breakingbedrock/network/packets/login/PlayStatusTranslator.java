@@ -1,11 +1,11 @@
 package lol.magix.breakingbedrock.network.packets.login;
 
-import org.cloudburstmc.protocol.bedrock.packet.PlayStatusPacket;
-import org.cloudburstmc.protocol.bedrock.packet.SetLocalPlayerAsInitializedPacket;
-import org.cloudburstmc.protocol.bedrock.packet.TickSyncPacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
+import org.cloudburstmc.protocol.bedrock.packet.PlayStatusPacket;
+import org.cloudburstmc.protocol.bedrock.packet.SetLocalPlayerAsInitializedPacket;
+import org.cloudburstmc.protocol.bedrock.packet.TickSyncPacket;
 
 @Translate(PacketType.BEDROCK)
 public final class PlayStatusTranslator extends Translator<PlayStatusPacket> {

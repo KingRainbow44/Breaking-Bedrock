@@ -1,10 +1,10 @@
 package lol.magix.breakingbedrock.network.packets.world;
 
-import org.cloudburstmc.protocol.bedrock.packet.NetworkChunkPublisherUpdatePacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import net.minecraft.network.packet.s2c.play.ChunkRenderDistanceCenterS2CPacket;
+import org.cloudburstmc.protocol.bedrock.packet.NetworkChunkPublisherUpdatePacket;
 
 @Translate(PacketType.BEDROCK)
 public final class ChunkPublishUpdateTranslator extends Translator<NetworkChunkPublisherUpdatePacket> {

@@ -4,12 +4,24 @@ package lol.magix.breakingbedrock.objects.absolute;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
 import org.cloudburstmc.protocol.bedrock.codec.v589.Bedrock_v589;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Constants related to networking.
  */
 public interface NetworkConstants {
     /* This will be the latest supported version. */
     BedrockCodec PACKET_CODEC = Bedrock_v589.CODEC;
+    /* This is the compression level used by Minecraft. */
+    int COMPRESSION_LEVEL = 6;
+
+    /* Ignored packets to log. */
+    Set<String> IGNORED_PACKETS = new HashSet<>() {{
+        this.add("SetTimePacket");
+        this.add("LevelChunkPacket");
+        this.add("NetworkChunkPublisherUpdatePacket");
+    }};
 
     // Constants for Xbox Live authentication.
     String XBOX_ANDROID_CID = "0000000048183522";

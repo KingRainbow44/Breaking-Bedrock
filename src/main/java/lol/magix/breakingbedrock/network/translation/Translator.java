@@ -18,7 +18,7 @@ public abstract class Translator<P> {
 
     protected final BedrockNetworkClient bedrockClient = BedrockNetworkClient.getInstance();
     protected final Logger logger = this.bedrockClient.getLogger();
-    protected final boolean shouldLog = bedrockClient.shouldLog();
+    protected final boolean shouldLog = this.bedrockClient.shouldLog();
 
     /**
      * Returns the Java network client.

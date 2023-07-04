@@ -2,6 +2,7 @@ package lol.magix.breakingbedrock.screens;
 
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.objects.ConnectionDetails;
+import lol.magix.breakingbedrock.objects.absolute.GameConstants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -10,7 +11,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -90,7 +90,7 @@ public final class JoinBedrockServerScreen extends Screen {
         this.portField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, (this.height / 4) + 52,
                 200, 20, Text.of("Enter Port"));
         this.onlineCheckbox = new CheckboxWidget(this.width / 2 - 100, (this.height / 4) + 80,
-                200, 20, Text.of("Use XBox Authentication?"), true);
+                200, 20, Text.of("Use XBox Authentication?"), GameConstants.DEFAULT_AUTHENTICATION);
 
         var cancelButton = ButtonWidget.builder(
                 ScreenTexts.CANCEL,
@@ -102,12 +102,12 @@ public final class JoinBedrockServerScreen extends Screen {
         // Modify data for each widget.
         this.addressField.setMaxLength(128);
         this.addressField.setFocused(true);
-        this.addressField.setText("127.0.0.1");
+        this.addressField.setText(GameConstants.DEFAULT_SERVER);
         this.addressField.setChangedListener(text -> this.modifyAddress());
 
         this.portField.setMaxLength(6);
         this.portField.setFocused(false);
-        this.portField.setText("19132");
+        this.portField.setText(GameConstants.DEFAULT_PORT);
         this.portField.setChangedListener(text -> this.modifyAddress());
 
         // Draw the widgets to the screen.

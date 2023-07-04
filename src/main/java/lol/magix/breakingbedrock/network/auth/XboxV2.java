@@ -169,7 +169,7 @@ public final class XboxV2 {
     private JsonObject createProofKey(ECPublicKey publicKey) {
         var proofKey = new JsonObject();
         proofKey.addProperty("crv", "P-256");
-        proofKey.addProperty("alg", "ES256");
+        proofKey.addProperty("alg", "ES384");
         proofKey.addProperty("use", "sig");
         proofKey.addProperty("kty", "EC");
 

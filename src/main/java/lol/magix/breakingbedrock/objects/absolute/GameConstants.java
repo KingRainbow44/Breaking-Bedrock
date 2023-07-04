@@ -3,12 +3,14 @@ package lol.magix.breakingbedrock.objects.absolute;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.utils.ResourceUtils;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.block.Block;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryOps;
 import net.minecraft.registry.SerializableRegistries;
+import net.minecraft.util.Identifier;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.common.SimpleDefinitionRegistry;
 
@@ -24,6 +26,10 @@ public interface GameConstants {
     /* The registry NBT definition. */
     RegistryOps<NbtElement> REGISTRY_OPS = RegistryOps.of(
             NbtOps.INSTANCE, DynamicRegistryManager.of(Registries.REGISTRIES));
+
+    /* The fallback block for invalid block states. */
+    Block FALLBACK_BLOCK = Registries.BLOCK.get(new Identifier(
+            System.getProperty("FallbackBlock", "minecraft:stone")));
 
     /* The default server address. */
     String DEFAULT_SERVER = System.getProperty("DefaultServerAddress", "127.0.0.1");

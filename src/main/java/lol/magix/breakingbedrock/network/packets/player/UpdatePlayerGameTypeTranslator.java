@@ -1,11 +1,11 @@
 package lol.magix.breakingbedrock.network.packets.player;
 
-import org.cloudburstmc.protocol.bedrock.packet.UpdatePlayerGameTypePacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.utils.ConversionUtils;
 import net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket;
+import org.cloudburstmc.protocol.bedrock.packet.UpdatePlayerGameTypePacket;
 
 @Translate(PacketType.BEDROCK)
 public final class UpdatePlayerGameTypeTranslator extends Translator<UpdatePlayerGameTypePacket> {

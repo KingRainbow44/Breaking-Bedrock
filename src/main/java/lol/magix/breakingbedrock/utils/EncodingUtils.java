@@ -23,6 +23,17 @@ public interface EncodingUtils {
     }
 
     /**
+     * Encodes a byte array to Base64.
+     *
+     * @param data The data.
+     * @param url Whether to use URL-safe encoding.
+     * @return The Base64-encoded data.
+     */
+    static String base64Encode(byte[] data, boolean url) {
+        return url ? Base64.getUrlEncoder().encodeToString(data) : base64Encode(data);
+    }
+
+    /**
      * Decodes a Base64-encoded string.
      * @param data The Base64-encoded data.
      * @return The decoded data.

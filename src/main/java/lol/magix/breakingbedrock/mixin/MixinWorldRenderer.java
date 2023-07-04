@@ -2,7 +2,7 @@ package lol.magix.breakingbedrock.mixin;
 
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.*;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

@@ -3,7 +3,7 @@ package lol.magix.breakingbedrock.utils;
 import com.google.gson.JsonObject;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
-import lol.magix.breakingbedrock.objects.game.Skin;
+import lol.magix.breakingbedrock.objects.game.ClientData;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -37,8 +37,8 @@ public interface ProfileUtils {
         var jwtHeader = new JsonObject();
         jwtHeader.addProperty("alg", "ES384");
         jwtHeader.addProperty("x5u", publicKey);
-        // Create a skin.
-        var skin = Skin.builder()
+        // Create client data.
+        var clientData = ClientData.builder()
                 .serverAddress(serverAddress)
                 .thirdPartyName(displayName)
                 .build();
@@ -46,7 +46,7 @@ public interface ProfileUtils {
         // Create a header & payload.
         var encoder = Base64.getUrlEncoder().withoutPadding();
         var header = encoder.encodeToString(gson.toJson(jwtHeader).getBytes());
-        var payload = encoder.encodeToString(gson.toJson(skin).getBytes());
+        var payload = encoder.encodeToString(gson.toJson(clientData).getBytes());
 
         try {
             // Sign the payload & header.

@@ -27,4 +27,9 @@ public final class BedrockPacketHandler
                 .getBedrockTranslator()
                 .translatePacket(packet);
     }
+
+    @Override
+    public void onDisconnect(String reason) {
+        BedrockNetworkClient.getInstance().onDisconnect(reason);
+    }
 }

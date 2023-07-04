@@ -1,5 +1,6 @@
 package lol.magix.breakingbedrock.objects.definitions.visualizer;
 
+import com.google.gson.JsonObject;
 import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizerMessage.PacketIds;
 import lol.magix.breakingbedrock.utils.EncodingUtils;
 import lombok.Builder;
@@ -26,10 +27,17 @@ public final class PacketVisualizerData {
      * @return A {@link PacketVisualizerData} instance.
      */
     public static PacketVisualizerMessage toMessage(BedrockPacket packet, boolean isOutbound) {
-        var encoded = EncodingUtils.jsonEncode(packet);
-        if (encoded.length() > 10000 && !isOutbound) {
-            var truncated = new TruncatedPacketData(encoded.substring(0, 10000));
-            encoded = EncodingUtils.jsonEncode(truncated);
+        String encoded = "";
+        try {
+            encoded = EncodingUtils.jsonEncode(packet);
+            if (encoded.length() > 10000 && !isOutbound) {
+                var truncated = new TruncatedPacketData(encoded.substring(0, 10000));
+                encoded = EncodingUtils.jsonEncode(truncated);
+            }
+        } catch (Exception exception) {
+            var object = new JsonObject();
+            object.addProperty("error", "Unable to encode packet.");
+            object.addProperty("message", exception.getMessage());
         }
 
         var packetData = PacketVisualizerData.builder()

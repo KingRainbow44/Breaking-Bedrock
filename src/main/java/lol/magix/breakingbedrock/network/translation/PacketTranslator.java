@@ -2,6 +2,7 @@ package lol.magix.breakingbedrock.network.translation;
 
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.annotations.Translate;
+import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.utils.ReflectionUtils;
 import lombok.Getter;
@@ -48,7 +49,8 @@ public final class PacketTranslator {
             var instance = translator.getDeclaredConstructor().newInstance();
             if (instance instanceof Translator translatorInstance)
                 this.translators.put(translatorInstance.getPacketClass(), translatorInstance);
-        } catch (Exception ignored) {
+        } catch (Exception exception) {
+            exception.printStackTrace();
             BreakingBedrock.getLogger().warn("Unable to register packet translator: {}", translator.getName());
         }
 
@@ -64,9 +66,17 @@ public final class PacketTranslator {
     @SuppressWarnings("unchecked")
     public <T> PacketSignal translatePacket(T inboundPacket) {
         var translator = (Translator<T>) this.translators.get(inboundPacket.getClass());
+
         if (translator != null) {
             translator.translate(inboundPacket);
+
+            // DEBUG LOGGING
+            // TODO: Remove later.
+            var name = inboundPacket.getClass().getSimpleName();
+            if (!NetworkConstants.IGNORED_PACKETS.contains(name))
+                System.out.println("Received packet " + name);
+
             return PacketSignal.HANDLED;
-        } else return PacketSignal.UNHANDLED;
+        } else return PacketSignal.HANDLED;
     }
 }

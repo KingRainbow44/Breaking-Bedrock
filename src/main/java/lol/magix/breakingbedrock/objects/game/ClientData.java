@@ -15,7 +15,7 @@ import java.util.UUID;
  * Minecraft Skin data.
  */
 @Builder
-public final class Skin {
+public final class ClientData {
     @SerializedName("AnimatedImageData")
     @Builder.Default public List<Object> animatedImageData = new ArrayList<>();
 
@@ -39,6 +39,9 @@ public final class Skin {
 
     @SerializedName("ClientRandomId")
     @Builder.Default public long clientRandomId = new Random().nextLong();
+
+    @SerializedName("CompatibleWithClientSideChunkGen")
+    @Builder.Default public boolean compatibleWithClientSideChunkGen = false;
 
     @SerializedName("CurrentInputMode")
     @Builder.Default public int currentInputMode = 1;
@@ -92,7 +95,7 @@ public final class Skin {
     @Builder.Default public String selfSignedId = UUID.randomUUID().toString();
 
     @SerializedName("ServerAddress")
-    @Builder.Default public Object serverAddress = "";
+    @Builder.Default public String serverAddress = "";
 
     @SerializedName("SkinAnimationData")
     @Builder.Default public String skinAnimationData = "";
@@ -131,5 +134,5 @@ public final class Skin {
     @Builder.Default public boolean trustedSkin = false;
 
     @SerializedName("UIProfile")
-    @Builder.Default public int uIProfile = 0;
+    @Builder.Default public int uiProfile = 0;
 }

@@ -1,12 +1,12 @@
 package lol.magix.breakingbedrock.network.packets.misc;
 
-import org.cloudburstmc.protocol.bedrock.packet.TextPacket;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.text.Text;
+import org.cloudburstmc.protocol.bedrock.packet.TextPacket;
 
 @Translate(PacketType.BEDROCK)
 public final class TextTranslator extends Translator<TextPacket> {

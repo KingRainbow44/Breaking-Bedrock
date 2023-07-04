@@ -42,8 +42,8 @@ public final class BreakingBedrock {
         // Load resources.
         GameConstants.loadRegistry();
 
-        BlockStateTranslator.loadMappings();
         BlockPaletteTranslator.loadMappings();
+        BlockStateTranslator.loadMappings();
         LegacyBlockPaletteTranslator.loadMappings();
 
         // Check for an Xbox access token.

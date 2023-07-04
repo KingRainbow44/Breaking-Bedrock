@@ -1,18 +1,19 @@
 package lol.magix.breakingbedrock.translators;
 
 import com.google.common.base.Preconditions;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import lol.magix.breakingbedrock.BreakingBedrock;
+import lol.magix.breakingbedrock.objects.absolute.GameConstants;
+import lol.magix.breakingbedrock.objects.absolute.Resources;
+import lol.magix.breakingbedrock.utils.ResourceUtils;
+import lombok.Getter;
+import net.minecraft.block.BlockState;
 import org.cloudburstmc.nbt.NBTInputStream;
 import org.cloudburstmc.nbt.NbtList;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtType;
 import org.cloudburstmc.nbt.util.stream.LittleEndianDataInputStream;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import lol.magix.breakingbedrock.BreakingBedrock;
-import lol.magix.breakingbedrock.objects.absolute.Resources;
-import lol.magix.breakingbedrock.utils.ResourceUtils;
-import lombok.Getter;
-import net.minecraft.block.BlockState;
 
 import java.io.IOException;
 
@@ -47,7 +48,8 @@ public final class LegacyBlockPaletteTranslator {
             var states = nbt.getList("LegacyStates", NbtType.COMPOUND);
             if (states != null) for (var state : states) {
                 var stateId = state.getInt("id") << 6 | state.getShort("val");
-                legacyToId.put(stateId, BlockPaletteTranslator.getRuntimeToState().get(runtimeId));
+                legacyToId.put(stateId, BlockStateTranslator.getRuntime2Java().getOrDefault(
+                                runtimeId, GameConstants.FALLBACK_BLOCK.getDefaultState()));
             }
         }
 

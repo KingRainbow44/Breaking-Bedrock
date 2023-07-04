@@ -1,12 +1,13 @@
 package lol.magix.breakingbedrock.network.packets.packs;
 
+import lol.magix.breakingbedrock.annotations.Translate;
+import lol.magix.breakingbedrock.network.translation.Translator;
+import lol.magix.breakingbedrock.objects.absolute.PacketType;
+import lol.magix.breakingbedrock.utils.EncodingUtils;
 import org.cloudburstmc.protocol.bedrock.packet.ClientCacheStatusPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ResourcePackClientResponsePacket;
 import org.cloudburstmc.protocol.bedrock.packet.ResourcePackClientResponsePacket.Status;
 import org.cloudburstmc.protocol.bedrock.packet.ResourcePacksInfoPacket;
-import lol.magix.breakingbedrock.annotations.Translate;
-import lol.magix.breakingbedrock.network.translation.Translator;
-import lol.magix.breakingbedrock.objects.absolute.PacketType;
 
 @Translate(PacketType.BEDROCK)
 public final class ResourcePackInfoTranslator extends Translator<ResourcePacksInfoPacket> {

@@ -1,7 +1,6 @@
 package lol.magix.breakingbedrock.utils;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
