@@ -7,6 +7,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import lol.magix.breakingbedrock.network.auth.XboxV2;
 import lol.magix.breakingbedrock.network.translation.PacketTranslator;
 import lol.magix.breakingbedrock.objects.ThreadFactoryBuilder;
+import lol.magix.breakingbedrock.objects.absolute.GameConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
 import lol.magix.breakingbedrock.translators.BlockPaletteTranslator;
 import lol.magix.breakingbedrock.translators.BlockStateTranslator;
@@ -39,6 +40,8 @@ public final class BreakingBedrock {
         PacketTranslator.initialize();
         PacketVisualizer.initialize();
         // Load resources.
+        GameConstants.loadRegistry();
+
         BlockStateTranslator.loadMappings();
         BlockPaletteTranslator.loadMappings();
         LegacyBlockPaletteTranslator.loadMappings();
@@ -47,6 +50,7 @@ public final class BreakingBedrock {
         var accessToken = System.getProperty("XboxAccessToken");
         if (accessToken == null || accessToken.isEmpty()) {
             System.setProperty("XboxAccessToken", XboxV2.getAccessToken()); // Attempt to get an access token.
+            logger.info("Xbox access token set. {}", System.getProperty("XboxAccessToken"));
         } else {
             logger.info("Xbox access token found. Xbox authentication is enabled.");
         }
