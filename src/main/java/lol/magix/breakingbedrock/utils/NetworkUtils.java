@@ -1,17 +1,20 @@
 package lol.magix.breakingbedrock.utils;
 
 import com.sun.net.httpserver.HttpServer;
+import io.netty.buffer.Unpooled;
 import lol.magix.breakingbedrock.objects.Pair;
 import lombok.SneakyThrows;
+import net.minecraft.client.network.ServerAddress;
 import net.minecraft.text.Text;
 import org.cloudburstmc.netty.channel.raknet.RakDisconnectReason;
+import org.cloudburstmc.protocol.bedrock.BedrockPong;
 import tech.xigam.express.Express;
 import tech.xigam.express.Router;
 
 import java.awt.*;
 import java.awt.Desktop.Action;
-import java.net.InetSocketAddress;
-import java.net.URI;
+import java.io.IOException;
+import java.net.*;
 import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.util.Base64;
@@ -21,6 +24,8 @@ import java.util.function.Consumer;
  * Utility class for network-related functions.
  */
 public interface NetworkUtils {
+    static short[] OFFLINE_DATA = {0x00, 0xFF, 0xFF, 0x00, 0xFE, 0xFE, 0xFE, 0xFE, 0xFD, 0xFD, 0xFD, 0xFD, 0x12, 0x34, 0x56, 0x78};
+
     /**
      * Finds an open port on the local machine.
      * Uses Minecraft's internal method + a fallback.
@@ -116,5 +121,43 @@ public interface NetworkUtils {
         if (!desktop.isSupported(Action.BROWSE)) return;
 
         desktop.browse(new URI(url));
+    }
+
+    /**
+     * Pings a Bedrock server.
+     *
+     * @param address The address to ping.
+     * @return The server's response.
+     */
+    static BedrockPong pingServer(ServerAddress address)
+            throws IOException {
+        // Prepare the socket.
+        var socket = new DatagramSocket();
+        var socketAddress = new InetSocketAddress(
+                address.getAddress(), address.getPort());
+
+        // Write the ping data.
+        var buffer = Unpooled.buffer();
+        buffer.writeByte(0x01);
+        buffer.writeLong(System.currentTimeMillis() / 1000L);
+        for (var bit : OFFLINE_DATA) {
+            buffer.writeByte(bit);
+        }
+        buffer.writeLong(2);
+
+        // Send the ping.
+        var input = buffer.array();
+        socket.send(new DatagramPacket(input, input.length, socketAddress));
+        // Receive the pong.
+        var output = new byte[4096];
+        var received = new DatagramPacket(output, output.length);
+        socket.receive(received);
+
+        // Skip the first 35 bytes.
+        var pongBuffer = Unpooled.wrappedBuffer(
+                received.getData(), 35, received.getLength() - 35);
+
+        // Parse the pong.
+        return BedrockPong.fromRakNet(pongBuffer);
     }
 }
