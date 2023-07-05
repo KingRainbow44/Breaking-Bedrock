@@ -25,7 +25,7 @@ public final class MixinWorldRenderer {
     @Shadow @Final private MinecraftClient client;
 
     @Inject(method = "setBlockBreakingInfo", at = @At("HEAD"), cancellable = true)
-    public void cancelBlockBreakingInfo(int entityId, BlockPos position, int stage, CallbackInfo callback) {
+    public void setBlockBreakingInfo(int entityId, BlockPos position, int stage, CallbackInfo callback) {
         var player = this.client.player; if (player == null) return;
         if (BedrockNetworkClient.getInstance().isConnected() && entityId == player.getId())
             callback.cancel(); // This lets the server handle the block breaking animation.
