@@ -67,16 +67,14 @@ public final class PacketTranslator {
     public <T> PacketSignal translatePacket(T inboundPacket) {
         var translator = (Translator<T>) this.translators.get(inboundPacket.getClass());
 
+        var name = inboundPacket.getClass().getSimpleName();
+        if (!NetworkConstants.IGNORED_PACKETS.contains(name))
+            System.out.println("Received packet " + name);
+
         if (translator != null) {
             translator.translate(inboundPacket);
+        }
 
-            // DEBUG LOGGING
-            // TODO: Remove later.
-            var name = inboundPacket.getClass().getSimpleName();
-            if (!NetworkConstants.IGNORED_PACKETS.contains(name))
-                System.out.println("Received packet " + name);
-
-            return PacketSignal.HANDLED;
-        } else return PacketSignal.HANDLED;
+        return PacketSignal.HANDLED;
     }
 }
