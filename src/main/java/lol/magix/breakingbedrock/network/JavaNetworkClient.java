@@ -1,16 +1,19 @@
 package lol.magix.breakingbedrock.network;
 
 import com.mojang.authlib.GameProfile;
+import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.util.telemetry.TelemetrySender;
 import net.minecraft.client.util.telemetry.WorldSession;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.OffThreadException;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
+import org.cloudburstmc.math.vector.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +24,8 @@ public final class JavaNetworkClient {
     private final Logger logger
             = LoggerFactory.getLogger("Java Client");
 
-    private final ClientConnection local;
-    private final ClientPlayNetworkHandler localNetwork;
+    @Getter private final ClientConnection local;
+    @Getter private final ClientPlayNetworkHandler localNetwork;
 
     public JavaNetworkClient() {
         var javaClient = MinecraftClient.getInstance();
@@ -55,5 +58,17 @@ public final class JavaNetworkClient {
             this.logger.warn("Failed to process packet: " +
                     packet.getClass().getSimpleName(), exception);
         }
+    }
+
+    /**
+     * @return The player's position.
+     */
+    public Vector3f getPlayerPosition() {
+        var player = MinecraftClient.getInstance().player;
+        if (player == null) return Vector3f.ZERO;
+
+        var pos = player.getPos();
+        return Vector3f.from(pos.getX(), pos.getY() +
+                player.getEyeHeight(EntityPose.STANDING), pos.getZ());
     }
 }
