@@ -1,4 +1,4 @@
-package lol.magix.breakingbedrock.translators;
+package lol.magix.breakingbedrock.translators.blockstate;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;

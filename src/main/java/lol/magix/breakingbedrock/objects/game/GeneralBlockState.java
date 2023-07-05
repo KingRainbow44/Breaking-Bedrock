@@ -1,7 +1,7 @@
 package lol.magix.breakingbedrock.objects.game;
 
 import lol.magix.breakingbedrock.BreakingBedrock;
-import lol.magix.breakingbedrock.translators.BlockStateTranslator;
+import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.minecraft.block.Block;

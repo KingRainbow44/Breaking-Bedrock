@@ -29,8 +29,6 @@ import java.util.UUID;
  * Based on Sandertv/gophertunnel
  */
 public final class XboxV2 {
-    private static final OkHttpClient httpClient = new OkHttpClient();
-
     /**
      * Attempts to fetch an access token.
      * @return The access token.
@@ -53,7 +51,7 @@ public final class XboxV2 {
                 .build();
 
         // Get the response.
-        try (var response = httpClient.newCall(request).execute()) {
+        try (var response = BreakingBedrock.getHttpClient().newCall(request).execute()) {
             if (response.code() != 200)
                 throw new IllegalStateException("Unable to initialize Xbox Live connection: " + response.code());
 
@@ -84,7 +82,7 @@ public final class XboxV2 {
                         .method("POST", tokenBody.build())
                         .build();
 
-                try (var tokenResponse = httpClient.newCall(tokenRequest).execute()) {
+                try (var tokenResponse = BreakingBedrock.getHttpClient().newCall(tokenRequest).execute()) {
                     if (tokenResponse.code() != 200) {
                         // Wait the interval.
                         Thread.sleep(interval * 1000L);
@@ -146,7 +144,7 @@ public final class XboxV2 {
                 .build();
 
         // Perform the request.
-        try (var response = httpClient.newCall(request).execute()) {
+        try (var response = BreakingBedrock.getHttpClient().newCall(request).execute()) {
             // Validate the response code.
             if (response.code() != 200)
                 return null;
@@ -314,7 +312,7 @@ public final class XboxV2 {
                 .build();
 
         // Perform the request.
-        try (var response = httpClient.newCall(request).execute()) {
+        try (var response = BreakingBedrock.getHttpClient().newCall(request).execute()) {
             var responseBody = response.body();
             if (responseBody == null)
                 return "";

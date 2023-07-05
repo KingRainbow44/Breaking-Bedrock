@@ -3,7 +3,7 @@ package lol.magix.breakingbedrock.network.packets.bedrock.world;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
-import lol.magix.breakingbedrock.translators.BlockStateTranslator;
+import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
 import lol.magix.breakingbedrock.utils.WorldUtils;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.state.property.Properties;
@@ -11,7 +11,7 @@ import org.cloudburstmc.protocol.bedrock.packet.UpdateBlockPacket;
 
 import java.util.Objects;
 
-import static lol.magix.breakingbedrock.translators.BlockPaletteTranslator.WATER_BLOCK_ID;
+import static lol.magix.breakingbedrock.translators.blockstate.BlockPaletteTranslator.WATER_BLOCK_ID;
 
 @Translate(PacketType.BEDROCK)
 public final class UpdateBlockTranslator extends Translator<UpdateBlockPacket> {

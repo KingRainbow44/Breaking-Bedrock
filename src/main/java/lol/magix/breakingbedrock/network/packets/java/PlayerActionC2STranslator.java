@@ -4,6 +4,7 @@ import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.events.defaults.PlayerTickEvent;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
+import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
 import lol.magix.breakingbedrock.utils.WorldUtils;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.math.Direction;
@@ -91,6 +92,9 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
                 transactionPacket.setItemInHand(ItemData.AIR); // TODO: Implement inventory.
                 transactionPacket.setPlayerPosition(WorldUtils.convert(player.getPos()));
                 transactionPacket.setClickPosition(Vector3f.ZERO);
+                transactionPacket.setHeadPosition(Vector3f.ZERO);
+                transactionPacket.setBlockDefinition(BlockStateTranslator.translate(
+                        world.getBlockState(packet.getPos())));
 
                 this.bedrockClient.sendPacket(transactionPacket);
             }
@@ -131,7 +135,7 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
 
             // Add the data to the input handler.
             this.bedrockClient.addInputData(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
-            this.bedrockClient.getBlockActions().add(actionData);
+            this.bedrockClient.addBlockAction(actionData);
         }
     }
 
@@ -143,6 +147,9 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
     private void onPlayerTick(PlayerTickEvent event) {
         var player = this.player();
         if (player == null) return;
+
+        if (this.lastDirection == null ||
+                this.lastBlockPos == null) return;
 
         var actionPacket = new PlayerActionPacket();
         actionPacket.setAction(PlayerActionType.CONTINUE_BREAK);

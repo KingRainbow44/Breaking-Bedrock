@@ -33,6 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Handles network connections to a Bedrock server.
@@ -81,6 +83,40 @@ public final class BedrockNetworkClient {
                 MinecraftClient.getInstance().execute(() ->
                         ScreenUtils.disconnect(Text.of(throwable.getMessage())));
             } else {
+                this.session = promise.getNow();
+                this.onSessionInitialized();
+            }
+        });
+    }
+
+    /**
+     * Initializes a connection with a server.
+     * Accepts parameters for status updates and cancellation.
+     *
+     * @param connectTo The server to connect to.
+     * @param statusUpdate A consumer that accepts a {@link Text} object.
+     * @param isCanceled A supplier that returns a boolean.
+     */
+    public void connect(
+            ConnectionDetails connectTo,
+            Consumer<Text> statusUpdate,
+            Supplier<Boolean> isCanceled) {
+        this.connectionDetails = connectTo;
+
+        this.connect().addListener((Promise<BedrockClientSession> promise) -> {
+            if (isCanceled.get()){
+                promise.getNow().close("Connection closed.");
+                return;
+            }
+
+            if (!promise.isSuccess()) {
+                var throwable = promise.cause();
+                this.getLogger().warn("Unable to connect to server.", throwable);
+                MinecraftClient.getInstance().execute(() ->
+                        ScreenUtils.disconnect(Text.of(throwable.getMessage())));
+            } else {
+                statusUpdate.accept(Text.of("Logging in..."));
+
                 this.session = promise.getNow();
                 this.onSessionInitialized();
             }
@@ -170,6 +206,18 @@ public final class BedrockNetworkClient {
     }
 
     /**
+     * @param data The block action data.
+     */
+    public void addBlockAction(PlayerBlockActionData data) {
+        if (this.getBlockActions().size() >= 100) {
+            this.getLogger().warn("Block action queue is full, dropping packet.");
+            return;
+        }
+
+        this.getBlockActions().add(data);
+    }
+
+    /**
      * Invoked when the client is disconnected.
      * @param reason The reason for disconnection.
      */
@@ -183,9 +231,12 @@ public final class BedrockNetworkClient {
         this.hasLoggedIn = false;
         this.data = null;
         this.session = null;
+        this.inputHandler = null;
+        this.blockActions = null;
         this.authentication = null;
         this.connectionDetails = null;
         this.javaNetworkClient = null;
+        this.blockEntityDataCache = null;
     }
 
     /**
@@ -283,6 +334,15 @@ public final class BedrockNetworkClient {
         }
     }
 
+    /**
+     * Disconnects the client from the server.
+     */
+    public void disconnect() {
+        if (this.session == null) return;
+
+        this.session.close("Disconnected");
+    }
+
     /*
      * Event methods.
      */
@@ -291,7 +351,7 @@ public final class BedrockNetworkClient {
      * Invoked when the Java player is ready to play.
      */
     public void onPlayerInitialization() {
-        this.blockActions = new LinkedList<>();
+        this.blockActions = new ArrayList<>(100);
         // TODO: Initialize container manager.
         this.blockEntityDataCache = new BlockEntityDataCache();
         // TODO: Set the open container.

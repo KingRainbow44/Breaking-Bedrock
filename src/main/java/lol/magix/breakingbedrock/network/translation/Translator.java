@@ -56,7 +56,7 @@ public abstract class Translator<P> {
      * @param runnable The runnable.
      */
     protected final void run(Runnable runnable) {
-        MinecraftClient.getInstance().execute(runnable);
+        MinecraftClient.getInstance().executeSync(runnable);
     }
 
     /**

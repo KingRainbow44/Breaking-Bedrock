@@ -23,7 +23,7 @@ public interface ConversionUtils {
      */
     static GameMode convertBedrockGameMode(GameType type) {
         return switch (type) {
-            case SURVIVAL, DEFAULT, SURVIVAL_VIEWER -> GameMode.SURVIVAL;
+            case SURVIVAL, SURVIVAL_VIEWER, DEFAULT -> GameMode.SURVIVAL;
             case CREATIVE, CREATIVE_VIEWER -> GameMode.CREATIVE;
             case ADVENTURE -> GameMode.ADVENTURE;
             case SPECTATOR -> GameMode.SPECTATOR;

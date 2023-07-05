@@ -1,4 +1,4 @@
-package lol.magix.breakingbedrock.translators;
+package lol.magix.breakingbedrock.translators.blockstate;
 
 import com.google.common.base.Preconditions;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;

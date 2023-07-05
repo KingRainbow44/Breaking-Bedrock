@@ -8,7 +8,7 @@ import lol.magix.breakingbedrock.mixin.interfaces.IMixinClientPlayerInteractionM
 import lol.magix.breakingbedrock.mixin.interfaces.IMixinWorldRenderer;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
-import lol.magix.breakingbedrock.translators.BlockStateTranslator;
+import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
 import lol.magix.breakingbedrock.utils.WorldUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;

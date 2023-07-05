@@ -19,12 +19,18 @@ public interface NetworkConstants {
     /* Ignored packets to log. */
     Set<String> IGNORED_PACKETS = new HashSet<>() {{
         this.add("SetTimePacket");
+        this.add("LevelEventPacket");
         this.add("LevelChunkPacket");
+        this.add("UpdateBlockPacket");
+        this.add("LevelSoundEventPacket");
+        this.add("MoveEntityAbsolutePacket");
         this.add("NetworkChunkPublisherUpdatePacket");
 
         this.add("Full");
         this.add("LookAndOnGround");
+        this.add("HandSwingC2SPacket");
         this.add("PositionAndOnGround");
+        this.add("ClientCommandC2SPacket");
     }};
 
     // Constants for Xbox Live authentication.

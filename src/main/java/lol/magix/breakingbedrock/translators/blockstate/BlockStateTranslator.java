@@ -1,4 +1,4 @@
-package lol.magix.breakingbedrock.translators;
+package lol.magix.breakingbedrock.translators.blockstate;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -7,12 +7,14 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lol.magix.breakingbedrock.BreakingBedrock;
+import lol.magix.breakingbedrock.objects.absolute.GameConstants;
 import lol.magix.breakingbedrock.objects.absolute.Resources;
 import lol.magix.breakingbedrock.objects.game.GeneralBlockState;
 import lol.magix.breakingbedrock.utils.ResourceUtils;
 import lombok.Getter;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
+import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -157,5 +159,18 @@ public final class BlockStateTranslator {
     public static <T extends Comparable<T>> BlockState parsePropertyValue(BlockState current, Property<T> property, String value) {
         var optional = property.parse(value);
         return optional.map(t -> current.with(property, t)).orElse(null);
+    }
+
+    /**
+     * Converts a block state into a block definition.
+     *
+     * @param state The block state.
+     * @return The block definition.
+     */
+    public static BlockDefinition translate(BlockState state) {
+        var id = java2Runtime.get(state);
+        return id == null ?
+                GameConstants.BLOCKS.get().getDefinition(0) :
+                GameConstants.BLOCKS.get().getDefinition(id);
     }
 }

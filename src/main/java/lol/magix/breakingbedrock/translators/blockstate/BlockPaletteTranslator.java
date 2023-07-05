@@ -1,4 +1,4 @@
-package lol.magix.breakingbedrock.translators;
+package lol.magix.breakingbedrock.translators.blockstate;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;

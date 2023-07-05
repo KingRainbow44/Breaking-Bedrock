@@ -45,15 +45,19 @@ public final class AuthInputHandler {
         if (data.isJumping()) {
             packet.getInputData().add(PlayerAuthInputData.START_JUMPING);
         }
-        if (this.inputData.contains(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS)) {
-            if (packet.getPlayerActions().addAll(client.getBlockActions()))
+        if (this.getInputData().contains(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS)) {
+            if (packet.getPlayerActions().addAll(client.getBlockActions())) {
                 client.getBlockActions().clear();
+            }
         }
         if (packet.getInputData().addAll(this.inputData)) {
-            this.inputData.clear();
+            this.getInputData().clear();
         }
 
         // Send the packet.
         client.sendPacket(packet);
+        // Reset the packet's data.
+        packet.getInputData().clear();
+        packet.getPlayerActions().clear();
     }
 }

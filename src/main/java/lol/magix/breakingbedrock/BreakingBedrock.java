@@ -9,12 +9,14 @@ import lol.magix.breakingbedrock.network.translation.PacketTranslator;
 import lol.magix.breakingbedrock.objects.ThreadFactoryBuilder;
 import lol.magix.breakingbedrock.objects.absolute.GameConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
-import lol.magix.breakingbedrock.translators.BlockPaletteTranslator;
-import lol.magix.breakingbedrock.translators.BlockStateTranslator;
-import lol.magix.breakingbedrock.translators.LegacyBlockPaletteTranslator;
+import lol.magix.breakingbedrock.translators.blockstate.BlockPaletteTranslator;
+import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
+import lol.magix.breakingbedrock.translators.entity.EntityTranslator;
+import lol.magix.breakingbedrock.translators.blockstate.LegacyBlockPaletteTranslator;
 import lol.magix.breakingbedrock.translators.blockentity.BlockEntityRegistry;
 import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
+import okhttp3.OkHttpClient;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,8 @@ public final class BreakingBedrock {
             = LoggerFactory.getLogger("BreakingBedrock");
     @Getter private static final Reflections reflector
             = new Reflections("lol.magix.breakingbedrock");
+    @Getter private static final OkHttpClient httpClient
+            = new OkHttpClient();
     @Getter private static final boolean debugEnabled
             = Objects.equals(System.getProperty("bedrockDebug"), "true");
     @Getter private static final EventLoopGroup eventGroup
@@ -47,6 +51,7 @@ public final class BreakingBedrock {
         BlockPaletteTranslator.loadMappings();
         BlockStateTranslator.loadMappings();
         LegacyBlockPaletteTranslator.loadMappings();
+        EntityTranslator.loadMappings();
 
         // Check for an Xbox access token.
         var accessToken = System.getProperty("XboxAccessToken");

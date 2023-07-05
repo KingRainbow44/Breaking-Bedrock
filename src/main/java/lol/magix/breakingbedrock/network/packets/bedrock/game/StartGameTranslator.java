@@ -42,8 +42,7 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
         var hashSeed = packet.getSeed();
 
         // Set player's gamemode.
-        var previousGameMode = GameMode.DEFAULT;
-        var currentGameMode = ConversionUtils.convertBedrockGameMode(packet.getPlayerGameType());
+        var gameMode = ConversionUtils.convertBedrockGameMode(packet.getPlayerGameType());
 
         // Register available dimensions.
         var hardcore = false;
@@ -75,7 +74,7 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
 
         // Connect on the local network.
         var gameJoinPacket = new GameJoinS2CPacket(
-                entityId, hardcore, previousGameMode, currentGameMode,
+                entityId, hardcore, gameMode, gameMode,
                 dimensionIds, registryManager, dimensionType,
                 dimensionId, hashSeed, maxPlayers, chunkLoadDistance, chunkLoadDistance,
                 reducedDebugInfo, showDeathScreen, debugWorld, flatWorld,
