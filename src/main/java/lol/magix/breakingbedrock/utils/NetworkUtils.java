@@ -1,10 +1,10 @@
 package lol.magix.breakingbedrock.utils;
 
+import com.google.common.net.HostAndPort;
 import com.sun.net.httpserver.HttpServer;
 import io.netty.buffer.Unpooled;
 import lol.magix.breakingbedrock.objects.Pair;
 import lombok.SneakyThrows;
-import net.minecraft.client.network.ServerAddress;
 import net.minecraft.text.Text;
 import org.cloudburstmc.netty.channel.raknet.RakDisconnectReason;
 import org.cloudburstmc.protocol.bedrock.BedrockPong;
@@ -129,12 +129,12 @@ public interface NetworkUtils {
      * @param address The address to ping.
      * @return The server's response.
      */
-    static BedrockPong pingServer(ServerAddress address)
+    static BedrockPong pingServer(HostAndPort address)
             throws IOException {
         // Prepare the socket.
         var socket = new DatagramSocket();
         var socketAddress = new InetSocketAddress(
-                address.getAddress(), address.getPort());
+                address.getHost(), address.getPort());
 
         // Write the ping data.
         var buffer = Unpooled.buffer();
