@@ -22,6 +22,7 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.Objects;
 
 public final class BreakingBedrock {
@@ -33,6 +34,9 @@ public final class BreakingBedrock {
             = new Reflections("lol.magix.breakingbedrock");
     @Getter private static final OkHttpClient httpClient
             = new OkHttpClient();
+    @Getter private static final File dataDirectory
+            = new File(MinecraftClient.getInstance().runDirectory,
+            "config/breakingbedrock");
     @Getter private static final boolean debugEnabled
             = Objects.equals(System.getProperty("bedrockDebug"), "true");
     @Getter private static final EventLoopGroup eventGroup
@@ -45,15 +49,25 @@ public final class BreakingBedrock {
         // Initialize separate systems.
         PacketTranslator.initialize();
         PacketVisualizer.initialize();
+
         // Load resources.
         GameConstants.loadRegistry();
         BlockEntityRegistry.loadRegistry();
 
+        // Load mappings.
         BlockPaletteTranslator.loadMappings();
         BlockStateTranslator.loadMappings();
         LegacyBlockPaletteTranslator.loadMappings();
         EntityTranslator.loadMappings();
         ItemTranslator.loadMappings();
+
+        // Check if the data directory exists.
+        if (!dataDirectory.exists()) {
+            if (!dataDirectory.mkdirs())
+                logger.error("Failed to create data directory.");
+            else
+                logger.info("Data directory created.");
+        }
 
         // Check for an Xbox access token.
         var accessToken = System.getProperty("XboxAccessToken");

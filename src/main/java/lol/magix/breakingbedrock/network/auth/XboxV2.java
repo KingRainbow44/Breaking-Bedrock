@@ -17,7 +17,9 @@ import lombok.SneakyThrows;
 import okhttp3.*;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
 import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -35,6 +37,14 @@ public final class XboxV2 {
      */
     @SneakyThrows
     public static String getAccessToken() {
+        // Check if an access token exists.
+        var tokenFile = new File(BreakingBedrock.getDataDirectory(), "token.txt");
+        if (tokenFile.exists()) {
+            var token = Files.readString(tokenFile.toPath());
+            if (token != null && !token.isEmpty())
+                return token;
+        }
+
         var gson = BreakingBedrock.getGson();
 
         // Create a form body for initializing a client connection.
@@ -96,8 +106,13 @@ public final class XboxV2 {
                 }
             }
 
+            // Get the access token.
+            var token = tokens.a();
+
+            // Save the access token.
+            Files.writeString(tokenFile.toPath(), token);
             // Return the access token.
-            return tokens.a();
+            return token;
         }
     }
 
