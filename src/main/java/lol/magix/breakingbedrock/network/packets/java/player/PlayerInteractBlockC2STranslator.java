@@ -1,4 +1,4 @@
-package lol.magix.breakingbedrock.network.packets.java;
+package lol.magix.breakingbedrock.network.packets.java.player;
 
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
@@ -8,7 +8,6 @@ import lol.magix.breakingbedrock.utils.WorldUtils;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
-import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 

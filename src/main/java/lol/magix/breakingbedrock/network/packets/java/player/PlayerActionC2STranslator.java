@@ -1,4 +1,4 @@
-package lol.magix.breakingbedrock.network.packets.java;
+package lol.magix.breakingbedrock.network.packets.java.player;
 
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.events.defaults.PlayerTickEvent;
@@ -15,7 +15,6 @@ import org.cloudburstmc.protocol.bedrock.data.AuthoritativeMovementMode;
 import org.cloudburstmc.protocol.bedrock.data.PlayerActionType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.PlayerBlockActionData;
-import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerActionPacket;
