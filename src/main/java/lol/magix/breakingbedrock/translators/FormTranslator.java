@@ -35,14 +35,20 @@ public final class FormTranslator {
         var form = FORMS.get(formId);
         if (form == null) return;
 
+        // Serialize the form.
         var responsePacket = new ModalFormResponsePacket();
         responsePacket.setFormId(formId);
         responsePacket.setFormData(form.serializeResponse());
         responsePacket.setCancelReason(Optional.empty());
 
+        // Send the packet.
         var client = BedrockNetworkClient.getInstance();
         if (client != null && client.isConnected())
             client.sendPacket(responsePacket);
+
+        // Unregister the form.
+        FORMS.remove(formId);
+        OPTIONS.remove(formId);
     }
 
     /**
@@ -93,10 +99,48 @@ public final class FormTranslator {
         switch (form.getType()) {
             default -> throw new RuntimeException("Invalid form type " + form.getType() + "!");
             case SIMPLE_FORM -> {
+                var simpleForm = (SimpleForm) form;
+
                 // This is a form with: title, description, and buttons.
+                player.sendMessage(TextUtils.translate(form.getTitle()));
+                player.sendMessage(TextUtils.translate(simpleForm.getContent()));
+
+                // Send the buttons.
+                for (var i = 0; i < simpleForm.getButtons().size(); i++) {
+                    var button = simpleForm.getButtons().get(i);
+                    player.sendMessage(TextUtils.translate(button).setStyle(Style.EMPTY
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                    "/formoption " + formId + " " + i))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                    Text.of("Click to select this option."))))
+                    );
+                }
+
+                // Register the options.
+                OPTIONS.put(formId, option -> {
+                    simpleForm.setSelected(option);
+                    FormTranslator.submitForm(formId);
+                });
             }
             case MODAL_FORM -> {
+                var modalForm = (ModalForm) form;
+
                 // This is a Yes or No form.
+                player.sendMessage(TextUtils.translate(form.getTitle()));
+                player.sendMessage(TextUtils.translate(modalForm.getContent()));
+                // Send the two buttons.
+                player.sendMessage(TextUtils.translate(modalForm.getButton1()).setStyle(Style.EMPTY
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                "/formoption " + formId + " 0"))));
+                player.sendMessage(TextUtils.translate(modalForm.getButton2()).setStyle(Style.EMPTY
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                "/formoption " + formId + " 1"))));
+
+                // Register the options.
+                OPTIONS.put(formId, option -> {
+                    modalForm.setResponse(option == 0);
+                    FormTranslator.submitForm(formId);
+                });
             }
             case CUSTOM_FORM -> {
                 var customForm = (CustomForm) form;
@@ -140,7 +184,7 @@ public final class FormTranslator {
                 var dropdown = (FormDropdown) element;
 
                 player.sendMessage(TextUtils.translate(dropdown.getText()));
-                for (var i = 0; i < dropdown.getOptions().size() - 1; i++) {
+                for (var i = 0; i < dropdown.getOptions().size(); i++) {
                     var option = dropdown.getOptions().get(i);
 
                     // Send the option to the player.
