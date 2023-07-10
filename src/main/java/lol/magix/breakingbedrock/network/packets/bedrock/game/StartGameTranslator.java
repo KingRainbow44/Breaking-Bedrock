@@ -6,11 +6,9 @@ import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.GameConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.utils.ConversionUtils;
+import lol.magix.breakingbedrock.utils.WorldUtils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.packet.s2c.play.ChunkRenderDistanceCenterS2CPacket;
-import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
-import net.minecraft.network.packet.s2c.play.SynchronizeTagsS2CPacket;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
@@ -68,8 +66,6 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
             }
         }
 
-        // Set starting position.
-        this.data().setStartingPos(packet.getPlayerPosition());
         // Set initial view distance.
         this.data().setViewDistance(chunkLoadDistance);
         // Set movement mode.
@@ -85,6 +81,11 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
                 Optional.empty(), 0
         );
         this.javaClient().processPacket(gameJoinPacket);
+
+        // Set the spawn position.
+        this.javaClient().processPacket(new PlayerSpawnPositionS2CPacket(
+                WorldUtils.toBlockPos(packet.getDefaultSpawn()), 0f
+        ));
 
         // Initialize the Bedrock client.
         this.bedrockClient.onPlayerInitialization();

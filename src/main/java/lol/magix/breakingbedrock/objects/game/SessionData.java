@@ -15,9 +15,6 @@ public final class SessionData {
     private boolean spawned = false;
     private boolean jumping = false;
 
-    private Vector3f startingPos;
-    private float startingAngle;
-
     /* Player data. */
     private List<String> chain = new ArrayList<>();
 
