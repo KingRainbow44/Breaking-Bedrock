@@ -69,8 +69,7 @@ public final class ItemTranslator {
 
             // Parse the Bedrock item data.
             var itemData = entry.getValue().getAsJsonObject();
-            var bedrockIdStr = itemData.get("bedrock_identifier").getAsString();
-            var bedrockId = id2Int.get(bedrockIdStr);
+            var bedrockId = itemData.get("bedrock_identifier").getAsString();
             var bedrockData = itemData.get("bedrock_data").getAsInt();
 
             if (item == Items.AIR && !javaIdStr.equals("minecraft:air")) {
