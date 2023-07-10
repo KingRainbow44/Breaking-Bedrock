@@ -1,6 +1,7 @@
 package lol.magix.breakingbedrock.utils;
 
 import net.minecraft.client.resource.language.TranslationStorage;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
@@ -40,7 +41,7 @@ public interface TextUtils {
      * @param parameters The parameters to use.
      * @return The translated text.
      */
-    static Text translate(String text, Object... parameters) {
+    static MutableText translate(String text, Object... parameters) {
         Text value = null;
         var stripped = TextUtils.strip(text);
         var raw = stripped.replaceAll("%", "");
@@ -83,6 +84,6 @@ public interface TextUtils {
             value = Texts.join(texts, Text.of(""));
         }
 
-        return value;
+        return value.copy();
     }
 }
