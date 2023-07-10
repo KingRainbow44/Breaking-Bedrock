@@ -52,9 +52,24 @@ public final class GeneralBlockState {
                 var blockPropertyKeysAndValues = blockProperties.split(",");
                 for (var keyAndValue : blockPropertyKeysAndValues) {
                     var keyAndValueArray = keyAndValue.split("=");
-                    this.properties.put(keyAndValueArray[0], keyAndValueArray[1]);
+
+                    var value = keyAndValueArray[1];
+                    this.properties.put(keyAndValueArray[0], switch (value) {
+                        default -> value;
+                        case "true" -> "1";
+                        case "false" -> "0";
+                    });
                 }
             }
+
+            // Sort the properties by property name length.
+            var sortedProperties = new HashMap<String, String>();
+            this.properties.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey((o1, o2) -> Integer.compare(o2.length(), o1.length())))
+                    .forEachOrdered(x -> sortedProperties.put(x.getKey(), x.getValue()));
+
+            this.properties.clear();
+            this.properties.putAll(sortedProperties);
         }
     }
 

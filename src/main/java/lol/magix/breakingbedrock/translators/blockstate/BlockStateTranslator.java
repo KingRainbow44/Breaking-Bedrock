@@ -64,7 +64,7 @@ public final class BlockStateTranslator {
                         else if (jsonValue.isNumber())
                             value = String.valueOf(jsonValue.getAsNumber());
                         else if (jsonValue.isBoolean())
-                            value = String.valueOf(jsonValue.getAsBoolean());
+                            value = jsonValue.getAsBoolean() ? "1" : "0";
                         else {
                             BreakingBedrock.getLogger().warn("Invalid block state value.");
                             continue;
@@ -158,7 +158,15 @@ public final class BlockStateTranslator {
      */
     public static <T extends Comparable<T>> BlockState parsePropertyValue(BlockState current, Property<T> property, String value) {
         var optional = property.parse(value);
-        return optional.map(t -> current.with(property, t)).orElse(null);
+        if (optional.isEmpty()) {
+            // Handle boolean properties.
+            optional = property.parse(
+                    value.equals("1") ? "true" : "false");
+        }
+
+        return optional
+                .map(t -> current.with(property, t))
+                .orElse(null);
     }
 
     /**
