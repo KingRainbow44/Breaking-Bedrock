@@ -45,11 +45,6 @@ public interface TextUtils {
         var stripped = TextUtils.strip(text);
         var raw = stripped.replaceAll("%", "");
 
-        System.out.println("Original: " + text);
-        System.out.println("Stripped: " + stripped);
-        System.out.println("Contains key: " + TranslationStorage
-                .getInstance().hasTranslation(raw));
-
         // Check if the text is translatable.
         if (stripped.startsWith("%") && TranslationStorage
                 .getInstance().hasTranslation(raw)) {
