@@ -6,21 +6,18 @@ import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.mixin.interfaces.IMixinPlayerEntity;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
+import lol.magix.breakingbedrock.translators.ItemTranslator;
 import lol.magix.breakingbedrock.utils.ConversionUtils;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.render.entity.PlayerModelPart;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.Items;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.EntityEquipmentUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket.Action;
 import net.minecraft.network.packet.s2c.play.PlayerSpawnS2CPacket;
 import net.minecraft.text.Text;
-import net.minecraft.world.GameMode;
-import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.packet.AddPlayerPacket;
 
 import java.util.EnumSet;
@@ -84,9 +81,8 @@ public final class AddPlayerTranslator extends Translator<AddPlayerPacket> {
             this.javaClient().processPacket(new PlayerSpawnS2CPacket(player));
 
             // Set the item the player is holding.
-            // TODO: Fetch item definition from client.
-            // TODO: Translate item definition into Java.
-            var itemStack = new Pair<>(EquipmentSlot.MAINHAND, Items.AIR.getDefaultStack());
+            var itemStack = new Pair<>(EquipmentSlot.MAINHAND,
+                    ItemTranslator.bedrock2Java(packet.getHand()));
             this.javaClient().processPacket(new EntityEquipmentUpdateS2CPacket(runtimeId, List.of(itemStack)));
 
             // Set the player skin flags.

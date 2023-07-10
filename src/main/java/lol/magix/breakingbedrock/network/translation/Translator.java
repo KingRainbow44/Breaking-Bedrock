@@ -2,6 +2,7 @@ package lol.magix.breakingbedrock.network.translation;
 
 import com.google.gson.Gson;
 import lol.magix.breakingbedrock.BreakingBedrock;
+import lol.magix.breakingbedrock.game.containers.PlayerContainerHolder;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.network.JavaNetworkClient;
 import lol.magix.breakingbedrock.objects.game.SessionData;
@@ -22,19 +23,28 @@ public abstract class Translator<P> {
     protected final boolean shouldLog = this.bedrockClient.shouldLog();
 
     /**
-     * Returns the Java network client.
-     * @return A {@link JavaNetworkClient} instance.
-     */
-    protected final JavaNetworkClient javaClient() {
-        return this.bedrockClient.getJavaNetworkClient();
-    }
-
-    /**
      * Returns the Bedrock client's session flags.
      * @return A {@link SessionData} instance.
      */
     protected final SessionData data() {
         return this.bedrockClient.getData();
+    }
+
+    /**
+     * Returns the Bedrock client's container holder.
+     *
+     * @return A {@link PlayerContainerHolder} instance.
+     */
+    protected final PlayerContainerHolder containers() {
+        return this.bedrockClient.getContainerHolder();
+    }
+
+    /**
+     * Returns the Java network client.
+     * @return A {@link JavaNetworkClient} instance.
+     */
+    protected final JavaNetworkClient javaClient() {
+        return this.bedrockClient.getJavaNetworkClient();
     }
 
     /**

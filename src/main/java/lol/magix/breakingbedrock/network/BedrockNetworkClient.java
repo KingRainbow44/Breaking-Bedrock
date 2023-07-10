@@ -6,6 +6,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.Promise;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.events.EventManager;
+import lol.magix.breakingbedrock.game.containers.PlayerContainerHolder;
 import lol.magix.breakingbedrock.network.auth.Authentication;
 import lol.magix.breakingbedrock.objects.ConnectionDetails;
 import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
@@ -14,10 +15,10 @@ import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizer
 import lol.magix.breakingbedrock.objects.game.AuthInputHandler;
 import lol.magix.breakingbedrock.objects.game.SessionData;
 import lol.magix.breakingbedrock.objects.game.caches.BlockEntityDataCache;
-import lol.magix.breakingbedrock.utils.IntervalUtils;
 import lol.magix.breakingbedrock.utils.ProfileUtils;
 import lol.magix.breakingbedrock.utils.ScreenUtils;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
@@ -63,6 +64,7 @@ public final class BedrockNetworkClient {
     @Getter private JavaNetworkClient javaNetworkClient = null;
 
     @Getter private AuthInputHandler inputHandler = null;
+    @Getter private PlayerContainerHolder containerHolder = null;
     @Getter private BlockEntityDataCache blockEntityDataCache = null;
     @Getter private List<PlayerBlockActionData> blockActions = null;
 
@@ -126,7 +128,17 @@ public final class BedrockNetworkClient {
     /**
      * Attempts to log in to the server.
      */
+    @SneakyThrows
     private Promise<BedrockClientSession> connect() {
+        // Create a session flags instance.
+        this.data = new SessionData();
+
+        // Attempt to authenticate.
+        this.authentication = new Authentication();
+        this.data.setChain(this.connectionDetails.online() ?
+                this.authentication.getOnlineChainData() :
+                this.authentication.getOfflineChainData(BreakingBedrock.getUsername()));
+
         // Fetch a backend event loop.
         var loop = BreakingBedrock.getEventGroup().next();
         Promise<BedrockClientSession> promise = loop.newPromise();
@@ -173,21 +185,11 @@ public final class BedrockNetworkClient {
         // Set session properties.
         this.session.setLogging(BreakingBedrock.isDebugEnabled());
 
-        // Create a session flags instance.
-        this.data = new SessionData();
-
         try {
             // Request protocol version from server.
             var requestPacket = new RequestNetworkSettingsPacket();
             requestPacket.setProtocolVersion(this.session.getCodec().getProtocolVersion());
             this.sendPacket(requestPacket, true);
-
-            // Apply compression properties.
-            // this.client.setCompression(PacketCompressionAlgorithm.ZLIB);
-            // this.client.setCompressionLevel(-1);
-
-            // Wait 2s, then send login packet.
-            IntervalUtils.runAfter(this::loginToServer, 2000);
         } catch (Exception exception) {
             this.logger.error("An error occurred while logging in.", exception);
             this.session.close("Login error");
@@ -252,11 +254,6 @@ public final class BedrockNetworkClient {
             // Attempt to log into server.
             var loginPacket = new LoginPacket();
 
-            // Attempt to authenticate.
-            this.authentication = new Authentication();
-            var chainData = this.connectionDetails.online() ?
-                    this.authentication.getOnlineChainData() :
-                    this.authentication.getOfflineChainData(BreakingBedrock.getUsername());
             // Pull profile data.
             var profile = ProfileUtils.getProfileData(this);
             if (profile == null) profile = ProfileUtils.SKIN_DATA_BASE_64;
@@ -268,7 +265,7 @@ public final class BedrockNetworkClient {
 
             // Set the login properties.
             loginPacket.setProtocolVersion(this.session.getCodec().getProtocolVersion());
-            loginPacket.getChain().addAll(chainData);
+            loginPacket.getChain().addAll(this.data.getChain());
             loginPacket.setExtra(profile);
 
             // Send the packet & update connection.
@@ -276,7 +273,7 @@ public final class BedrockNetworkClient {
             this.javaNetworkClient = new JavaNetworkClient();
         } catch (Exception exception) {
             this.logger.error("An error occurred while logging in.", exception);
-            this.session.close("Login error");
+            this.disconnect("Login error");
         }
     }
 
@@ -338,9 +335,22 @@ public final class BedrockNetworkClient {
      * Disconnects the client from the server.
      */
     public void disconnect() {
-        if (this.session == null) return;
+        this.disconnect("Disconnected");
+    }
 
-        this.session.close("Disconnected");
+    /**
+     * Disconnects the client from the server.
+     *
+     * @param reason The reason for disconnection.
+     */
+    public void disconnect(String reason) {
+        // Display a disconnect screen.
+        if (this.getJavaNetworkClient() != null)
+            this.getJavaNetworkClient().disconnect(reason);
+
+        // Disconnect from the server.
+        if (this.session != null && this.session.isConnected())
+            this.session.close(reason);
     }
 
     /*
@@ -352,9 +362,8 @@ public final class BedrockNetworkClient {
      */
     public void onPlayerInitialization() {
         this.blockActions = new ArrayList<>(100);
-        // TODO: Initialize container manager.
+        this.containerHolder = new PlayerContainerHolder();
         this.blockEntityDataCache = new BlockEntityDataCache();
-        // TODO: Set the open container.
         this.inputHandler = new AuthInputHandler(this);
     }
 }

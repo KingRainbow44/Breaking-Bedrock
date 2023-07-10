@@ -9,6 +9,7 @@ import lol.magix.breakingbedrock.network.translation.PacketTranslator;
 import lol.magix.breakingbedrock.objects.ThreadFactoryBuilder;
 import lol.magix.breakingbedrock.objects.absolute.GameConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
+import lol.magix.breakingbedrock.translators.ItemTranslator;
 import lol.magix.breakingbedrock.translators.blockstate.BlockPaletteTranslator;
 import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
 import lol.magix.breakingbedrock.translators.entity.EntityTranslator;
@@ -52,6 +53,7 @@ public final class BreakingBedrock {
         BlockStateTranslator.loadMappings();
         LegacyBlockPaletteTranslator.loadMappings();
         EntityTranslator.loadMappings();
+        ItemTranslator.loadMappings();
 
         // Check for an Xbox access token.
         var accessToken = System.getProperty("XboxAccessToken");
@@ -62,7 +64,7 @@ public final class BreakingBedrock {
             logger.info("Xbox access token found. Xbox authentication is enabled.");
         }
 
-        logger.info("Initialized!");
+        logger.info("Breaking Bedrock has finished loading.");
     }
 
     /**

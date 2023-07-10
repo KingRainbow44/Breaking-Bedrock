@@ -82,14 +82,18 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
                 this.lastDirection = null;
                 this.lastBlockPos = null;
 
+                // Get inventory properties.
+                var selectedSlot = player.getInventory().selectedSlot;
+                var item = this.containers().getInventory().getItem(selectedSlot);
+
                 // Send transaction packet.
                 var transactionPacket = new InventoryTransactionPacket();
                 transactionPacket.setTransactionType(InventoryTransactionType.ITEM_USE);
                 transactionPacket.setActionType(2);
                 transactionPacket.setBlockPosition(blockPos);
                 transactionPacket.setBlockFace(packet.getDirection().ordinal());
-                transactionPacket.setHotbarSlot(player.getInventory().selectedSlot);
-                transactionPacket.setItemInHand(ItemData.AIR); // TODO: Implement inventory.
+                transactionPacket.setHotbarSlot(selectedSlot);
+                transactionPacket.setItemInHand(item);
                 transactionPacket.setPlayerPosition(WorldUtils.convert(player.getPos()));
                 transactionPacket.setClickPosition(Vector3f.ZERO);
                 transactionPacket.setHeadPosition(Vector3f.ZERO);

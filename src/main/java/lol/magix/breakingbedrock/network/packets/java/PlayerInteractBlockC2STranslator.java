@@ -32,7 +32,7 @@ public final class PlayerInteractBlockC2STranslator extends Translator<PlayerInt
         var offset = packet.getBlockHitResult().getPos()
                 .subtract(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ());
 
-        var handItem = ItemData.AIR; // TODO: Implement inventory.
+        var handItem = this.containers().getInventory().getItem(selectedSlot);
 
         {
             // Send the first inventory transaction.
