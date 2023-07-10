@@ -4,12 +4,19 @@ import com.google.gson.JsonObject;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.objects.game.ClientData;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket.Action;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket.Action.Writer;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket.Entry;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Base64;
+import java.util.EnumSet;
+import java.util.List;
 
 /**
  * Utility class for skin-related operations.
@@ -80,5 +87,42 @@ public interface ProfileUtils {
 
         byteArrayOutputStream.close();
         return EncodingUtils.base64Encode(byteArrayOutputStream.toByteArray());
+    }
+
+    /**
+     * Creates a PlayerListS2C packet from the parts which make it up.
+     *
+     * @param entry The entry.
+     * @param action The action.
+     * @return The packet.
+     */
+    static PacketByteBuf asPacket(List<Entry> entry, Action action) {
+        // Create a buffer representing the packet.
+        var buffer = PacketByteBufs.create();
+        buffer.writeEnumSet(EnumSet.of(action), Action.class);
+        buffer.writeCollection(entry, (buf, anEntry) -> {
+            buf.writeUuid(anEntry.profileId());
+            var writer = ProfileUtils.getWriterFor(action);
+            if (writer != null) writer.write(buf, anEntry);
+        });
+
+        return buffer;
+    }
+
+    /**
+     * Get the writer for the given action.
+     *
+     * @param action The action.
+     * @return The writer.
+     */
+    static Writer getWriterFor(Action action) {
+        try {
+            var type = action.getClass();
+            var field = type.getDeclaredField("writer");
+            field.setAccessible(true);
+            return (Writer) field.get(action);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 }
