@@ -42,6 +42,7 @@ public final class AuthInputHandler {
         // Set the packet's data.
         packet.setTick(event.getTick());
         packet.getInputData().clear();
+        packet.getPlayerActions().clear();
         if (data.isJumping()) {
             packet.getInputData().add(PlayerAuthInputData.START_JUMPING);
         }
