@@ -15,6 +15,7 @@ public final class BedrockPacketHandler
     @Override
     public PacketSignal handlePacket(BedrockPacket packet) {
         var session = BedrockNetworkClient.getHandle();
+        if (session == null) return PacketSignal.UNHANDLED;
 
         if (session.isLogging()) {
             // Visualize inbound packet.
