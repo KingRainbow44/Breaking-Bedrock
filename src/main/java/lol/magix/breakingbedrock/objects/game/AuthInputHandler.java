@@ -56,8 +56,5 @@ public final class AuthInputHandler {
 
         // Send the packet.
         client.sendPacket(packet);
-        // Reset the packet's data.
-        packet.getInputData().clear();
-        packet.getPlayerActions().clear();
     }
 }
