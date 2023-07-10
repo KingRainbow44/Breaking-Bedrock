@@ -71,7 +71,7 @@ public final class AddPlayerTranslator extends Translator<AddPlayerPacket> {
                 buffer.writeCollection(List.of(entry), (buf, anEntry) -> {
                     buf.writeUuid(anEntry.profileId());
                     var writer = AddPlayerTranslator.getWriterFor(Action.ADD_PLAYER);
-                    if (writer != null) writer.write(buf, anEntry);;
+                    if (writer != null) writer.write(buf, anEntry);
                 });
 
                 this.javaClient().processPacket(new PlayerListS2CPacket(buffer));
