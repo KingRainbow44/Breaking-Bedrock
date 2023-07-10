@@ -40,7 +40,10 @@ public final class ClientCommandC2STranslator extends Translator<ClientCommandC2
                 case STOP_SPRINTING -> inputData = PlayerAuthInputData.STOP_SPRINTING;
             }
 
-            if (inputData != null) this.bedrockClient.addInputData(inputData);
+            if (inputData != null) {
+                this.bedrockClient.addInputData(inputData);
+                return;
+            }
         }
 
         if (actionType == null) return;
