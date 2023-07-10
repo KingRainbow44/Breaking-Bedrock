@@ -68,6 +68,10 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
             }
         }
 
+        // Set starting position.
+        this.data().setStartingPos(packet.getPlayerPosition());
+        // Set initial view distance.
+        this.data().setViewDistance(chunkLoadDistance);
         // Set movement mode.
         this.data().setMovementMode(
                 packet.getAuthoritativeMovementMode());
@@ -118,7 +122,7 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
 
         // Request the render distance.
         var distancePacket = new RequestChunkRadiusPacket();
-        distancePacket.setRadius(chunkLoadDistance);
+        distancePacket.setRadius(2); // Set to 2, request after chunks are loaded.
         this.bedrockClient.sendPacket(distancePacket, true);
 
         // Perform client setup.

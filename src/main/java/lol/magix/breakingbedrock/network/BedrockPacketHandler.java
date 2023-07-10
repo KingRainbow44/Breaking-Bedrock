@@ -30,6 +30,6 @@ public final class BedrockPacketHandler
 
     @Override
     public void onDisconnect(String reason) {
-        BedrockNetworkClient.getInstance().onDisconnect(reason);
+        this.getClient().disconnect(reason);
     }
 }

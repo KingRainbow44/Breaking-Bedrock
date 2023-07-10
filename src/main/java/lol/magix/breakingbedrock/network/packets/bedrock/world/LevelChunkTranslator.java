@@ -113,7 +113,7 @@ public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
 
         // Process the packet.
         final var emptySectionsF = emptySections;
-        MinecraftClient.getInstance().executeSync(() -> {
+        this.run(() -> {
             var processedSections = new ChunkSection[24];
             System.arraycopy(sections, emptySectionsF,
                     processedSections, 4, sections.length - 4);
@@ -123,6 +123,9 @@ public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
                     0, processedSections, null, null);
             this.javaClient().processPacket(new ChunkDataS2CPacket(
                     chunk, world.getLightingProvider(), null, null));
+
+            // Check the bedrock client ready state.
+            this.bedrockClient.checkReadyState();
         });
     }
 

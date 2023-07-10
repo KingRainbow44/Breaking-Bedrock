@@ -28,6 +28,9 @@ public final class PlayerMoveC2STranslator extends Translator<PlayerMoveC2SPacke
         var bedrockClient = BedrockNetworkClient.getInstance();
         var data = bedrockClient.getData();
 
+        // Check if the player is ready.
+        if (!bedrockClient.checkReadyState()) return;
+
         var player = MinecraftClient.getInstance().player;
         if (player == null) return;
 

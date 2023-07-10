@@ -37,4 +37,12 @@ public interface WorldUtils {
     static Vector3f convert(Vec3d source) {
         return Vector3f.from(source.getX(), source.getY(), source.getZ());
     }
+
+    /**
+     * @param source The source vector.
+     * @return The converted vector.
+     */
+    static Vec3d convert(Vector3f source) {
+        return new Vec3d(source.getX(), source.getY(), source.getZ());
+    }
 }

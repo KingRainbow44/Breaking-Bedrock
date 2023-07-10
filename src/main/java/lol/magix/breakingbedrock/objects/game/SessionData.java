@@ -1,6 +1,7 @@
 package lol.magix.breakingbedrock.objects.game;
 
 import lombok.Data;
+import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.data.AuthoritativeMovementMode;
 
 import java.util.ArrayList;
@@ -14,6 +15,9 @@ public final class SessionData {
     private boolean spawned = false;
     private boolean jumping = false;
 
+    private Vector3f startingPos;
+    private float startingAngle;
+
     /* Player data. */
     private List<String> chain = new ArrayList<>();
 
@@ -21,7 +25,10 @@ public final class SessionData {
     private String xuid = "";
     private UUID identity = null;
 
+    private int viewDistance = 4;
+
     /* Player flags. */
     private boolean isInitialized = false;
+    private boolean isReady = false;
     private AuthoritativeMovementMode movementMode = AuthoritativeMovementMode.CLIENT;
 }

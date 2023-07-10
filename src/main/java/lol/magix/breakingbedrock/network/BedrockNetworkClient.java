@@ -17,9 +17,11 @@ import lol.magix.breakingbedrock.objects.game.SessionData;
 import lol.magix.breakingbedrock.objects.game.caches.BlockEntityDataCache;
 import lol.magix.breakingbedrock.utils.ProfileUtils;
 import lol.magix.breakingbedrock.utils.ScreenUtils;
+import lol.magix.breakingbedrock.utils.WorldUtils;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.network.packet.s2c.play.PlayerSpawnPositionS2CPacket;
 import net.minecraft.text.Text;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
@@ -29,6 +31,7 @@ import org.cloudburstmc.protocol.bedrock.data.PlayerBlockActionData;
 import org.cloudburstmc.protocol.bedrock.netty.initializer.BedrockClientInitializer;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.LoginPacket;
+import org.cloudburstmc.protocol.bedrock.packet.RequestChunkRadiusPacket;
 import org.cloudburstmc.protocol.bedrock.packet.RequestNetworkSettingsPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -220,28 +223,6 @@ public final class BedrockNetworkClient {
     }
 
     /**
-     * Invoked when the client is disconnected.
-     * @param reason The reason for disconnection.
-     */
-    public void onDisconnect(String reason) {
-        // Display a client disconnect screen.
-        if (this.data.isInitialized())
-            MinecraftClient.getInstance().execute(() ->
-                    ScreenUtils.disconnect(Text.of(reason)));
-
-        // Invalidate client properties.
-        this.hasLoggedIn = false;
-        this.data = null;
-        this.session = null;
-        this.inputHandler = null;
-        this.blockActions = null;
-        this.authentication = null;
-        this.connectionDetails = null;
-        this.javaNetworkClient = null;
-        this.blockEntityDataCache = null;
-    }
-
-    /**
      * Attempts to send a {@link LoginPacket} to the server.
      * This will start a client login if successful.
      */
@@ -285,6 +266,38 @@ public final class BedrockNetworkClient {
         return BreakingBedrock.isDebugEnabled() || (
                 this.session != null && this.session.isLogging()
         );
+    }
+
+    /**
+     * Checks if the player is ready.
+     *
+     * @return True if ready, false otherwise.
+     */
+    public boolean checkReadyState() {
+        // Check if the client is already ready.
+        if (this.data.isReady()) return true;
+
+        // Check if the client is connected.
+        if (!this.isConnected()) return false;
+
+        // Check if the client has a player.
+        var client = MinecraftClient.getInstance();
+        var player = client.player;
+        if (player == null) return false;
+
+        // Check if the player is in a world.
+        if (client.world == null) return false;
+
+        // Check if the chunk the player is in is loaded.
+        var block = player.getBlockPos();
+        var rendered = client.worldRenderer.isRenderingReady(block);
+        if (!rendered) return false;
+
+        // Set the player as ready.
+        this.data.setReady(true);
+        this.onReady();
+
+        return true;
     }
 
     /*
@@ -351,6 +364,8 @@ public final class BedrockNetworkClient {
         // Disconnect from the server.
         if (this.session != null && this.session.isConnected())
             this.session.close(reason);
+
+        this.onDisconnect(reason);
     }
 
     /*
@@ -365,5 +380,50 @@ public final class BedrockNetworkClient {
         this.containerHolder = new PlayerContainerHolder();
         this.blockEntityDataCache = new BlockEntityDataCache();
         this.inputHandler = new AuthInputHandler(this);
+    }
+
+    /**
+     * Invoked when the client is disconnected.
+     * @param reason The reason for disconnection.
+     */
+    public void onDisconnect(String reason) {
+        // Display a client disconnect screen.
+        if (this.data != null && this.data.isInitialized())
+            MinecraftClient.getInstance().execute(() ->
+                    ScreenUtils.disconnect(Text.of(reason)));
+
+        // Invalidate client properties.
+        this.hasLoggedIn = false;
+        this.data = null;
+        this.session = null;
+        this.inputHandler = null;
+        this.blockActions = null;
+        this.authentication = null;
+        this.connectionDetails = null;
+        this.javaNetworkClient = null;
+        this.blockEntityDataCache = null;
+    }
+
+    /**
+     * Invoked when the client is ready to play.
+     */
+    public void onReady() {
+        var client = MinecraftClient.getInstance();
+        var player = client.player;
+        if (player == null) return;
+
+        // Send player spawn position packet.
+        this.getJavaNetworkClient().processPacket(
+                new PlayerSpawnPositionS2CPacket(
+                        WorldUtils.toBlockPos(this.getData()
+                                .getStartingPos().toInt()), 0f
+                ));
+
+        // Request additional chunks.
+        {
+            var distancePacket = new RequestChunkRadiusPacket();
+            distancePacket.setRadius(this.getData().getViewDistance());
+            this.sendPacket(distancePacket, true);
+        }
     }
 }
