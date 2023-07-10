@@ -45,15 +45,7 @@ public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
 
         // Fetch the world.
         var world = MinecraftClient.getInstance().world;
-        if (world == null) {
-            this.queue.add(packet);
-            return;
-        }
-
-        // Try to process other queued packets.
-        for (var queuedPacket : this.queue) {
-            this.translate(queuedPacket);
-        }
+        if (world == null) return;
 
         // Perform chunk rendering.
         var biomeRegistry = world.getRegistryManager().get(RegistryKeys.BIOME);
