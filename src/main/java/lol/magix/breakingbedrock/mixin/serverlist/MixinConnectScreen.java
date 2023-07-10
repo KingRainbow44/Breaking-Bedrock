@@ -2,6 +2,7 @@ package lol.magix.breakingbedrock.mixin.serverlist;
 
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.objects.ConnectionDetails;
+import lol.magix.breakingbedrock.objects.absolute.GameConstants;
 import lol.magix.breakingbedrock.objects.game.BedrockServerInfo;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConnectScreen;
@@ -38,7 +39,10 @@ public abstract class MixinConnectScreen extends Screen {
         ci.cancel();
 
         // Attempt to connect to the server.
-        var connectionAddress = new ConnectionDetails(address.getAddress(), address.getPort(), false);
+        var connectionAddress = new ConnectionDetails(address.getAddress(), address.getPort(),
+                GameConstants.DEFAULT_AUTHENTICATION);
+
+        this.setStatus(Text.translatable("connect.connecting"));
         BedrockNetworkClient.getInstance().connect(connectionAddress, this::setStatus, () -> {
             if (this.connectingCancelled) {
                 BedrockNetworkClient.getInstance().disconnect();
