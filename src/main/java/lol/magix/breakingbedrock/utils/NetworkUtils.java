@@ -158,6 +158,11 @@ public interface NetworkUtils {
                 received.getData(), 35, received.getLength() - 35);
 
         // Parse the pong.
-        return BedrockPong.fromRakNet(pongBuffer);
+        var pong = BedrockPong.fromRakNet(pongBuffer);
+        // Release the buffer.
+        buffer.release();
+        pongBuffer.release();
+
+        return pong;
     }
 }
