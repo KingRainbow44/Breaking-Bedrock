@@ -1,6 +1,7 @@
 package lol.magix.breakingbedrock.network;
 
 import com.mojang.authlib.GameProfile;
+import lol.magix.breakingbedrock.utils.ScreenUtils;
 import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -13,6 +14,7 @@ import net.minecraft.network.NetworkSide;
 import net.minecraft.network.OffThreadException;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.text.Text;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,5 +72,28 @@ public final class JavaNetworkClient {
         var pos = player.getPos();
         return Vector3f.from(pos.getX(), pos.getY() +
                 player.getEyeHeight(EntityPose.STANDING), pos.getZ());
+    }
+
+    /**
+     * Disconnects from the server.
+     */
+    public void disconnect() {
+        this.disconnect("Disconnected");
+    }
+
+    /**
+     * Disconnects from the server.
+     *
+     * @param reason The reason for disconnecting.
+     */
+    public void disconnect(String reason) {
+        var world = this.localNetwork.getWorld();
+        if (world == null) return;
+
+        // Disconnect from the world.
+        world.disconnect();
+        // Show disconnect screen.
+        MinecraftClient.getInstance().execute(() -> ScreenUtils.disconnect(
+                Text.of(reason)));
     }
 }
