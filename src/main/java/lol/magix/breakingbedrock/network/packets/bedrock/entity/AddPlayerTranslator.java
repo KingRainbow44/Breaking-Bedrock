@@ -7,7 +7,9 @@ import lol.magix.breakingbedrock.mixin.interfaces.IMixinPlayerEntity;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.ItemTranslator;
+import lol.magix.breakingbedrock.translators.entity.EntityMetadataTranslator;
 import lol.magix.breakingbedrock.utils.ConversionUtils;
+import lol.magix.breakingbedrock.utils.ProfileUtils;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.render.entity.PlayerModelPart;
@@ -64,17 +66,9 @@ public final class AddPlayerTranslator extends Translator<AddPlayerPacket> {
                         identity, profile, true, 0,
                         ConversionUtils.convertBedrockGameMode(packet.getGameType()),
                         Text.of(profile.getName()), null);
-
-                // Create a buffer representing the packet.
-                var buffer = PacketByteBufs.create();
-                buffer.writeEnumSet(EnumSet.of(Action.ADD_PLAYER), Action.class);
-                buffer.writeCollection(List.of(entry), (buf, anEntry) -> {
-                    buf.writeUuid(anEntry.profileId());
-                    var writer = AddPlayerTranslator.getWriterFor(Action.ADD_PLAYER);
-                    if (writer != null) writer.write(buf, anEntry);
-                });
-
-                this.javaClient().processPacket(new PlayerListS2CPacket(buffer));
+                this.javaClient().processPacket(new PlayerListS2CPacket(
+                        ProfileUtils.asPacket(List.of(entry), Action.ADD_PLAYER)
+                ));
             }
 
             // Spawn the player to the client.
@@ -84,6 +78,10 @@ public final class AddPlayerTranslator extends Translator<AddPlayerPacket> {
             var itemStack = new Pair<>(EquipmentSlot.MAINHAND,
                     ItemTranslator.bedrock2Java(packet.getHand()));
             this.javaClient().processPacket(new EntityEquipmentUpdateS2CPacket(runtimeId, List.of(itemStack)));
+
+            // Translate the player's metadata.
+            EntityMetadataTranslator.translate(
+                    new lol.magix.breakingbedrock.objects.Pair<>(player, packet.getMetadata()));
 
             // Set the player skin flags.
             player.getDataTracker().set(
@@ -97,25 +95,6 @@ public final class AddPlayerTranslator extends Translator<AddPlayerPacket> {
                                     | PlayerModelPart.CAPE.getBitFlag()
                     )
             );
-            this.javaClient().processPacket(new EntityTrackerUpdateS2CPacket(
-                    player.getId(), player.getDataTracker().getChangedEntries()));
         });
-    }
-
-    /**
-     * Get the writer for the given action.
-     *
-     * @param action The action.
-     * @return The writer.
-     */
-    private static Action.Writer getWriterFor(Action action) {
-        try {
-            var type = action.getClass();
-            var field = type.getDeclaredField("writer");
-            field.setAccessible(true);
-            return (Action.Writer) field.get(action);
-        } catch (Exception ignored) {
-            return null;
-        }
     }
 }

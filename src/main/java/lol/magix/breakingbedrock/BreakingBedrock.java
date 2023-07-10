@@ -12,6 +12,7 @@ import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
 import lol.magix.breakingbedrock.translators.ItemTranslator;
 import lol.magix.breakingbedrock.translators.blockstate.BlockPaletteTranslator;
 import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
+import lol.magix.breakingbedrock.translators.entity.EntityMetadataTranslator;
 import lol.magix.breakingbedrock.translators.entity.EntityTranslator;
 import lol.magix.breakingbedrock.translators.blockstate.LegacyBlockPaletteTranslator;
 import lol.magix.breakingbedrock.translators.blockentity.BlockEntityRegistry;
@@ -49,6 +50,7 @@ public final class BreakingBedrock {
         // Initialize separate systems.
         PacketTranslator.initialize();
         PacketVisualizer.initialize();
+        EntityMetadataTranslator.initialize();
 
         // Load resources.
         GameConstants.loadRegistry();

@@ -23,6 +23,7 @@ public interface NetworkConstants {
         this.add("LevelEventPacket");
         this.add("LevelChunkPacket");
         this.add("UpdateBlockPacket");
+        this.add("SetEntityDataPacket");
         this.add("LevelSoundEventPacket");
         this.add("MoveEntityDeltaPacket");
         this.add("MoveEntityAbsolutePacket");
