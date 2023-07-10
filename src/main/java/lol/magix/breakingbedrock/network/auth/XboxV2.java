@@ -102,8 +102,10 @@ public final class XboxV2 {
     }
 
     private final String accessToken;
-    private final ECPublicKey publicKey;
-    private final ECPrivateKey privateKey;
+    private final ECPublicKey xblPublicKey;
+    private final ECPrivateKey xblPrivateKey;
+
+    private final ECPublicKey clientPublicKey;
 
     @Getter private String deviceToken = "";
     @Getter private JsonObject authToken = null;
@@ -111,13 +113,18 @@ public final class XboxV2 {
     /**
      * Creates a new XboxV2 instance.
      * @param accessToken The access token to use.
-     * @param publicKey The public key to use.
-     * @param privateKey The private key to use.
+     * @param xblPublicKey The public key to use. (XBox Live)
+     * @param xblPrivateKey The private key to use. (XBox Live)
+     * @param clientPublicKey The client public key to use.
      */
-    public XboxV2(String accessToken, ECPublicKey publicKey, ECPrivateKey privateKey) {
+    public XboxV2(
+            String accessToken, ECPublicKey xblPublicKey,
+            ECPrivateKey xblPrivateKey, ECPublicKey clientPublicKey
+    ) {
         this.accessToken = accessToken;
-        this.publicKey = publicKey;
-        this.privateKey = privateKey;
+        this.xblPublicKey = xblPublicKey;
+        this.xblPrivateKey = xblPrivateKey;
+        this.clientPublicKey = clientPublicKey;
     }
 
     /**
@@ -167,7 +174,7 @@ public final class XboxV2 {
     private JsonObject createProofKey(ECPublicKey publicKey) {
         var proofKey = new JsonObject();
         proofKey.addProperty("crv", "P-256");
-        proofKey.addProperty("alg", "ES384");
+        proofKey.addProperty("alg", "ES256");
         proofKey.addProperty("use", "sig");
         proofKey.addProperty("kty", "EC");
 
@@ -208,7 +215,7 @@ public final class XboxV2 {
         bytesToSign.write(new byte[] { 0 });
 
         var signature = Signature.getInstance("SHA256withECDSA");
-        signature.initSign(privateKey);
+        signature.initSign(this.xblPrivateKey);
         signature.update(bytesToSign.toByteArray());
         var signatureBytes = EncodingUtils.derToJose(signature.sign(), AlgorithmType.ECDSA256);
 
@@ -237,15 +244,17 @@ public final class XboxV2 {
         jsonObject.addProperty("Sandbox", "RETAIL");
         jsonObject.addProperty("UseModernGamertag", true);
         jsonObject.addProperty("AccessToken", "t=" + this.accessToken);
-        jsonObject.addProperty("AppId", "0000000048183522");
+        jsonObject.addProperty("AppId", NetworkConstants.XBOX_ANDROID_CID);
         jsonObject.addProperty("deviceToken", this.deviceToken);
         // Add the proof key.
-        jsonObject.add("ProofKey", this.createProofKey(this.publicKey));
+        jsonObject.add("ProofKey", this.createProofKey(this.xblPublicKey));
 
         // Perform request.
         var response = this.doRequest(NetworkConstants.XBOX_TOKEN_AUTH, jsonObject);
-        if (response == null)
+        if (response == null) {
+            BreakingBedrock.getLogger().warn("Failed to obtain Xbox Live token.");
             return;
+        }
 
         this.authToken = response;
     }
@@ -267,13 +276,15 @@ public final class XboxV2 {
         properties.addProperty("Id", "{" + UUID.randomUUID() + "}");
         properties.addProperty("Version", "10");
         // Create signature.
-        var proofKey = this.createProofKey(publicKey);
+        var proofKey = this.createProofKey(this.xblPublicKey);
         properties.add("ProofKey", proofKey);
 
         // Perform request.
         var response = this.doRequest(NetworkConstants.XBOX_DEVICE_AUTH, jsonObject);
-        if (response == null)
+        if (response == null) {
+            BreakingBedrock.getLogger().warn("Failed to obtain Xbox Live device token.");
             return;
+        }
 
         // Set the device token.
         this.deviceToken = response.get("Token").getAsString();
@@ -291,7 +302,8 @@ public final class XboxV2 {
     public String getChainData() {
         // Create the request data.
         var jsonObject = new JsonObject();
-        jsonObject.addProperty("identityPublicKey", EncodingUtils.base64Encode(this.publicKey.getEncoded()));
+         jsonObject.addProperty("identityPublicKey",
+                 EncodingUtils.base64Encode(this.clientPublicKey.getEncoded()));
         var jsonEncoded = EncodingUtils.jsonEncode(jsonObject);
 
         // Build the authorization header.
@@ -308,14 +320,17 @@ public final class XboxV2 {
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Client-Version", NetworkConstants.PACKET_CODEC.getMinecraftVersion())
                 .addHeader("Authorization", "XBL3.0 x=" + userHash + ";" + token)
+                .addHeader("x-xbl-contract-version", "1")
                 .method("POST", RequestBody.create(jsonEncoded, MediaType.get("application/json")))
                 .build();
 
         // Perform the request.
         try (var response = BreakingBedrock.getHttpClient().newCall(request).execute()) {
             var responseBody = response.body();
-            if (responseBody == null)
+            if (responseBody == null) {
+                BreakingBedrock.getLogger().warn("Failed to obtain Minecraft JWT chain.");
                 return "";
+            }
 
             return responseBody.string();
         }

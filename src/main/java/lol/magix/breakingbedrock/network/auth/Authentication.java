@@ -47,26 +47,6 @@ public final class Authentication {
     @Getter private String displayName;
     @Getter private UUID identity;
 
-    /*
-     * Key utility methods.
-     */
-
-    /**
-     * Returns the Xbox Live private key, or the Bedrock private key if Xbox Live is not enabled.
-     * @return A private key.
-     */
-    public ECPrivateKey getPreferredPrivateKey() {
-        return this.xblPrivateKey == null ? this.privateKey : this.xblPrivateKey;
-    }
-
-    /**
-     * Returns the Xbox Live public key, or the Bedrock public key if Xbox Live is not enabled.
-     * @return A public key.
-     */
-    public ECPublicKey getPreferredPublicKey() {
-        return this.xblPublicKey == null ? this.publicKey : this.xblPublicKey;
-    }
-
     /**
      * Generates data for online authentication.
      * @return Authentication data. (JSON-encoded)
@@ -79,21 +59,23 @@ public final class Authentication {
         this.xblPublicKey = (ECPublicKey) ecdsa256KeyPair.getPublic();
         this.xblPrivateKey = (ECPrivateKey) ecdsa256KeyPair.getPrivate();
 
-        // Get login chain data from Minecraft's authentication API.
-        var xboxAuth = new XboxV2(System.getProperty("XboxAccessToken"), this.xblPublicKey, this.xblPrivateKey);
-        xboxAuth.obtainDeviceToken(); // Obtain a device token.
-        xboxAuth.obtainAuthToken("https://multiplayer.minecraft.net/"); // Obtain an auth token.
-        var chainData = xboxAuth.getChainData(); // Obtain chain data.
-
         // Generate a Minecraft: Bedrock keypair.
         var ecdsa384KeyPair = EncryptionUtils.createKeyPair();
         this.publicKey = (ECPublicKey) ecdsa384KeyPair.getPublic();
         this.privateKey = (ECPrivateKey) ecdsa384KeyPair.getPrivate();
 
-        System.out.println("PRIVATE");
-        System.out.println(EncodingUtils.base64Encode(this.privateKey.getEncoded()));
-        System.out.println("PUBLIC");
-        System.out.println(EncodingUtils.base64Encode(this.publicKey.getEncoded()));
+        // Get login chain data from Minecraft's authentication API.
+        var xboxAuth = new XboxV2(System.getProperty("XboxAccessToken"),
+                this.xblPublicKey, this.xblPrivateKey, this.publicKey);
+        xboxAuth.obtainDeviceToken(); // Obtain a device token.
+        xboxAuth.obtainAuthToken("https://multiplayer.minecraft.net/"); // Obtain an auth token.
+        var chainData = xboxAuth.getChainData(); // Obtain chain data.
+
+        var keyPairs = new JsonObject();
+        keyPairs.addProperty("private-xbl", EncodingUtils.base64Encode(this.xblPrivateKey.getEncoded()));
+        keyPairs.addProperty("public-xbl", EncodingUtils.base64Encode(this.xblPublicKey.getEncoded()));
+        keyPairs.addProperty("private-bedrock", EncodingUtils.base64Encode(this.privateKey.getEncoded()));
+        keyPairs.addProperty("public-bedrock", EncodingUtils.base64Encode(this.publicKey.getEncoded()));
 
         // Decode the chain data.
         var chainDataJson = gson.fromJson(chainData, JsonObject.class);
@@ -114,6 +96,7 @@ public final class Authentication {
             var currentTime = Instant.now().getEpochSecond();
             var newTime = TimeUnit.HOURS.toSeconds(6);
 
+            newChain.addProperty("iss", "BreakingBedrock");
             newChain.addProperty("exp", currentTime + newTime);
             newChain.addProperty("nbf", currentTime - newTime);
             newChain.addProperty("identityPublicKey", x5uKey);
@@ -140,7 +123,8 @@ public final class Authentication {
 
         // Return the updated chain data.
         return chains.asList().stream()
-                .map(JsonElement::toString)
+                .map(element -> element.toString()
+                        .replaceAll("\"", ""))
                 .toList();
     }
 

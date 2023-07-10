@@ -29,7 +29,7 @@ public interface ProfileUtils {
         var authData = client.getAuthentication();
 
         // Get properties.
-        var publicKey = EncodingUtils.base64Encode(authData.getPreferredPublicKey().getEncoded());
+        var publicKey = EncodingUtils.base64Encode(authData.getPublicKey().getEncoded());
         var displayName = authData.getDisplayName();
         var serverAddress = client.getConnectionDetails().address();
 
@@ -51,7 +51,7 @@ public interface ProfileUtils {
         try {
             // Sign the payload & header.
             var dataToSign = (header + "." + payload).getBytes();
-            var signature = authData.signBytes(dataToSign, authData.getPreferredPrivateKey());
+            var signature = authData.signBytes(dataToSign, authData.getPrivateKey());
             return header + "." + payload + "." + signature;
         } catch (Exception ignored) {
             BreakingBedrock.getLogger().warn("Unable to sign profile data.");
