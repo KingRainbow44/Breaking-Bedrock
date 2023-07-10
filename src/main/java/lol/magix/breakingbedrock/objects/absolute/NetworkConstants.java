@@ -19,10 +19,12 @@ public interface NetworkConstants {
     /* Ignored packets to log. */
     Set<String> IGNORED_PACKETS = new HashSet<>() {{
         this.add("SetTimePacket");
+        this.add("SetScorePacket");
         this.add("LevelEventPacket");
         this.add("LevelChunkPacket");
         this.add("UpdateBlockPacket");
         this.add("LevelSoundEventPacket");
+        this.add("MoveEntityDeltaPacket");
         this.add("MoveEntityAbsolutePacket");
         this.add("NetworkChunkPublisherUpdatePacket");
 
