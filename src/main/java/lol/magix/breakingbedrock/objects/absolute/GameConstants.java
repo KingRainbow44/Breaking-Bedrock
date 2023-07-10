@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 public interface GameConstants {
+    /* The player entity offset. */
+    float PLAYER_OFFSET = 1.62F;
+
     /* The block definitions. */
     AtomicReference<SimpleDefinitionRegistry<BlockDefinition>> BLOCKS = new AtomicReference<>();
     /* The registry manager for login. */
