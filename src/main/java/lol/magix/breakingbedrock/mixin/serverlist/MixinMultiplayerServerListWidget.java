@@ -109,7 +109,7 @@ public abstract class MixinMultiplayerServerListWidget {
      */
     private static Text createPlayerCountText(int current, int max) {
         if (current >= 1000) {
-            return Text.literal(Integer.toString(current)).formatted(Formatting.GRAY); // TODO: make this a toggleable setting, but still keep it a fun nod.
+            return Text.literal(Integer.toString(current)).formatted(Formatting.GRAY);
         }
 
         return Text.literal(Integer.toString(current)).append(Text.literal("/").formatted(Formatting.DARK_GRAY)).append(Integer.toString(max)).formatted(Formatting.GRAY);
