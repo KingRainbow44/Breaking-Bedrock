@@ -23,6 +23,11 @@ public final class UpdateBlockTranslator extends Translator<UpdateBlockPacket> {
     @Override
     public void translate(UpdateBlockPacket packet) {
         var block = packet.getDefinition();
+        if (block == null) {
+            this.logger.warn("Block at {} does not have a block definition.",
+                    packet.getBlockPosition());
+            return;
+        }
 
         var blockPos = WorldUtils.toBlockPos(packet.getBlockPosition());
         var newState = BlockStateTranslator.getRuntime2Java().get(block.getRuntimeId());
