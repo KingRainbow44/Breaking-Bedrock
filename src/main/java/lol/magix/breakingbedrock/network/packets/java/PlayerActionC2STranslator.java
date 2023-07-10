@@ -49,6 +49,7 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
                 var actionPacket = new PlayerActionPacket();
                 actionPacket.setAction(PlayerActionType.START_BREAK);
                 actionPacket.setBlockPosition(blockPos);
+                actionPacket.setResultPosition(blockPos);
                 actionPacket.setFace(packet.getDirection().ordinal());
 
                 this.sendPacket(actionPacket);
@@ -61,6 +62,7 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
                 var actionPacket = new PlayerActionPacket();
                 actionPacket.setAction(PlayerActionType.STOP_BREAK);
                 actionPacket.setBlockPosition(blockPos);
+                actionPacket.setResultPosition(blockPos);
                 actionPacket.setFace(packet.getDirection().ordinal());
 
                 this.sendPacket(actionPacket);
@@ -71,6 +73,7 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
                     creativeActionPacket.setRuntimeEntityId(this.data().getRuntimeId());
                     creativeActionPacket.setAction(PlayerActionType.DIMENSION_CHANGE_REQUEST_OR_CREATIVE_DESTROY_BLOCK);
                     creativeActionPacket.setBlockPosition(blockPos);
+                    creativeActionPacket.setResultPosition(blockPos);
                     creativeActionPacket.setFace(packet.getDirection().ordinal());
 
                     this.bedrockClient.sendPacket(creativeActionPacket);
