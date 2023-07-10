@@ -1,8 +1,10 @@
 package lol.magix.breakingbedrock.network.packets.bedrock.entity;
 
 import lol.magix.breakingbedrock.annotations.Translate;
+import lol.magix.breakingbedrock.network.packets.java.movement.PlayerMoveC2STranslator;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
 
@@ -41,6 +43,10 @@ public final class MovePlayerTranslator extends Translator<MovePlayerPacket> {
                 // Update the player's position.
                 this.javaClient().processPacket(new PlayerPositionLookS2CPacket(
                         x, y, z, yaw, pitch, Collections.emptySet(), this.teleportId.getAndIncrement()));
+                // Send the move acknowledgement.
+                PlayerMoveC2STranslator.translate(new PlayerMoveC2SPacket.Full(
+                        x, y, z, yaw, pitch, packet.isOnGround()
+                ), MovePlayerPacket.Mode.TELEPORT);
                 return;
             }
 
