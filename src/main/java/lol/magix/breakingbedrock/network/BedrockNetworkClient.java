@@ -413,11 +413,13 @@ public final class BedrockNetworkClient {
         if (player == null) return;
 
         // Send player spawn position packet.
+        var startPos = this.getData().getStartingPos();
         this.getJavaNetworkClient().processPacket(
                 new PlayerSpawnPositionS2CPacket(
-                        WorldUtils.toBlockPos(this.getData()
-                                .getStartingPos().toInt()), 0f
+                        WorldUtils.toBlockPos(startPos.toInt()), 0f
                 ));
+        // Set the player's position.
+        player.setPosition(WorldUtils.convert(startPos));
 
         // Request additional chunks.
         {
