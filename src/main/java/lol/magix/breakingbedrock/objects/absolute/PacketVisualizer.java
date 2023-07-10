@@ -16,7 +16,7 @@ import java.net.InetSocketAddress;
 /**
  * Debugger class which logs all packets to a webs
  */
-public final class  PacketVisualizer extends WebSocketServer {
+public final class PacketVisualizer extends WebSocketServer {
     @Getter private static PacketVisualizer instance;
     @Getter private static boolean enabled = false;
 
