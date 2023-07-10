@@ -1,7 +1,7 @@
 package lol.magix.breakingbedrock;
 
+import com.google.common.net.HostAndPort;
 import lol.magix.breakingbedrock.utils.NetworkUtils;
-import net.minecraft.client.network.ServerAddress;
 
 public final class PingTest {
     public static void main(String[] args) {
@@ -9,7 +9,7 @@ public final class PingTest {
             System.out.println("Pinging server...");
 
             var pong = NetworkUtils.pingServer(
-                    new ServerAddress("localhost", 19132)
+                    HostAndPort.fromParts("localhost", 19132)
             );
 
             System.out.println(pong);
