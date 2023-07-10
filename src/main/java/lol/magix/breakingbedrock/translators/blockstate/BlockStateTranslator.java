@@ -113,8 +113,12 @@ public final class BlockStateTranslator {
                     continue;
                 }
 
-                runtime2Java.put(bedrockRuntimeId, java.toJavaBlockState());
-                bedrock2Java.put(bedrock, java);
+                if (!runtime2Java.containsKey(bedrockRuntimeId)) {
+                    runtime2Java.put(bedrockRuntimeId, java.toJavaBlockState());
+                }
+                if (!bedrock2Java.containsKey(bedrock)) {
+                    bedrock2Java.put(bedrock, java);
+                }
             }
         }
 
@@ -141,8 +145,12 @@ public final class BlockStateTranslator {
                     continue;
                 }
 
-                java2Runtime.put(java.toJavaBlockState(), bedrockRuntimeId);
-                java2Bedrock.put(java, bedrock);
+                if (!java2Runtime.containsKey(java.toJavaBlockState())) {
+                    java2Runtime.put(java.toJavaBlockState(), bedrockRuntimeId);
+                }
+                if (!java2Bedrock.containsKey(java)) {
+                    java2Bedrock.put(java, bedrock);
+                }
             }
         }
 
