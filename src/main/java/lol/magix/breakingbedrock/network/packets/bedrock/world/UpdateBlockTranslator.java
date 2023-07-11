@@ -4,7 +4,7 @@ import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
-import lol.magix.breakingbedrock.utils.WorldUtils;
+import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.state.property.Properties;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateBlockPacket;
@@ -29,7 +29,7 @@ public final class UpdateBlockTranslator extends Translator<UpdateBlockPacket> {
             return;
         }
 
-        var blockPos = WorldUtils.toBlockPos(packet.getBlockPosition());
+        var blockPos = GameUtils.toBlockPos(packet.getBlockPosition());
         var newState = BlockStateTranslator.getRuntime2Java().get(block.getRuntimeId());
 
         switch (packet.getDataLayer()) {

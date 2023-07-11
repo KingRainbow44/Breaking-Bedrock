@@ -4,7 +4,7 @@ import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.blockentity.BlockEntityRegistry;
-import lol.magix.breakingbedrock.utils.WorldUtils;
+import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -43,7 +43,7 @@ public final class BlockEntityDataTranslator extends Translator<BlockEntityDataP
             var tag = translator.translateTag(packet.getData());
             try {
                 this.javaClient().processPacket(constructor.newInstance(
-                        WorldUtils.toBlockPos(packet.getBlockPosition()),
+                        GameUtils.toBlockPos(packet.getBlockPosition()),
                         translator.getJavaId(), tag));
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);

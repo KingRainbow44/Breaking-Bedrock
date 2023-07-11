@@ -1,7 +1,7 @@
 package lol.magix.breakingbedrock.translators.blockentity.defaults;
 
 import lol.magix.breakingbedrock.translators.blockentity.BlockEntityTranslator;
-import lol.magix.breakingbedrock.utils.WorldUtils;
+import lol.magix.breakingbedrock.utils.GameUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.minecraft.block.entity.BlockEntityType;
@@ -25,7 +25,7 @@ public final class ChestBlockEntityTranslator extends BlockEntityTranslator {
 
         var y = bedrockNbt.getInt("y");
         var xz = Vector2i.from(bedrockNbt.getInt("x"), bedrockNbt.getInt("z"));
-        var blockPos = WorldUtils.toBlockPos(Vector3i.from(xz.getX(), y, xz.getY()));
+        var blockPos = GameUtils.toBlockPos(Vector3i.from(xz.getX(), y, xz.getY()));
         if (bedrockNbt.containsKey("pairx", NbtType.INT) && bedrockNbt.containsKey("pairz", NbtType.INT)) {
             Vector2i pairXZ = Vector2i.from(bedrockNbt.getInt("pairx"), bedrockNbt.getInt("pairz"));
 

@@ -5,7 +5,7 @@ import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.Pair;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.entity.EntityMetadataTranslator;
-import lol.magix.breakingbedrock.utils.WorldUtils;
+import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
 import org.cloudburstmc.protocol.bedrock.packet.AddItemEntityPacket;
@@ -30,8 +30,8 @@ public final class AddItemEntityTranslator extends Translator<AddItemEntityPacke
 
             // Set entity properties.
             entity.setId(uniqueId);
-            entity.setPosition(WorldUtils.convert(packet.getPosition()));
-            entity.setVelocity(WorldUtils.convert(packet.getMotion()));
+            entity.setPosition(GameUtils.convert(packet.getPosition()));
+            entity.setVelocity(GameUtils.convert(packet.getMotion()));
 
             // Spawn the entity on the client.
             this.javaClient().processPacket(entity.createSpawnPacket());

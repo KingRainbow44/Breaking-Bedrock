@@ -9,7 +9,7 @@ import lol.magix.breakingbedrock.mixin.interfaces.IMixinWorldRenderer;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
-import lol.magix.breakingbedrock.utils.WorldUtils;
+import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.client.MinecraftClient;
@@ -54,7 +54,7 @@ public final class LevelEventTranslator extends Translator<LevelEventPacket> {
         switch ((LevelEvent) packet.getType()) {
             case BLOCK_START_BREAK -> {
                 var position = packet.getPosition().toInt();
-                var blockBreakingInfo = new BlockBreakingInfo(0, WorldUtils.toBlockPos(position));
+                var blockBreakingInfo = new BlockBreakingInfo(0, GameUtils.toBlockPos(position));
                 var blockBreakingWrapper = new BlockBreakingWrapper(packet.getData(), blockBreakingInfo);
                 BLOCK_BREAKING_INFOS.put(position, blockBreakingWrapper);
 
@@ -62,7 +62,7 @@ public final class LevelEventTranslator extends Translator<LevelEventPacket> {
                 sortedSet.add(blockBreakingInfo);
                 ((IMixinWorldRenderer) MinecraftClient.getInstance().worldRenderer)
                         .getBlockBreakingProgressions()
-                        .put(WorldUtils.asLong(position), sortedSet);
+                        .put(GameUtils.asLong(position), sortedSet);
             }
             case BLOCK_UPDATE_BREAK -> {
                 BlockBreakingWrapper blockBreakingWrapper = BLOCK_BREAKING_INFOS.get(packet.getPosition().toInt());
@@ -90,7 +90,7 @@ public final class LevelEventTranslator extends Translator<LevelEventPacket> {
                 var bedrockRuntimeId = packet.getData() & 0xffffff; // Strip out the above encoding
                 var blockState = BlockStateTranslator.getRuntime2Java().get(bedrockRuntimeId);
                 var vector = packet.getPosition().toInt();
-                var pos = WorldUtils.toBlockPos(vector);
+                var pos = GameUtils.toBlockPos(vector);
 
                 if (blockState.getRenderType() != BlockRenderType.INVISIBLE) {
                     int x = pos.getX();
@@ -120,7 +120,7 @@ public final class LevelEventTranslator extends Translator<LevelEventPacket> {
                 }
             }
             case PARTICLE_DESTROY_BLOCK -> world.syncWorldEvent(client.player, 2001,
-                    WorldUtils.toBlockPos(packet.getPosition().toInt()),
+                    GameUtils.toBlockPos(packet.getPosition().toInt()),
                     Block.getRawIdFromState(BlockStateTranslator.getRuntime2Java().get(packet.getData())));
         }
     }

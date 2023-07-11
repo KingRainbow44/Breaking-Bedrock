@@ -3,7 +3,7 @@ package lol.magix.breakingbedrock.mixin;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.network.packets.bedrock.world.LevelEventTranslator;
-import lol.magix.breakingbedrock.utils.WorldUtils;
+import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
@@ -53,7 +53,7 @@ public final class MixinWorldRenderer {
 
             var z = (int) (entry.getValue().currentDuration * 10F) - 1;
             z = MathHelper.clamp(z, 0, 10);
-            var key = WorldUtils.asLong(entry.getKey());
+            var key = GameUtils.asLong(entry.getKey());
             if (LevelEventTranslator.TO_REMOVE.remove(key) || z == 10) {
                 iterator.remove();
                 this.blockBreakingProgressions.remove(key);

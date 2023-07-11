@@ -4,7 +4,7 @@ import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
-import lol.magix.breakingbedrock.utils.WorldUtils;
+import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -27,7 +27,7 @@ public final class PlayerInteractBlockC2STranslator extends Translator<PlayerInt
         var selectedSlot = inventory.selectedSlot;
 
         var sourcePos = packet.getBlockHitResult().getBlockPos();
-        var blockPos = WorldUtils.toBlockPos(sourcePos);
+        var blockPos = GameUtils.toBlockPos(sourcePos);
         var offset = packet.getBlockHitResult().getPos()
                 .subtract(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ());
 
@@ -43,7 +43,7 @@ public final class PlayerInteractBlockC2STranslator extends Translator<PlayerInt
             transactionPacket1.setHotbarSlot(selectedSlot);
             transactionPacket1.setItemInHand(handItem);
             transactionPacket1.setPlayerPosition(this.javaClient().getPlayerPosition());
-            transactionPacket1.setClickPosition(WorldUtils.convert(offset));
+            transactionPacket1.setClickPosition(GameUtils.convert(offset));
             transactionPacket1.setBlockDefinition(BlockStateTranslator.translate(world.getBlockState(sourcePos)));
             this.bedrockClient.sendPacket(transactionPacket1);
         }

@@ -5,7 +5,7 @@ import lol.magix.breakingbedrock.events.defaults.PlayerTickEvent;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
-import lol.magix.breakingbedrock.utils.WorldUtils;
+import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameMode;
@@ -39,7 +39,7 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
         var player = this.player();
         if (player == null) return;
 
-        var blockPos = WorldUtils.toBlockPos(packet.getPos());
+        var blockPos = GameUtils.toBlockPos(packet.getPos());
         switch (packet.getAction()) {
             case START_DESTROY_BLOCK -> {
                 this.lastDirection = packet.getDirection();
@@ -96,7 +96,7 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
                 transactionPacket.setBlockFace(packet.getDirection().ordinal());
                 transactionPacket.setHotbarSlot(selectedSlot);
                 transactionPacket.setItemInHand(item);
-                transactionPacket.setPlayerPosition(WorldUtils.convert(player.getPos()));
+                transactionPacket.setPlayerPosition(GameUtils.convert(player.getPos()));
                 transactionPacket.setClickPosition(Vector3f.ZERO);
                 transactionPacket.setHeadPosition(Vector3f.ZERO);
                 transactionPacket.setBlockDefinition(BlockStateTranslator.translate(
