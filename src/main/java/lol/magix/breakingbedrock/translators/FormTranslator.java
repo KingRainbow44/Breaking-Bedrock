@@ -108,7 +108,9 @@ public final class FormTranslator {
                 // Send the buttons.
                 for (var i = 0; i < simpleForm.getButtons().size(); i++) {
                     var button = simpleForm.getButtons().get(i);
-                    player.sendMessage(TextUtils.translate(button).setStyle(Style.EMPTY
+                    var text = button.getText();
+
+                    player.sendMessage(TextUtils.translate(text).setStyle(Style.EMPTY
                             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                     "/formoption " + formId + " " + i))
                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
