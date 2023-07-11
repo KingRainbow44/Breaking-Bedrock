@@ -1,28 +1,23 @@
 package lol.magix.breakingbedrock.network.packets.bedrock.game;
 
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.GameConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.utils.ConversionUtils;
-import lol.magix.breakingbedrock.utils.WorldUtils;
+import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
-import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
-import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleBlockDefinition;
 import org.cloudburstmc.protocol.bedrock.packet.RequestChunkRadiusPacket;
 import org.cloudburstmc.protocol.bedrock.packet.StartGamePacket;
 import org.cloudburstmc.protocol.common.SimpleDefinitionRegistry;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Translate(PacketType.BEDROCK)
 public final class StartGameTranslator extends Translator<StartGamePacket> {
@@ -84,7 +79,7 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
 
         // Set the spawn position.
         this.javaClient().processPacket(new PlayerSpawnPositionS2CPacket(
-                WorldUtils.toBlockPos(packet.getDefaultSpawn()), 0f
+                GameUtils.toBlockPos(packet.getDefaultSpawn()), 0f
         ));
 
         // Initialize the Bedrock client.
@@ -133,33 +128,21 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
         // Set up the item registry.
         SimpleDefinitionRegistry.Builder<ItemDefinition> itemRegistry
                 = SimpleDefinitionRegistry.builder();
-        var itemRuntimeIds = new IntOpenHashSet();
+        BiMap<Integer, String> itemRuntimeIds = HashBiMap.create();
         for (var definition : packet.getItemDefinitions()) {
-            if (itemRuntimeIds.add(definition.getRuntimeId()))
+            if (itemRuntimeIds.put(definition.getRuntimeId(),
+                    definition.getIdentifier()) == null)
                 itemRegistry.add(definition);
             else
                 this.logger.warn("Duplicate item entry {}.",
                         definition.getIdentifier());
         }
         codecHelper.setItemDefinitions(itemRegistry.build());
-        // Set up the block registry.
-        var palette = packet.getBlockPalette();
-        if (palette != null && !palette.isEmpty()) {
-            SimpleDefinitionRegistry.Builder<BlockDefinition> blockRegistry
-                    = SimpleDefinitionRegistry.builder();
-            for (var i = 0; i < palette.size(); i++) {
-                var builder = palette.get(i).toBuilder();
-                builder.remove("name_hash");
-                builder.remove("network_id");
+        // Set the item runtime IDs.
+        this.data().getId2Runtime().clear();
+        this.data().getId2Runtime().putAll(itemRuntimeIds.inverse());
 
-                var block = builder.build();
-                blockRegistry.add(new SimpleBlockDefinition(
-                        block.getString("name"), i, block
-                ));
-            }
-            codecHelper.setBlockDefinitions(blockRegistry.build());
-        } else {
-            codecHelper.setBlockDefinitions(GameConstants.BLOCKS.get());
-        }
+        // Set up the block registry.
+        codecHelper.setBlockDefinitions(GameConstants.BLOCKS.get());
     }
 }

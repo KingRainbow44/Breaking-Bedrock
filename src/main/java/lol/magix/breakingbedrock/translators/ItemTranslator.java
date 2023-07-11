@@ -158,15 +158,19 @@ public final class ItemTranslator {
             return ItemData.AIR;
         }
 
+        // Fetch the item's runtime ID.
+        var runtimeId = client.getData().getId2Runtime()
+                .get(idPair[0] + ":" + idPair[1]);
+
         // Get the client defined registries.
         var codec = client.getSession().getPeer().getCodecHelper();
         var itemRegistry = codec.getItemDefinitions();
         var blockRegistry = codec.getBlockDefinitions();
 
         return ItemData.builder()
-                .definition(itemRegistry.getDefinition(Integer.parseInt(idPair[0])))
+                .definition(itemRegistry.getDefinition(runtimeId))
                 .blockDefinition(blockRegistry.getDefinition(blockRuntimeId))
-                .damage(Integer.parseInt(idPair[1]))
+                .damage(Integer.parseInt(idPair[2]))
                 .count(stack.getCount())
                 .tag(java2Bedrock(stack.getNbt()))
                 .build();
