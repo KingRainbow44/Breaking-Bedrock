@@ -27,6 +27,17 @@ public final class AuthInputHandler {
     }
 
     /**
+     * Un-registers the handler.
+     */
+    public void unregisterHandler() {
+        this.nextPacket = null;
+        this.inputData.clear();
+
+        client.getEventManager().removeListener(
+                PlayerTickEvent.class, this::onPlayerTick);
+    }
+
+    /**
      * Invoked when the client ticks.
      *
      * @param event The event.

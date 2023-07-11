@@ -15,11 +15,14 @@ import org.cloudburstmc.protocol.bedrock.data.InputMode;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 @Translate(PacketType.JAVA)
 public final class PlayerMoveC2STranslator extends Translator<PlayerMoveC2SPacket> {
-    private static Vector3f lastPosition = Vector3f.ZERO;
-    private static Vector3f lastRotation = Vector3f.ZERO;
-    private static boolean lastOnGround = false;
+    private static AtomicReference<Vector3f> lastPosition = new AtomicReference<>(Vector3f.ZERO);
+    private static AtomicReference<Vector3f> lastRotation = new AtomicReference<>(Vector3f.ZERO);
+    private static AtomicBoolean lastOnGround = new AtomicBoolean(false);
 
     public static void translate(
             PlayerMoveC2SPacket packet,
@@ -53,8 +56,9 @@ public final class PlayerMoveC2STranslator extends Translator<PlayerMoveC2SPacke
         switch (data.getMovementMode()) {
             case CLIENT -> {
                 // Compare with last position.
-                if (lastPosition.equals(currentPos) && lastRotation.equals(currentRot) &&
-                        lastOnGround == onGround) return;
+                if (lastPosition.get().equals(currentPos) &&
+                        lastRotation.get().equals(currentRot) &&
+                        lastOnGround.get() == onGround) return;
 
                 var movePacket = new MovePlayerPacket();
                 movePacket.setRuntimeEntityId(runtimeId);
@@ -71,7 +75,7 @@ public final class PlayerMoveC2STranslator extends Translator<PlayerMoveC2SPacke
                 movePacket.setPlayMode(ClientPlayMode.NORMAL);
                 movePacket.setInputInteractionModel(InputInteractionModel.CROSSHAIR);
                 movePacket.setVrGazeDirection(Vector3f.ZERO);
-                movePacket.setDelta(currentPos.sub(PlayerMoveC2STranslator.lastPosition));
+                movePacket.setDelta(currentPos.sub(PlayerMoveC2STranslator.lastPosition.get()));
                 movePacket.setMotion(movePacket.getDelta().toVector2(true));
                 movePacket.setPosition(currentPos);
                 movePacket.setAnalogMoveVector(Vector2f.ZERO);
@@ -84,9 +88,9 @@ public final class PlayerMoveC2STranslator extends Translator<PlayerMoveC2SPacke
         }
 
         // Update last variables.
-        PlayerMoveC2STranslator.lastPosition = currentPos;
-        PlayerMoveC2STranslator.lastRotation = currentRot;
-        PlayerMoveC2STranslator.lastOnGround = onGround;
+        PlayerMoveC2STranslator.lastPosition.set(currentPos);
+        PlayerMoveC2STranslator.lastRotation.set(currentRot);
+        PlayerMoveC2STranslator.lastOnGround.set(onGround);
     }
 
     @Override

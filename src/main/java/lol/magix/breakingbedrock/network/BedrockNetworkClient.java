@@ -17,11 +17,9 @@ import lol.magix.breakingbedrock.objects.game.SessionData;
 import lol.magix.breakingbedrock.objects.game.caches.BlockEntityDataCache;
 import lol.magix.breakingbedrock.utils.ProfileUtils;
 import lol.magix.breakingbedrock.utils.ScreenUtils;
-import lol.magix.breakingbedrock.utils.WorldUtils;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.packet.s2c.play.PlayerSpawnPositionS2CPacket;
 import net.minecraft.text.Text;
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
@@ -392,6 +390,14 @@ public final class BedrockNetworkClient {
             MinecraftClient.getInstance().execute(() ->
                     ScreenUtils.disconnect(Text.of(reason)));
 
+        // Un-register the input handler listener.
+        if (this.inputHandler != null)
+            this.inputHandler.unregisterHandler();
+
+        // Clear the block actions.
+        if (this.blockActions != null)
+            this.blockActions.clear();
+
         // Invalidate client properties.
         this.hasLoggedIn = false;
         this.data = null;
@@ -399,6 +405,7 @@ public final class BedrockNetworkClient {
         this.inputHandler = null;
         this.blockActions = null;
         this.authentication = null;
+        this.containerHolder = null;
         this.connectionDetails = null;
         this.javaNetworkClient = null;
         this.blockEntityDataCache = null;
