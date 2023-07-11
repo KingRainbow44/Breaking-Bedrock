@@ -3,6 +3,7 @@ package lol.magix.breakingbedrock.network.packets.bedrock.entity;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
+import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExperienceBarUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.util.math.MathHelper;
@@ -20,7 +21,7 @@ public final class UpdateAttributesTranslator extends Translator<UpdateAttribute
         var player = this.player();
         if (player == null) return;
 
-        var runtimeId = packet.getRuntimeEntityId();
+        var runtimeId = (int) packet.getRuntimeEntityId();
         if (runtimeId != player.getId()) return;
 
         this.run(() -> {
@@ -40,10 +41,10 @@ public final class UpdateAttributesTranslator extends Translator<UpdateAttribute
                     case "minecraft:absorption" -> {
                         player.setAbsorptionAmount(attribute.getValue());
 
-                        // TODO: Update the entity tracker.
-                        // this.javaClient().processPacket(new EntityTrackerUpdateS2CPacket(
-                        //         runtimeId, List.of(DataTracker.Entry)
-                        // ));
+                        // Update the entity tracker.
+                        this.javaClient().processPacket(new EntityTrackerUpdateS2CPacket(
+                                runtimeId, player.getDataTracker().getChangedEntries()
+                        ));
                     }
                 }
             }
