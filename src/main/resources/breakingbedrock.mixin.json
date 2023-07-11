@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "MixinClientConnection",
-    "interfaces.IMixinPlayerEntity"
+    "interfaces.IMixinPlayerEntity",
+    "interfaces.IMixinPlayerInteractEntityC2SPacket"
   ],
   "client": [
     "MixinClientPlayerEntity",
