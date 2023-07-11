@@ -1,4 +1,4 @@
-package lol.magix.breakingbedrock.network.packets.bedrock;
+package lol.magix.breakingbedrock.network.packets.bedrock.chat;
 
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
