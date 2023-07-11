@@ -49,8 +49,7 @@ public final class PacketTranslator {
             var instance = translator.getDeclaredConstructor().newInstance();
             if (instance instanceof Translator translatorInstance)
                 this.translators.put(translatorInstance.getPacketClass(), translatorInstance);
-        } catch (Exception exception) {
-            exception.printStackTrace();
+        } catch (Exception ignored) {
             BreakingBedrock.getLogger().warn("Unable to register packet translator: {}", translator.getName());
         }
 
