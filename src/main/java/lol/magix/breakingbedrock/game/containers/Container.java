@@ -71,4 +71,12 @@ public abstract class Container {
      * When invoked, the inventory should be synced and updated.
      */
     public abstract void updateInventory();
+
+    @Override
+    public String toString() {
+        return "Container{" +
+                "items=" + items +
+                ", size=" + size +
+                '}';
+    }
 }

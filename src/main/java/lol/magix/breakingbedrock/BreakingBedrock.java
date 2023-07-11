@@ -16,6 +16,7 @@ import lol.magix.breakingbedrock.translators.entity.EntityMetadataTranslator;
 import lol.magix.breakingbedrock.translators.entity.EntityTranslator;
 import lol.magix.breakingbedrock.translators.blockstate.LegacyBlockPaletteTranslator;
 import lol.magix.breakingbedrock.translators.blockentity.BlockEntityRegistry;
+import lol.magix.breakingbedrock.translators.screen.ScreenHandlerTranslator;
 import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import okhttp3.OkHttpClient;
@@ -50,6 +51,7 @@ public final class BreakingBedrock {
         // Initialize separate systems.
         PacketTranslator.initialize();
         PacketVisualizer.initialize();
+        ScreenHandlerTranslator.initialize();
         EntityMetadataTranslator.initialize();
 
         // Load resources.

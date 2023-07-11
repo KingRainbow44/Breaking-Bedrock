@@ -9,6 +9,8 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.DimensionTypes;
 import org.cloudburstmc.protocol.bedrock.data.GameRuleData;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerSlotType;
 
 import java.util.List;
 
@@ -76,5 +78,22 @@ public interface ConversionUtils {
                 case "doimmediaterespawn" -> player.setShowsDeathScreen(!((Boolean) value));
             }
         }
+    }
+
+    /**
+     * Converts a Bedrock {@link ContainerSlotType} to a container ID.
+     *
+     * @param type The Bedrock container slot type.
+     * @param fallback The fallback container ID.
+     * @return The container ID.
+     */
+    static int typeToContainer(ContainerSlotType type, int fallback) {
+        return switch (type) {
+            default -> fallback;
+            case INVENTORY, HOTBAR, HOTBAR_AND_INVENTORY -> ContainerId.INVENTORY;
+            case OFFHAND -> ContainerId.OFFHAND;
+            case ARMOR -> ContainerId.ARMOR;
+            case CURSOR -> ContainerId.UI;
+        };
     }
 }

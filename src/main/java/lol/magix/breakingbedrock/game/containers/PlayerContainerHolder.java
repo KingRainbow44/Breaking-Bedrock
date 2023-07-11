@@ -4,9 +4,12 @@ import lol.magix.breakingbedrock.game.containers.player.ArmorContainer;
 import lol.magix.breakingbedrock.game.containers.player.CursorContainer;
 import lol.magix.breakingbedrock.game.containers.player.InventoryContainer;
 import lol.magix.breakingbedrock.game.containers.player.OffhandContainer;
+import lol.magix.breakingbedrock.utils.ConversionUtils;
 import lombok.Getter;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerSlotType;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,6 +32,15 @@ public final class PlayerContainerHolder {
      */
     public Container getContainer(int container) {
         return this.containers.get(container);
+    }
+
+    /**
+     * @param type The container type.
+     * @return The container.
+     */
+    public Container getContainer(ContainerSlotType type) {
+        return this.getContainer(ConversionUtils.typeToContainer(
+                type, this.getCurrentContainerId()));
     }
 
     /**
@@ -90,5 +102,12 @@ public final class PlayerContainerHolder {
         }
 
         this.currentContainerId = -1;
+    }
+
+    /**
+     * @return The containers.
+     */
+    public Map<Integer, Container> getContainers() {
+        return Collections.unmodifiableMap(this.containers);
     }
 }
