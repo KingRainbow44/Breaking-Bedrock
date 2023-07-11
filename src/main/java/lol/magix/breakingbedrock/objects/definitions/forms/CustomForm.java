@@ -30,7 +30,6 @@ public final class CustomForm implements IForm {
 
         this.formElements = new ArrayList<>();
         for (var element : this.content) {
-            System.out.println(element);
             this.formElements.add(switch (element.get("type").getAsString()) {
                 default -> new FormElement() {
                     @Override
