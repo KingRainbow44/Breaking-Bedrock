@@ -37,13 +37,16 @@ public final class TextTranslator extends Translator<TextPacket> {
                         .replaceAll("%", ""));
                 var parameters = packet.getParameters().toArray();
                 // Check if the translation key is valid.
+                Text textContainer;
                 if (!TranslationStorage.getInstance().hasTranslation(translationKey)) {
                     this.logger.warn("Unknown translation key: {}", translationKey);
+                    textContainer = TextUtils.translate(packet.getMessage());
                 } else {
-                    var textContainer = TextUtils.translate(packet.getMessage(), parameters);
-                    var messagePacket = new GameMessageS2CPacket(textContainer, false);
-                    this.javaClient().processPacket(messagePacket);
+                    textContainer = TextUtils.translation(packet.getMessage(), parameters);
                 }
+
+                var messagePacket = new GameMessageS2CPacket(textContainer, false);
+                this.javaClient().processPacket(messagePacket);
             }
         }
     }

@@ -102,15 +102,15 @@ public final class FormTranslator {
                 var simpleForm = (SimpleForm) form;
 
                 // This is a form with: title, description, and buttons.
-                player.sendMessage(TextUtils.translate(form.getTitle()));
-                player.sendMessage(TextUtils.translate(simpleForm.getContent()));
+                player.sendMessage(TextUtils.translation(form.getTitle()));
+                player.sendMessage(TextUtils.translation(simpleForm.getContent()));
 
                 // Send the buttons.
                 for (var i = 0; i < simpleForm.getButtons().size(); i++) {
                     var button = simpleForm.getButtons().get(i);
                     var text = button.getText();
 
-                    player.sendMessage(TextUtils.translate(text).setStyle(Style.EMPTY
+                    player.sendMessage(TextUtils.translation(text).setStyle(Style.EMPTY
                             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                     "/formoption " + formId + " " + i))
                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
@@ -128,13 +128,13 @@ public final class FormTranslator {
                 var modalForm = (ModalForm) form;
 
                 // This is a Yes or No form.
-                player.sendMessage(TextUtils.translate(form.getTitle()));
-                player.sendMessage(TextUtils.translate(modalForm.getContent()));
+                player.sendMessage(TextUtils.translation(form.getTitle()));
+                player.sendMessage(TextUtils.translation(modalForm.getContent()));
                 // Send the two buttons.
-                player.sendMessage(TextUtils.translate(modalForm.getButton1()).setStyle(Style.EMPTY
+                player.sendMessage(TextUtils.translation(modalForm.getButton1()).setStyle(Style.EMPTY
                         .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                 "/formoption " + formId + " 0"))));
-                player.sendMessage(TextUtils.translate(modalForm.getButton2()).setStyle(Style.EMPTY
+                player.sendMessage(TextUtils.translation(modalForm.getButton2()).setStyle(Style.EMPTY
                         .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                 "/formoption " + formId + " 1"))));
 
@@ -148,7 +148,7 @@ public final class FormTranslator {
                 var customForm = (CustomForm) form;
 
                 // This is a form with a variety of elements.
-                player.sendMessage(TextUtils.translate(form.getTitle()));
+                player.sendMessage(TextUtils.translation(form.getTitle()));
                 // Translate each element into a chat message.
                 for (var element : customForm.getContent()) {
                     FormTranslator.translate(formId, player, element);
@@ -180,17 +180,17 @@ public final class FormTranslator {
         switch (element.getType()) {
             case LABEL -> {
                 var label = (FormLabel) element;
-                player.sendMessage(TextUtils.translate(label.getText()));
+                player.sendMessage(TextUtils.translation(label.getText()));
             }
             case DROPDOWN -> {
                 var dropdown = (FormDropdown) element;
 
-                player.sendMessage(TextUtils.translate(dropdown.getText()));
+                player.sendMessage(TextUtils.translation(dropdown.getText()));
                 for (var i = 0; i < dropdown.getOptions().size(); i++) {
                     var option = dropdown.getOptions().get(i);
 
                     // Send the option to the player.
-                    player.sendMessage(TextUtils.translate(option)
+                    player.sendMessage(TextUtils.translation(option)
                             .copy().setStyle(Style.EMPTY
                                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                             String.format("/formoption %d %d", formId, i)))
