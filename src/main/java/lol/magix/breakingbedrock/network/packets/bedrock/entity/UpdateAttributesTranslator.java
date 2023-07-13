@@ -25,11 +25,11 @@ public final class UpdateAttributesTranslator extends Translator<UpdateAttribute
         if (runtimeId != player.getId()) return;
 
         this.run(() -> {
-            var health = 20f;
-            var food = 20;
-            var saturation = 5f;
-            var level = 0;
-            var experience = 0f;
+            var health = player.getHealth();
+            var food = player.getHungerManager().getFoodLevel();
+            var saturation = player.getHungerManager().getSaturationLevel();
+            var level = player.experienceLevel;
+            var experience = (float) player.totalExperience;
 
             for (var attribute : packet.getAttributes()) {
                 switch (attribute.getName()) {
@@ -53,7 +53,7 @@ public final class UpdateAttributesTranslator extends Translator<UpdateAttribute
             this.javaClient().processPacket(new HealthUpdateS2CPacket(
                     health, food, saturation));
             this.javaClient().processPacket(new ExperienceBarUpdateS2CPacket(
-                    experience, UpdateAttributesTranslator.total(level), level
+                    experience, (int) UpdateAttributesTranslator.total(level), level
             ));
         });
     }
@@ -65,13 +65,13 @@ public final class UpdateAttributesTranslator extends Translator<UpdateAttribute
      * @param xpLevel The level to reach.
      * @return The total amount of experience required to reach the given level.
      */
-    private static int total(int xpLevel) {
+    private static float total(int xpLevel) {
         if (xpLevel <= 16) {
             return MathHelper.square(xpLevel) + 6 * xpLevel;
         } else if (xpLevel <= 31) {
-            return (int) (2.5 * MathHelper.square(xpLevel) - 40.5 * xpLevel + 360);
+            return (float) (2.5 * MathHelper.square(xpLevel) - 40.5 * xpLevel + 360);
         }
 
-        return (int) (4.5 * MathHelper.square(xpLevel) - 162.5 * xpLevel + 2220);
+        return (float) (4.5 * MathHelper.square(xpLevel) - 162.5 * xpLevel + 2220);
     }
 }
