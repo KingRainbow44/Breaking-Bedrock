@@ -20,9 +20,11 @@ public interface DebugCommand {
      * Registers the '/debug' command.
      */
     static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(literal("debug")
-                        .then(argument("log", word())
-                                .executes(DebugCommand::toggleLogging))
+        dispatcher
+                .register(literal("debug")
+                        .then(literal("log")
+                                .then(argument("log", word())
+                                        .executes(DebugCommand::toggleLogging)))
                 .executes(DebugCommand::showUsage));
     }
 
