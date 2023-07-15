@@ -2,6 +2,7 @@ package lol.magix.breakingbedrock;
 
 import com.mojang.brigadier.Command;
 import lol.magix.breakingbedrock.commands.BlockCommand;
+import lol.magix.breakingbedrock.commands.DebugCommand;
 import lol.magix.breakingbedrock.commands.ItemCommand;
 import lol.magix.breakingbedrock.translators.FormTranslator;
 import net.fabricmc.api.ClientModInitializer;
@@ -41,6 +42,7 @@ public final class BreakingBedrockInitializer implements ClientModInitializer {
             // Register external commands.
             BlockCommand.register(dispatcher);
             ItemCommand.register(dispatcher);
+            DebugCommand.register(dispatcher);
         });
     }
 }

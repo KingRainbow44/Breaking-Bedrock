@@ -30,7 +30,6 @@ import org.cloudburstmc.protocol.bedrock.data.PlayerBlockActionData;
 import org.cloudburstmc.protocol.bedrock.netty.initializer.BedrockClientInitializer;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.LoginPacket;
-import org.cloudburstmc.protocol.bedrock.packet.RequestChunkRadiusPacket;
 import org.cloudburstmc.protocol.bedrock.packet.RequestNetworkSettingsPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +53,19 @@ public final class BedrockNetworkClient {
      */
     public static BedrockClientSession getHandle() {
         return BedrockNetworkClient.getInstance().session;
+    }
+
+    /**
+     * @return Whether packets should be logged or not.
+     */
+    public static boolean logPackets() {
+        var instance = BedrockNetworkClient.getInstance();
+        if (instance == null || !instance.isConnected()) return false;
+
+        var data = instance.getData();
+        if (data == null) return false;
+
+        return data.isLogPackets();
     }
 
     private boolean hasLoggedIn = false;

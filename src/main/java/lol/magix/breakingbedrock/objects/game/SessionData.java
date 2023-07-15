@@ -28,4 +28,6 @@ public final class SessionData {
     private boolean isInitialized = false;
     private boolean isReady = false;
     private AuthoritativeMovementMode movementMode = AuthoritativeMovementMode.CLIENT;
+
+    private boolean logPackets = false;
 }

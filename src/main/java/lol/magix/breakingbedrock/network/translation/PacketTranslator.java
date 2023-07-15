@@ -2,6 +2,7 @@ package lol.magix.breakingbedrock.network.translation;
 
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.annotations.Translate;
+import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.utils.ReflectionUtils;
@@ -67,8 +68,10 @@ public final class PacketTranslator {
         var translator = (Translator<T>) this.translators.get(inboundPacket.getClass());
 
         var name = inboundPacket.getClass().getSimpleName();
-        if (!NetworkConstants.IGNORED_PACKETS.contains(name))
-            System.out.println("Received packet " + name);
+        if (BedrockNetworkClient.logPackets() &&
+                !NetworkConstants.IGNORED_PACKETS.contains(name)) {
+            BreakingBedrock.getLogger().info("Received packet: {}", name);
+        }
 
         if (translator != null) {
             translator.translate(inboundPacket);
