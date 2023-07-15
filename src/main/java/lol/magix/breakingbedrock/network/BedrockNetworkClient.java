@@ -7,7 +7,6 @@ import io.netty.util.concurrent.Promise;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.events.EventManager;
 import lol.magix.breakingbedrock.game.containers.PlayerContainerHolder;
-import lol.magix.breakingbedrock.game.scoreboards.ScoreboardContainer;
 import lol.magix.breakingbedrock.game.scoreboards.ScoreboardHolder;
 import lol.magix.breakingbedrock.network.auth.Authentication;
 import lol.magix.breakingbedrock.objects.ConnectionDetails;
@@ -424,11 +423,6 @@ public final class BedrockNetworkClient {
         var player = client.player;
         if (player == null) return;
 
-        // Request additional chunks.
-        {
-            var distancePacket = new RequestChunkRadiusPacket();
-            distancePacket.setRadius(this.getData().getViewDistance());
-            this.sendPacket(distancePacket, true);
-        }
+        this.getLogger().debug("Player has finished connecting.");
     }
 }

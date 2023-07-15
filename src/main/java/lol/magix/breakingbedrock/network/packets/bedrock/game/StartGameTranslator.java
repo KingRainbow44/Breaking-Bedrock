@@ -118,7 +118,7 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
 
         // Request the render distance.
         var distancePacket = new RequestChunkRadiusPacket();
-        distancePacket.setRadius(2); // Set to 2, request after chunks are loaded.
+        distancePacket.setRadius(chunkLoadDistance);
         this.bedrockClient.sendPacket(distancePacket, true);
 
         // Perform client setup.
