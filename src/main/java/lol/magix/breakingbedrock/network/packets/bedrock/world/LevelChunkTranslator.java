@@ -2,6 +2,7 @@ package lol.magix.breakingbedrock.network.packets.bedrock.world;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.GameConstants;
@@ -23,15 +24,9 @@ import net.minecraft.world.chunk.*;
 import net.minecraft.world.tick.ChunkTickScheduler;
 import org.cloudburstmc.protocol.bedrock.packet.LevelChunkPacket;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-
 @Translate(PacketType.BEDROCK)
 // Taken from THEREALWWEFAN231/tunnelmc.
 public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
-    private final List<LevelChunkPacket> queue = new LinkedList<>();
-
     @Override
     public Class<LevelChunkPacket> getPacketClass() {
         return LevelChunkPacket.class;
@@ -162,6 +157,8 @@ public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
      * @param size The size of the palette.
      */
     private static void decodeEight(ByteBuf buffer, ChunkSection section, byte size) {
+        var logger = BreakingBedrock.getLogger();
+
         for (var storageReadIndex = 0; storageReadIndex < size; storageReadIndex++) {
             var storage = DecodedPaletteStorage.fromPacket(buffer, DecodedPaletteStorage.BLOCK_PALETTE);
             if (storage == null) continue;
@@ -174,7 +171,7 @@ public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
                             if (id != null && id != BlockPaletteTranslator.AIR_BLOCK_ID) {
                                 var blockState = BlockStateTranslator.getRuntime2Java().get(id);
                                 if (blockState == null) {
-                                    System.out.printf("Missing block state for %d%n", id);
+                                    logger.debug("Missing block state for {}.", id);
                                     blockState = GameConstants.FALLBACK_BLOCK.getDefaultState();
                                 }
 
