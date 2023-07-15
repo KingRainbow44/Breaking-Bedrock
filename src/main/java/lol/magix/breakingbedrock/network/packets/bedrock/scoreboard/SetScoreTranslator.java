@@ -48,9 +48,6 @@ public final class SetScoreTranslator extends Translator<SetScorePacket> {
                 container.getId2Name().put(entry.getScoreboardId(), name);
             }
 
-            BreakingBedrock.getLogger().warn("Setting score of {} (scoreboard ID: {}) for scoreboard objective {} with target player {}.",
-                    entry.getScore(), entry.getScoreboardId(), entry.getObjectiveId(), name);
-
             this.javaClient().processPacket(new ScoreboardPlayerUpdateS2CPacket(
                     action == Action.SET ? UpdateMode.CHANGE : UpdateMode.REMOVE,
                     entry.getObjectiveId(),
