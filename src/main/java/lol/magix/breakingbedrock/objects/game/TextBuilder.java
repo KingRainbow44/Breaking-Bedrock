@@ -29,8 +29,21 @@ public final class TextBuilder {
     }
 
     private Style style = Style.EMPTY;
+    private Object[] arguments = new Object[0];
+
     private final String text;
     private final Mode mode;
+
+    /**
+     * Sets the translatable text arguments.
+     *
+     * @param args The arguments.
+     * @return The text builder.
+     */
+    public TextBuilder args(Object... args) {
+        this.arguments = args;
+        return this;
+    }
 
     /**
      * Applies color to the text.
@@ -72,7 +85,7 @@ public final class TextBuilder {
         // Get the text instance.
         var text = switch (this.mode) {
             case TEXT -> Text.literal(this.text);
-            case TRANSLATABLE -> Text.translatable(this.text);
+            case TRANSLATABLE -> Text.translatable(this.text, this.arguments);
         };
 
         // Apply the style.

@@ -60,7 +60,7 @@ public interface DebugCommand {
                 clientData.setLogPackets(newValue);
 
                 context.getSource().sendFeedback(translate("commands.debug.packets")
-                        .color(newValue ? 0x00FF6D : 0xFF462E).get());
+                        .args(newValue ? "enabled" : "disabled").color(newValue ? 0x00FF6D : 0xFF462E).get());
             }
         }
 
