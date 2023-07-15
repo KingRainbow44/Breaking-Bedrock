@@ -42,15 +42,11 @@ public final class AvailableCommandsTranslator extends Translator<AvailableComma
                     }
                 }
 
-                System.out.println("registering " + command.getName());
-
                 root.addChild((CommandNode<CommandSource>) (Object) builder.build());
             }
         } catch (Exception exception) {
             exception.printStackTrace();
         }
-
-        System.out.println("registering root");
 
         this.javaClient().processPacket(new CommandTreeS2CPacket(root));
     }
