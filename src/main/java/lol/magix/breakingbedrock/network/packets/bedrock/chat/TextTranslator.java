@@ -8,6 +8,7 @@ import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.text.Text;
 import org.cloudburstmc.protocol.bedrock.packet.TextPacket;
+import org.cloudburstmc.protocol.bedrock.packet.TextPacket.Type;
 
 @Translate(PacketType.BEDROCK)
 public final class TextTranslator extends Translator<TextPacket> {
@@ -18,11 +19,12 @@ public final class TextTranslator extends Translator<TextPacket> {
 
     @Override
     public void translate(TextPacket packet) {
-        switch (packet.getType()) {
-            default -> this.logger.warn("Unknown text packet type: {}", packet.getType());
-            case RAW -> {
+        var type = packet.getType();
+        switch (type) {
+            default -> this.logger.warn("Unknown text packet type: {}", type);
+            case RAW, TIP -> {
                 var messagePacket = new GameMessageS2CPacket(
-                        Text.of(packet.getMessage()), false);
+                        Text.of(packet.getMessage()), type == Type.TIP);
                 this.javaClient().processPacket(messagePacket);
             }
             case CHAT -> {
