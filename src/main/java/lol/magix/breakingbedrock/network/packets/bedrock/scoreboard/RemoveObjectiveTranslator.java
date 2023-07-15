@@ -30,5 +30,9 @@ public final class RemoveObjectiveTranslator extends Translator<RemoveObjectiveP
         this.javaClient().processPacket(new ScoreboardObjectiveUpdateS2CPacket(
                 objective, ScoreboardObjectiveUpdateS2CPacket.REMOVE_MODE
         ));
+
+        // Remove the scoreboard from the holder.
+        this.bedrockClient.getScoreboardHolder()
+                .removeScoreboard(objectiveId);
     }
 }

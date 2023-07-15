@@ -7,6 +7,8 @@ import io.netty.util.concurrent.Promise;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.events.EventManager;
 import lol.magix.breakingbedrock.game.containers.PlayerContainerHolder;
+import lol.magix.breakingbedrock.game.scoreboards.ScoreboardContainer;
+import lol.magix.breakingbedrock.game.scoreboards.ScoreboardHolder;
 import lol.magix.breakingbedrock.network.auth.Authentication;
 import lol.magix.breakingbedrock.objects.ConnectionDetails;
 import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
@@ -66,6 +68,7 @@ public final class BedrockNetworkClient {
 
     @Getter private AuthInputHandler inputHandler = null;
     @Getter private PlayerContainerHolder containerHolder = null;
+    @Getter private ScoreboardHolder scoreboardHolder = null;
     @Getter private BlockEntityDataCache blockEntityDataCache = null;
     @Getter private List<PlayerBlockActionData> blockActions = null;
 
@@ -375,6 +378,7 @@ public final class BedrockNetworkClient {
      */
     public void onPlayerInitialization() {
         this.blockActions = new ArrayList<>(100);
+        this.scoreboardHolder = new ScoreboardHolder();
         this.containerHolder = new PlayerContainerHolder();
         this.blockEntityDataCache = new BlockEntityDataCache();
         this.inputHandler = new AuthInputHandler(this);
@@ -406,6 +410,7 @@ public final class BedrockNetworkClient {
         this.blockActions = null;
         this.authentication = null;
         this.containerHolder = null;
+        this.scoreboardHolder = null;
         this.connectionDetails = null;
         this.javaNetworkClient = null;
         this.blockEntityDataCache = null;
