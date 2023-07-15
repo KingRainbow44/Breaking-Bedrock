@@ -96,27 +96,30 @@ public final class LevelEventTranslator extends Translator<LevelEventPacket> {
                     int x = pos.getX();
                     int y = pos.getY();
                     int z = pos.getZ();
-                    Box box = blockState.getOutlineShape(world, pos).getBoundingBox();
-                    double x1 = (double)x + random.nextDouble() * (box.maxX - box.minX - 0.20000000298023224) + 0.10000000149011612 + box.minX;
-                    double y1 = (double)y + random.nextDouble() * (box.maxY - box.minY - 0.20000000298023224) + 0.10000000149011612 + box.minY;
-                    double z1 = (double)z + random.nextDouble() * (box.maxZ - box.minZ - 0.20000000298023224) + 0.10000000149011612 + box.minZ;
-                    switch (direction) {
-                        case UP -> y1 = (double)y + box.maxY + 0.10000000149011612;
-                        case DOWN -> y1 = (double)y + box.minY - 0.10000000149011612;
-                        case NORTH -> z1 = (double)z + box.minZ - 0.10000000149011612;
-                        case SOUTH -> z1 = (double)z + box.maxZ + 0.10000000149011612;
-                        case WEST -> x1 = (double)x + box.minX - 0.10000000149011612;
-                        case EAST -> x1 = (double)x + box.maxX + 0.10000000149011612;
-                    }
 
-                    client.particleManager.addParticle(
-                            (new BlockDustParticle(
-                                    world, x1, y1, z1,
-                                    0.0, 0.0, 0.0,
-                                    blockState, pos)
-                            ).move(0.2F)
-                                    .scale(0.6F)
-                    );
+                    try {
+                        Box box = blockState.getOutlineShape(world, pos).getBoundingBox();
+                        double x1 = (double)x + random.nextDouble() * (box.maxX - box.minX - 0.20000000298023224) + 0.10000000149011612 + box.minX;
+                        double y1 = (double)y + random.nextDouble() * (box.maxY - box.minY - 0.20000000298023224) + 0.10000000149011612 + box.minY;
+                        double z1 = (double)z + random.nextDouble() * (box.maxZ - box.minZ - 0.20000000298023224) + 0.10000000149011612 + box.minZ;
+                        switch (direction) {
+                            case UP -> y1 = (double)y + box.maxY + 0.10000000149011612;
+                            case DOWN -> y1 = (double)y + box.minY - 0.10000000149011612;
+                            case NORTH -> z1 = (double)z + box.minZ - 0.10000000149011612;
+                            case SOUTH -> z1 = (double)z + box.maxZ + 0.10000000149011612;
+                            case WEST -> x1 = (double)x + box.minX - 0.10000000149011612;
+                            case EAST -> x1 = (double)x + box.maxX + 0.10000000149011612;
+                        }
+
+                        client.particleManager.addParticle(
+                                (new BlockDustParticle(
+                                        world, x1, y1, z1,
+                                        0.0, 0.0, 0.0,
+                                        blockState, pos)
+                                ).move(0.2F)
+                                        .scale(0.6F)
+                        );
+                    } catch (UnsupportedOperationException ignored) { }
                 }
             }
             case PARTICLE_DESTROY_BLOCK -> world.syncWorldEvent(client.player, 2001,
