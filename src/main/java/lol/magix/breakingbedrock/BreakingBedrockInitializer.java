@@ -15,6 +15,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 public final class BreakingBedrockInitializer implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        // Register commands.
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) -> {
             dispatcher
                     .register(literal("formoption")

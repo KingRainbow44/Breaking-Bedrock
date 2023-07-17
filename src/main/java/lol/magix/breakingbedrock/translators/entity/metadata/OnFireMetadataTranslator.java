@@ -16,6 +16,5 @@ public final class OnFireMetadataTranslator extends EntityMetadataTranslator<Enu
 
         if (data.entity() instanceof LivingEntity livingEntity)
             livingEntity.setOnFire(value);
-
     }
 }
