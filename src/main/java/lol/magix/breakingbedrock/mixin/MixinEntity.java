@@ -2,6 +2,7 @@ package lol.magix.breakingbedrock.mixin;
 
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.data.DataTracker;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
