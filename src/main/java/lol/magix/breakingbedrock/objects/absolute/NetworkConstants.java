@@ -2,7 +2,7 @@ package lol.magix.breakingbedrock.objects.absolute;
 
 
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
-import org.cloudburstmc.protocol.bedrock.codec.v589.Bedrock_v589;
+import org.cloudburstmc.protocol.bedrock.codec.v594.Bedrock_v594;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +12,7 @@ import java.util.Set;
  */
 public interface NetworkConstants {
     /* This will be the latest supported version. */
-    BedrockCodec PACKET_CODEC = Bedrock_v589.CODEC;
+    BedrockCodec PACKET_CODEC = Bedrock_v594.CODEC;
     /* This is the compression level used by Minecraft. */
     int COMPRESSION_LEVEL = 6;
 
