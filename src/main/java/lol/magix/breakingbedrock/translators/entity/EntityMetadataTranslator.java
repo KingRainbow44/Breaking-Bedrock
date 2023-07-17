@@ -23,7 +23,9 @@ public abstract class EntityMetadataTranslator<T> {
     public static void initialize() {
         EntityMetadataTranslator.addTranslator(new AirMetadataTranslator());
         EntityMetadataTranslator.addTranslator(new ScaleMetadataTranslator());
+        EntityMetadataTranslator.addTranslator(new ScoreMetadataTranslator());
         EntityMetadataTranslator.addTranslator(new HealthMetadataTranslator());
+        EntityMetadataTranslator.addTranslator(new OnFireMetadataTranslator());
         EntityMetadataTranslator.addTranslator(new NameTagMetadataTranslator());
         EntityMetadataTranslator.addTranslator(new ImmobileMetadataTranslator());
         EntityMetadataTranslator.addTranslator(new SneakingMetadataTranslator());

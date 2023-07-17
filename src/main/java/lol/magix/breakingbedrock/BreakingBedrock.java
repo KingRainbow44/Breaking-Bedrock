@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import lol.magix.breakingbedrock.game.nametag.NameTagManager;
 import lol.magix.breakingbedrock.network.auth.XboxV2;
 import lol.magix.breakingbedrock.network.translation.PacketTranslator;
 import lol.magix.breakingbedrock.objects.ThreadFactoryBuilder;
@@ -50,6 +51,7 @@ public final class BreakingBedrock {
      */
     public static void initialize() {
         // Initialize separate systems.
+        NameTagManager.initialize();
         PacketTranslator.initialize();
         PacketVisualizer.initialize();
         ResourcePackTranslator.initialize();

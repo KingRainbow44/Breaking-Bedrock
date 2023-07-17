@@ -1,6 +1,7 @@
 package lol.magix.breakingbedrock.network.packets.java.entity;
 
 import lol.magix.breakingbedrock.annotations.Translate;
+import lol.magix.breakingbedrock.commands.DebugCommand;
 import lol.magix.breakingbedrock.mixin.interfaces.IMixinPlayerInteractEntityC2SPacket;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
@@ -35,19 +36,26 @@ public final class PlayerInteractEntityC2STranslator extends Translator<PlayerIn
         var blockPos = BlockPos.ofFloored(sourcePos);
         var block = world.getBlockState(blockPos);
 
+        var entityId = ((IMixinPlayerInteractEntityC2SPacket) packet).getEntityId();
+
+        // Prepare the transaction packet.
         var transactionPacket = new InventoryTransactionPacket();
         transactionPacket.setTransactionType(InventoryTransactionType.ITEM_USE_ON_ENTITY);
         transactionPacket.setActionType(1);
         transactionPacket.setHotbarSlot(selectedSlot);
-        transactionPacket.setRuntimeEntityId(
-                ((IMixinPlayerInteractEntityC2SPacket) packet).getEntityId()
-        );
+        transactionPacket.setRuntimeEntityId(entityId);
         transactionPacket.setHotbarSlot(selectedSlot);
         transactionPacket.setItemInHand(inventory.getItem(selectedSlot));
         transactionPacket.setPlayerPosition(this.javaClient().getPlayerPosition());
         transactionPacket.setClickPosition(GameUtils.convert(sourcePos.subtract(
                 blockPos.getX(), blockPos.getY(), blockPos.getZ())));
         transactionPacket.setBlockDefinition(BlockStateTranslator.translate(block));
+
+        // Check if entity logging is enabled.
+        if (DebugCommand.ENTITY_DEBUG.get()) {
+            DebugCommand.ENTITY_LOGGER.accept(
+                    world.getEntityById(entityId));
+        }
 
         this.bedrockClient.sendPacket(transactionPacket);
     }
