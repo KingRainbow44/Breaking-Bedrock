@@ -17,7 +17,7 @@ public final class SneakingMetadataTranslator extends EntityMetadataTranslator<E
 
         entity.setSneaking(value);
         entity.setPose(value ?
-                EntityPose.CROAKING :
+                EntityPose.CROUCHING :
                 EntityPose.STANDING);
     }
 }
