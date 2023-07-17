@@ -11,6 +11,7 @@ public interface EntityTranslator {
         // These are some Bedrock states which aren't common with Java.
         this.put("minecraft:ender_crystal", EntityType.END_CRYSTAL);
         this.put("minecraft:splash_potion", EntityType.POTION);
+        this.put("minecraft:fishing_hook", EntityType.FISHING_BOBBER);
     }};
 
     /**
