@@ -51,80 +51,83 @@ public final class LevelEventTranslator extends Translator<LevelEventPacket> {
             return;
         }
 
-        switch ((LevelEvent) packet.getType()) {
-            case BLOCK_START_BREAK -> {
-                var position = packet.getPosition().toInt();
-                var blockBreakingInfo = new BlockBreakingInfo(0, GameUtils.toBlockPos(position));
-                var blockBreakingWrapper = new BlockBreakingWrapper(packet.getData(), blockBreakingInfo);
-                BLOCK_BREAKING_INFOS.put(position, blockBreakingWrapper);
+        if (packet.getType() instanceof LevelEvent levelEvent) {
+            switch (levelEvent) {
+                case BLOCK_START_BREAK -> {
+                    var position = packet.getPosition().toInt();
+                    var blockBreakingInfo = new BlockBreakingInfo(0, GameUtils.toBlockPos(position));
+                    var blockBreakingWrapper = new BlockBreakingWrapper(packet.getData(), blockBreakingInfo);
+                    BLOCK_BREAKING_INFOS.put(position, blockBreakingWrapper);
 
-                SortedSet<BlockBreakingInfo> sortedSet = Sets.newTreeSet();
-                sortedSet.add(blockBreakingInfo);
-                ((IMixinWorldRenderer) MinecraftClient.getInstance().worldRenderer)
-                        .getBlockBreakingProgressions()
-                        .put(GameUtils.asLong(position), sortedSet);
-            }
-            case BLOCK_UPDATE_BREAK -> {
-                BlockBreakingWrapper blockBreakingWrapper = BLOCK_BREAKING_INFOS.get(packet.getPosition().toInt());
-                if (blockBreakingWrapper == null) {
-                    break;
+                    SortedSet<BlockBreakingInfo> sortedSet = Sets.newTreeSet();
+                    sortedSet.add(blockBreakingInfo);
+                    ((IMixinWorldRenderer) MinecraftClient.getInstance().worldRenderer)
+                            .getBlockBreakingProgressions()
+                            .put(GameUtils.asLong(position), sortedSet);
                 }
-                blockBreakingWrapper.length = packet.getData();
-            }
-            case BLOCK_STOP_BREAK -> {
-                if (packet.getPosition().equals(Vector3f.ZERO)) {
-                    if (BLOCK_BREAKING_INFOS.containsKey(packet.getPosition().toInt())) {
-                        long key = ((IMixinClientPlayerInteractionManager) interactionManager).getCurrentBreakingPos().asLong();
-                        TO_REMOVE.add(key);
+                case BLOCK_UPDATE_BREAK -> {
+                    BlockBreakingWrapper blockBreakingWrapper = BLOCK_BREAKING_INFOS.get(packet.getPosition().toInt());
+                    if (blockBreakingWrapper == null) {
+                        break;
                     }
-                } else {
-                    Vector3i position = packet.getPosition().toInt();
-                    if (BLOCK_BREAKING_INFOS.containsKey(position)) {
-                        long key = BlockPos.asLong(position.getX(), position.getY(), position.getZ());
-                        TO_REMOVE.add(key);
-                    }
+                    blockBreakingWrapper.length = packet.getData();
                 }
-            }
-            case PARTICLE_CRACK_BLOCK -> {
-                var direction = Direction.byId(packet.getData() >> 24);
-                var bedrockRuntimeId = packet.getData() & 0xffffff; // Strip out the above encoding
-                var blockState = BlockStateTranslator.getRuntime2Java().get(bedrockRuntimeId);
-                var vector = packet.getPosition().toInt();
-                var pos = GameUtils.toBlockPos(vector);
-
-                if (blockState != null && blockState.getRenderType() != BlockRenderType.INVISIBLE) {
-                    int x = pos.getX();
-                    int y = pos.getY();
-                    int z = pos.getZ();
-
-                    try {
-                        Box box = blockState.getOutlineShape(world, pos).getBoundingBox();
-                        double x1 = (double)x + random.nextDouble() * (box.maxX - box.minX - 0.20000000298023224) + 0.10000000149011612 + box.minX;
-                        double y1 = (double)y + random.nextDouble() * (box.maxY - box.minY - 0.20000000298023224) + 0.10000000149011612 + box.minY;
-                        double z1 = (double)z + random.nextDouble() * (box.maxZ - box.minZ - 0.20000000298023224) + 0.10000000149011612 + box.minZ;
-                        switch (direction) {
-                            case UP -> y1 = (double)y + box.maxY + 0.10000000149011612;
-                            case DOWN -> y1 = (double)y + box.minY - 0.10000000149011612;
-                            case NORTH -> z1 = (double)z + box.minZ - 0.10000000149011612;
-                            case SOUTH -> z1 = (double)z + box.maxZ + 0.10000000149011612;
-                            case WEST -> x1 = (double)x + box.minX - 0.10000000149011612;
-                            case EAST -> x1 = (double)x + box.maxX + 0.10000000149011612;
+                case BLOCK_STOP_BREAK -> {
+                    if (packet.getPosition().equals(Vector3f.ZERO)) {
+                        if (BLOCK_BREAKING_INFOS.containsKey(packet.getPosition().toInt())) {
+                            long key = ((IMixinClientPlayerInteractionManager) interactionManager).getCurrentBreakingPos().asLong();
+                            TO_REMOVE.add(key);
                         }
-
-                        client.particleManager.addParticle(
-                                (new BlockDustParticle(
-                                        world, x1, y1, z1,
-                                        0.0, 0.0, 0.0,
-                                        blockState, pos)
-                                ).move(0.2F)
-                                        .scale(0.6F)
-                        );
-                    } catch (UnsupportedOperationException ignored) { }
+                    } else {
+                        Vector3i position = packet.getPosition().toInt();
+                        if (BLOCK_BREAKING_INFOS.containsKey(position)) {
+                            long key = BlockPos.asLong(position.getX(), position.getY(), position.getZ());
+                            TO_REMOVE.add(key);
+                        }
+                    }
                 }
+                case PARTICLE_CRACK_BLOCK -> {
+                    var direction = Direction.byId(packet.getData() >> 24);
+                    var bedrockRuntimeId = packet.getData() & 0xffffff; // Strip out the above encoding
+                    var blockState = BlockStateTranslator.getRuntime2Java().get(bedrockRuntimeId);
+                    var vector = packet.getPosition().toInt();
+                    var pos = GameUtils.toBlockPos(vector);
+
+                    if (blockState != null && blockState.getRenderType() != BlockRenderType.INVISIBLE) {
+                        int x = pos.getX();
+                        int y = pos.getY();
+                        int z = pos.getZ();
+
+                        try {
+                            Box box = blockState.getOutlineShape(world, pos).getBoundingBox();
+                            double x1 = (double)x + random.nextDouble() * (box.maxX - box.minX - 0.20000000298023224) + 0.10000000149011612 + box.minX;
+                            double y1 = (double)y + random.nextDouble() * (box.maxY - box.minY - 0.20000000298023224) + 0.10000000149011612 + box.minY;
+                            double z1 = (double)z + random.nextDouble() * (box.maxZ - box.minZ - 0.20000000298023224) + 0.10000000149011612 + box.minZ;
+                            switch (direction) {
+                                case UP -> y1 = (double)y + box.maxY + 0.10000000149011612;
+                                case DOWN -> y1 = (double)y + box.minY - 0.10000000149011612;
+                                case NORTH -> z1 = (double)z + box.minZ - 0.10000000149011612;
+                                case SOUTH -> z1 = (double)z + box.maxZ + 0.10000000149011612;
+                                case WEST -> x1 = (double)x + box.minX - 0.10000000149011612;
+                                case EAST -> x1 = (double)x + box.maxX + 0.10000000149011612;
+                            }
+
+                            client.particleManager.addParticle(
+                                    (new BlockDustParticle(
+                                            world, x1, y1, z1,
+                                            0.0, 0.0, 0.0,
+                                            blockState, pos)
+                                    ).move(0.2F)
+                                            .scale(0.6F)
+                            );
+                        } catch (UnsupportedOperationException ignored) { }
+                    }
+                }
+                case PARTICLE_DESTROY_BLOCK -> MinecraftClient.getInstance()
+                        .execute(() -> world.syncWorldEvent(client.player, 2001,
+                                GameUtils.toBlockPos(packet.getPosition().toInt()),
+                                Block.getRawIdFromState(BlockStateTranslator.getRuntime2Java().get(packet.getData()))));
             }
-            case PARTICLE_DESTROY_BLOCK -> world.syncWorldEvent(client.player, 2001,
-                    GameUtils.toBlockPos(packet.getPosition().toInt()),
-                    Block.getRawIdFromState(BlockStateTranslator.getRuntime2Java().get(packet.getData())));
         }
     }
 
