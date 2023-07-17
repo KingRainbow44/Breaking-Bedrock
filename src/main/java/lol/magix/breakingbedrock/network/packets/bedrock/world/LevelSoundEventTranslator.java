@@ -8,6 +8,7 @@ import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import org.cloudburstmc.protocol.bedrock.packet.LevelSoundEventPacket;
 
 @Translate(PacketType.BEDROCK)
@@ -33,6 +34,16 @@ public final class LevelSoundEventTranslator extends Translator<LevelSoundEventP
                         soundGroup.getPitch() * 0.5F,
                         SoundInstance.createRandom(), position));
             }
+            case ATTACK_NODAMAGE -> soundManager.play(new PositionedSoundInstance(
+                    SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE,
+                    SoundCategory.PLAYERS, 1.0F, 1.0F,
+                    SoundInstance.createRandom(), position
+            ));
+            case ATTACK_STRONG -> soundManager.play(new PositionedSoundInstance(
+                    SoundEvents.ENTITY_PLAYER_ATTACK_STRONG,
+                    SoundCategory.PLAYERS, 1.0F, 1.0F,
+                    SoundInstance.createRandom(), position
+            ));
         }
     }
 }
