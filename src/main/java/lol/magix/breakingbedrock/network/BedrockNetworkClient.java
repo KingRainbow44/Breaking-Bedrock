@@ -60,6 +60,14 @@ public final class BedrockNetworkClient {
     }
 
     /**
+     * @return Whether the client is connected to a server or not.
+     */
+    public static boolean connected() {
+        var instance = BedrockNetworkClient.getInstance();
+        return instance != null && instance.isConnected();
+    }
+
+    /**
      * @return Whether packets should be logged or not.
      */
     public static boolean logPackets() {
