@@ -3,6 +3,7 @@ package lol.magix.breakingbedrock.utils;
 import lol.magix.breakingbedrock.objects.Triplet;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -11,7 +12,11 @@ import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 
+import java.lang.reflect.Method;
+
 public interface GameUtils {
+    Method SET_FLAG = GameUtils.setFlagMethod();
+
     /**
      * @param vector The vector to convert.
      * @return The converted vector.
@@ -81,5 +86,30 @@ public interface GameUtils {
     static boolean isAir(ItemData item) {
         return item.getDefinition().getIdentifier()
                 .equals(ItemData.AIR.getDefinition().getIdentifier());
+    }
+
+    /**
+     * @return The setFlag method.
+     */
+    static Method setFlagMethod() {
+        try {
+            return Entity.class.getDeclaredMethod(
+                    "setFlag", int.class, boolean.class);
+        } catch (Exception ignored) { }
+
+        throw new RuntimeException("Could not find setFlag method!");
+    }
+
+    /**
+     * Sets the flag of an entity.
+     *
+     * @param entity The entity to set the flag of.
+     * @param index The index of the flag.
+     * @param value The value to set the flag to.
+     */
+    static void setFlag(Entity entity, int index, boolean value) {
+        try {
+            SET_FLAG.invoke(entity, index, value);
+        } catch (Exception ignored) { }
     }
 }

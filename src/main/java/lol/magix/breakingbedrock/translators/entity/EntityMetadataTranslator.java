@@ -4,8 +4,6 @@ import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.objects.Pair;
 import lol.magix.breakingbedrock.translators.entity.metadata.*;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataMap;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 
@@ -24,6 +22,7 @@ public abstract class EntityMetadataTranslator<T> {
      */
     public static void initialize() {
         EntityMetadataTranslator.addTranslator(new AirMetadataTranslator());
+        EntityMetadataTranslator.addTranslator(new ScaleMetadataTranslator());
         EntityMetadataTranslator.addTranslator(new HealthMetadataTranslator());
         EntityMetadataTranslator.addTranslator(new NameTagMetadataTranslator());
         EntityMetadataTranslator.addTranslator(new ImmobileMetadataTranslator());
