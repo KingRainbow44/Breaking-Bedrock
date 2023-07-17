@@ -15,6 +15,7 @@
     "MixinPlayerEntityRenderer",
     "MixinResourcePackManager",
     "MixinWorldRenderer",
+    "interfaces.IMixinTntEntity",
     "interfaces.IMixinClientPlayerInteractionManager",
     "interfaces.IMixinPlayerEntity",
     "interfaces.IMixinPlayerInteractEntityC2SPacket",
