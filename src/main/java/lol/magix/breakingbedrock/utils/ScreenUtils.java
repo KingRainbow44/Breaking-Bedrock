@@ -14,8 +14,7 @@ public interface ScreenUtils {
      */
     static void disconnect(Text reason) {
         var client = MinecraftClient.getInstance();
-        var screen = new DisconnectedScreen(client.currentScreen,
-                Text.translatable("disconnect.closed"), reason);
-        client.disconnect(screen);
+        client.disconnect(new DisconnectedScreen(client.currentScreen,
+                Text.translatable("disconnect.closed"), reason));
     }
 }
