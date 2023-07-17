@@ -29,9 +29,9 @@ public final class SetEntityDataTranslator extends Translator<SetEntityDataPacke
             EntityMetadataTranslator.translate(
                     new Pair<>(entity, packet.getMetadata()));
 
-            this.javaClient().processPacket(new EntityTrackerUpdateS2CPacket(
-                    entity.getId(), entity.getDataTracker().getChangedEntries()
-            ));
+            var entries = entity.getDataTracker().getChangedEntries();
+            if (entries != null) this.javaClient().processPacket(
+                    new EntityTrackerUpdateS2CPacket(entity.getId(), entries));
         });
     }
 }

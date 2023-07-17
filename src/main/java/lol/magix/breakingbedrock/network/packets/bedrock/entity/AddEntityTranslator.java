@@ -50,9 +50,10 @@ public final class AddEntityTranslator extends Translator<AddEntityPacket> {
 
             // Update the entity's metadata.
             EntityMetadataTranslator.translate(new Pair<>(entity, packet.getMetadata()));
-            this.javaClient().processPacket(new EntityTrackerUpdateS2CPacket(
-                    entity.getId(), entity.getDataTracker().getChangedEntries()
-            ));
+
+            var changedEntries = entity.getDataTracker().getChangedEntries();
+            if (changedEntries != null) this.javaClient().processPacket(
+                    new EntityTrackerUpdateS2CPacket(entity.getId(),changedEntries));
         });
     }
 }
