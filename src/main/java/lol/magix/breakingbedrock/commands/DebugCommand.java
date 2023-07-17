@@ -6,16 +6,42 @@ import com.mojang.brigadier.context.CommandContext;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.translators.pack.ResourcePackTranslator;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static lol.magix.breakingbedrock.objects.game.TextBuilder.translate;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public interface DebugCommand {
+    AtomicBoolean ENTITY_DEBUG = new AtomicBoolean(false);
+    Consumer<Entity> ENTITY_LOGGER = DebugCommand::logEntity;
+
     Text USAGE = Text.literal("Usage: /debug <log> [packets]")
             .setStyle(Style.EMPTY.withColor(0xFF462E));
+
+    /**
+     * Callback for entity logging.
+     *
+     * @param entity The entity to log.
+     */
+    static void logEntity(Entity entity) {
+        if (entity instanceof ArmorStandEntity nameTag) {
+            var customName = nameTag.getCustomName();
+            System.out.println("custom name exists: " + (customName != null));
+            if (customName != null) System.out.println("custom name: " + customName);
+            System.out.println("custom name shown: " + (nameTag.isCustomNameVisible()));
+        } else {
+            System.out.println("entity is not name tag");
+            System.out.println("entity type: " + (entity == null ?
+                    "null" : entity.getClass().getSimpleName()));
+        }
+    }
 
     /**
      * Registers the '/debug' command.
@@ -28,6 +54,8 @@ public interface DebugCommand {
                                         .executes(DebugCommand::toggleLogging)))
                         .then(literal("resourcepack")
                                 .executes(DebugCommand::translateResourcePack))
+                        .then(literal("entity")
+                                .executes(DebugCommand::enableEntityLogging))
                 .executes(DebugCommand::showUsage));
     }
 
@@ -96,6 +124,23 @@ public interface DebugCommand {
         } catch (Exception exception) {
             exception.printStackTrace();
         }
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    /**
+     * Called when the command is used with the 'entity' argument.
+     * Enables/disables entity logging.
+     *
+     * @param context The command context.
+     * @return The command result.
+     */
+    static int enableEntityLogging(CommandContext<FabricClientCommandSource> context) {
+        var newValue = !ENTITY_DEBUG.get();
+        ENTITY_DEBUG.set(newValue);
+
+        context.getSource().sendFeedback(translate("commands.debug.entity")
+                .args(newValue ? "enabled" : "disabled").color(newValue ? 0x00FF6D : 0xFF462E).get());
 
         return Command.SINGLE_SUCCESS;
     }
