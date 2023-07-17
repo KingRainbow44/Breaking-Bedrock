@@ -5,6 +5,18 @@ package lol.magix.breakingbedrock.utils;
  */
 public interface IntervalUtils {
     /**
+     * Sleep for a specified amount of time.
+     *
+     * @param millis The amount of time to sleep in milliseconds.
+     */
+    static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    /**
      * Run a task after a specified delay.
      *
      * @param runnable The task to run.

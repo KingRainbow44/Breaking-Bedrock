@@ -1,3 +1,4 @@
 {
-  "commands.debug.packets": "[DEBUG] Packet logging is now %s."
+  "commands.debug.packets": "[DEBUG] Packet logging is now %s.",
+  "commands.debug.resourcepack": "[DEBUG] Translating resource pack %s using key %s..."
 }

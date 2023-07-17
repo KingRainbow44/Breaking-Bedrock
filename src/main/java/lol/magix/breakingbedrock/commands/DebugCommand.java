@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
+import lol.magix.breakingbedrock.translators.pack.ResourcePackTranslator;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -25,6 +26,8 @@ public interface DebugCommand {
                         .then(literal("log")
                                 .then(argument("log", word())
                                         .executes(DebugCommand::toggleLogging)))
+                        .then(literal("resourcepack")
+                                .executes(DebugCommand::translateResourcePack))
                 .executes(DebugCommand::showUsage));
     }
 
@@ -62,6 +65,36 @@ public interface DebugCommand {
                 context.getSource().sendFeedback(translate("commands.debug.packets")
                         .args(newValue ? "enabled" : "disabled").color(newValue ? 0x00FF6D : 0xFF462E).get());
             }
+        }
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    /**
+     * Called when the command is used with the 'resourcepack' argument.
+     * Translates the resource pack.
+     *
+     * @param context The command context.
+     * @return The command result.
+     */
+    static int translateResourcePack(CommandContext<FabricClientCommandSource> context) {
+        var resourcePackId = System.getProperty("DebugResourcePackId");
+        var resourcePackKey = System.getProperty("DebugResourcePackKey");
+
+        context.getSource().sendFeedback(translate("commands.debug.resourcepack")
+                .args(resourcePackId, resourcePackKey).color(0xFFFE00).get());
+
+        // Create a new resource pack.
+        var pack = ResourcePackTranslator.getCache().get(resourcePackId);
+        if (pack == null) {
+            throw new NullPointerException("Invalid resource pack ID: " + resourcePackId);
+        }
+
+        try {
+            // Translate the resource pack.
+            ResourcePackTranslator.translate(pack);
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
 
         return Command.SINGLE_SUCCESS;

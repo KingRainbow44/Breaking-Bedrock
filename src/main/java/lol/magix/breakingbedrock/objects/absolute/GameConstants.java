@@ -21,6 +21,9 @@ public interface GameConstants {
     /* The player entity offset. */
     float PLAYER_OFFSET = 1.62F;
 
+    /* The current Java resource pack format. */
+    int RP_FORMAT = 15;
+
     /* The block definitions. */
     AtomicReference<SimpleDefinitionRegistry<BlockDefinition>> BLOCKS = new AtomicReference<>();
     /* The registry manager for login. */

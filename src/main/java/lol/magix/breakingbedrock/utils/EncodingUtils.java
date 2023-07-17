@@ -5,9 +5,14 @@ import com.google.gson.JsonElement;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.objects.absolute.AlgorithmType;
 
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
 import java.security.SignatureException;
 import java.util.Base64;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Utility class for encoding and decoding data.
@@ -61,6 +66,16 @@ public interface EncodingUtils {
     }
 
     /**
+     * Converts an object into a JSON element.
+     *
+     * @param object The object.
+     * @return The JSON element.
+     */
+    static JsonElement toJson(Object object) {
+        return BreakingBedrock.getGson().toJsonTree(object);
+    }
+
+    /**
      * Encodes an object into a JSON object.
      * @param object The object.
      * @return The JSON object.
@@ -76,6 +91,17 @@ public interface EncodingUtils {
      */
     static <T> T jsonDecode(String json, Class<T> type) {
         return BreakingBedrock.getGson().fromJson(json, type);
+    }
+
+    /**
+     * Decodes a JSON file into an object.
+     *
+     * @param file The JSON file.
+     * @param type The object type.
+     * @return The object.
+     */
+    static <T> T jsonDecode(File file, Class<T> type) throws IOException {
+        return BreakingBedrock.getGson().fromJson(new FileReader(file), type);
     }
 
     /**
@@ -160,5 +186,68 @@ public interface EncodingUtils {
         result.add(additional);
         result.addAll(source);
         return result;
+    }
+
+    /**
+     * Un-zips a file.
+     *
+     * @param source The source file.
+     * @param output The output directory.
+     * @throws IOException If an I/O error occurs.
+     */
+    static void unzip(File source, File output) throws IOException {
+        try (var zipStream = new ZipInputStream(new FileInputStream(source))) {
+            var entry = zipStream.getNextEntry();
+            while (entry != null) {
+                var filePath = output.toPath().resolve(entry.getName());
+                if (!entry.isDirectory()) {
+                    var parent = filePath.getParent();
+                    if (parent != null) {
+                        if (!parent.toFile().exists() && !parent.toFile().mkdirs())
+                            throw new IOException("Failed to create directory: " + parent);
+                    }
+
+                    try (var outputStream = new java.io.FileOutputStream(filePath.toFile())) {
+                        var buffer = new byte[1024];
+                        int length;
+                        while ((length = zipStream.read(buffer)) > 0) {
+                            outputStream.write(buffer, 0, length);
+                        }
+                    }
+                } else {
+                    if (!filePath.toFile().exists() && !filePath.toFile().mkdirs())
+                        throw new IOException("Failed to create directory: " + filePath);
+                }
+
+                zipStream.closeEntry();
+                entry = zipStream.getNextEntry();
+            }
+        }
+    }
+
+    /**
+     * Zips a file.
+     *
+     * @param source The source file.
+     * @param output The output file.
+     * @throws IOException If an I/O error occurs.
+     */
+    static void zip(File source, File output) throws IOException {
+        var path = Files.createFile(output.toPath());
+        try (var zs = new ZipOutputStream(Files.newOutputStream(path))) {
+            var sourcePath = source.toPath();
+            Files.walk(sourcePath)
+                    .filter(p -> !Files.isDirectory(p))
+                    .forEach(p -> {
+                        var zipEntry = new ZipEntry(sourcePath.relativize(p).toString());
+                        try {
+                            zs.putNextEntry(zipEntry);
+                            Files.copy(p, zs);
+                            zs.closeEntry();
+                        } catch (IOException exception) {
+                            exception.printStackTrace();
+                        }
+                    });
+        }
     }
 }

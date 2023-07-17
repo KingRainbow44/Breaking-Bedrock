@@ -1,5 +1,6 @@
 package lol.magix.breakingbedrock.objects.game;
 
+import lol.magix.breakingbedrock.translators.pack.ResourcePackInfo;
 import lombok.Data;
 import org.cloudburstmc.protocol.bedrock.data.AuthoritativeMovementMode;
 
@@ -9,6 +10,8 @@ import java.util.*;
 public final class SessionData {
     /* Server data. */
     private final Map<String, Integer> id2Runtime = new HashMap<>();
+    private final List<ResourcePackInfo> activePacks = new ArrayList<>();
+    private boolean packsDownloaded = true;
 
     /* Entity data. */
     private int runtimeId = -1;

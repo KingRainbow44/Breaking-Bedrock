@@ -16,9 +16,6 @@ public interface ResourceUtils {
      */
     static InputStream getResourceAsStream(String path) {
         // Validate the path.
-//        if (!path.startsWith("/"))
-//            path = "/" + path;
-
         var stream = ResourceUtils.class.getClassLoader().getResourceAsStream(path);
         if (stream == null) {
             BreakingBedrock.getLogger().error("Resource {} could not be loaded.", path);

@@ -16,6 +16,9 @@ import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizer
 import lol.magix.breakingbedrock.objects.game.AuthInputHandler;
 import lol.magix.breakingbedrock.objects.game.SessionData;
 import lol.magix.breakingbedrock.objects.game.caches.BlockEntityDataCache;
+import lol.magix.breakingbedrock.translators.pack.ResourcePackInfo;
+import lol.magix.breakingbedrock.translators.pack.ResourcePackTranslator;
+import lol.magix.breakingbedrock.utils.IntervalUtils;
 import lol.magix.breakingbedrock.utils.ProfileUtils;
 import lol.magix.breakingbedrock.utils.ScreenUtils;
 import lombok.Getter;
@@ -35,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -435,6 +439,51 @@ public final class BedrockNetworkClient {
         var player = client.player;
         if (player == null) return;
 
+        // Attempt to load resource packs.
+        if (this.getData().isPacksDownloaded()) {
+            this.getJavaNetworkClient().loadResourcePacks();
+        }
+
         this.getLogger().debug("Player has finished connecting.");
+    }
+
+    /**
+     * Invoked when the client has downloaded all resource packs.
+     */
+    public void onPacksDownloaded() {
+        // Get all loaded packs.
+        var packs = this.getData().getActivePacks();
+        // Check if the client has any packs.
+        if (packs == null || packs.isEmpty()) return;
+
+        // Queue all packs for translation.
+        var translated = new ArrayList<ResourcePackInfo>();
+        var promise = new CompletableFuture<Void>();
+        for (var pack : packs) {
+            BreakingBedrock.getEventGroup().execute(() -> {
+                try {
+                    // Translate the resource pack.
+                    ResourcePackTranslator.translate(pack);
+                    // Add the pack to the translated list.
+                    translated.add(pack);
+                } catch (Exception exception) {
+                    BedrockNetworkClient.this.getLogger().warn(
+                            "Failed to translate pack: " + pack.getPackId(), exception);
+                }
+            });
+        }
+
+        // Queue the promise to be completed.
+        new Thread(() -> {
+            while (translated.size() != packs.size()) {
+                IntervalUtils.sleep(100);
+            }
+            promise.complete(null);
+        }).start();
+
+        // Wait for all packs to be translated.
+        var client = MinecraftClient.getInstance();
+        promise.thenRun(() -> client.execute(() ->
+                this.getJavaNetworkClient().loadResourcePacks()));
     }
 }
