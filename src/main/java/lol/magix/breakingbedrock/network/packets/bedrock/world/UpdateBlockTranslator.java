@@ -2,6 +2,7 @@ package lol.magix.breakingbedrock.network.packets.bedrock.world;
 
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
+import lol.magix.breakingbedrock.objects.absolute.GameConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
 import lol.magix.breakingbedrock.utils.GameUtils;
@@ -31,6 +32,9 @@ public final class UpdateBlockTranslator extends Translator<UpdateBlockPacket> {
 
         var blockPos = GameUtils.toBlockPos(packet.getBlockPosition());
         var newState = BlockStateTranslator.getRuntime2Java().get(block.getRuntimeId());
+        if (newState == null) {
+            newState = GameConstants.FALLBACK_BLOCK.getDefaultState();
+        }
 
         switch (packet.getDataLayer()) {
             case 0 -> this.javaClient().processPacket(

@@ -30,5 +30,8 @@ public interface BlockEntityRegistry {
         TRANSLATORS.put("Chest", new ChestBlockEntityTranslator());
         TRANSLATORS.put("EnderChest", new GenericBlockEntityTranslator(
                 BlockEntityType.ENDER_CHEST));
+
+        // These are block entity translators with unhandled logic.
+        TRANSLATORS.put("Lectern", new GenericBlockEntityTranslator(BlockEntityType.LECTERN));
     }
 }

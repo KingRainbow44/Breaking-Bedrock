@@ -33,30 +33,32 @@ public final class ClickSlotC2STranslator2 extends Translator<ClickSlotC2SPacket
     public void translate(ClickSlotC2SPacket packet) {
         var requestPacket = new ItemStackRequestPacket();
 
-        // Get a request ID for handling the response.
-        var requestId = RANDOM.nextInt(1000);
-        var actions = switch (packet.getActionType()) {
-            default -> {
-                this.logger.debug("Unhandled slot action: " + packet.getActionType());
-                yield null;
+        try {
+            // Get a request ID for handling the response.
+            var requestId = RANDOM.nextInt(1000);
+            var actions = switch (packet.getActionType()) {
+                default -> {
+                    this.logger.debug("Unhandled slot action: " + packet.getActionType());
+                    yield null;
+                }
+                case PICKUP -> this.pickup(packet, requestId);
+                case SWAP -> this.swap(packet, requestId);
+            };
+
+            // Check if the actions are null.
+            if (actions == null) {
+                // Revert inventory changes.
+                ClickSlotC2STranslator2.revert(this.containers());
+                return;
             }
-            case PICKUP -> this.pickup(packet, requestId);
-            case SWAP -> this.swap(packet, requestId);
-        };
 
-        // Check if the actions are null.
-        if (actions == null) {
-            // Revert inventory changes.
-            ClickSlotC2STranslator2.revert(this.containers());
-            return;
-        }
+            // Add all actions to the transaction packet.
+            requestPacket.getRequests().add(new ItemStackRequest(
+                    requestId, actions, new String[0]
+            ));
 
-        // Add all actions to the transaction packet.
-        requestPacket.getRequests().add(new ItemStackRequest(
-                requestId, actions, new String[0]
-        ));
-
-        this.bedrockClient.sendPacket(requestPacket);
+            this.bedrockClient.sendPacket(requestPacket);
+        } catch (Exception ignored) { }
     }
 
     /**

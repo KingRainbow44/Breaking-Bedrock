@@ -92,7 +92,7 @@ public final class LevelEventTranslator extends Translator<LevelEventPacket> {
                 var vector = packet.getPosition().toInt();
                 var pos = GameUtils.toBlockPos(vector);
 
-                if (blockState.getRenderType() != BlockRenderType.INVISIBLE) {
+                if (blockState != null && blockState.getRenderType() != BlockRenderType.INVISIBLE) {
                     int x = pos.getX();
                     int y = pos.getY();
                     int z = pos.getZ();

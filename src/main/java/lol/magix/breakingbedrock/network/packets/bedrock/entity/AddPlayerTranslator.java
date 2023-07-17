@@ -10,19 +10,16 @@ import lol.magix.breakingbedrock.translators.ItemTranslator;
 import lol.magix.breakingbedrock.translators.entity.EntityMetadataTranslator;
 import lol.magix.breakingbedrock.utils.ConversionUtils;
 import lol.magix.breakingbedrock.utils.ProfileUtils;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.render.entity.PlayerModelPart;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.network.packet.s2c.play.EntityEquipmentUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket.Action;
 import net.minecraft.network.packet.s2c.play.PlayerSpawnS2CPacket;
 import net.minecraft.text.Text;
 import org.cloudburstmc.protocol.bedrock.packet.AddPlayerPacket;
 
-import java.util.EnumSet;
 import java.util.List;
 
 @Translate(PacketType.BEDROCK)

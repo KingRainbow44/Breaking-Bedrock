@@ -6,6 +6,7 @@ import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.client.util.telemetry.TelemetrySender;
 import net.minecraft.client.util.telemetry.WorldSession;
 import net.minecraft.entity.EntityPose;
@@ -146,13 +147,24 @@ public final class JavaNetworkClient {
      * @param reason The reason for disconnecting.
      */
     public void disconnect(String reason) {
-        var world = this.localNetwork.getWorld();
+        var world = this.client.world;
         if (world == null) return;
 
         // Disconnect from the world.
         world.disconnect();
+
         // Show disconnect screen.
-        MinecraftClient.getInstance().execute(() -> ScreenUtils.disconnect(
-                Text.of(reason)));
+        MinecraftClient.getInstance().execute(() -> {
+            // Check if the player is in game.
+            if (this.client.player == null) return;
+            if (this.client.cameraEntity == null) return;
+
+            // Get the disconnect reason.
+            Text disconnectReason = Text.literal(reason);
+            if (TranslationStorage.getInstance().hasTranslation(reason))
+                disconnectReason = Text.translatable(reason);
+
+            ScreenUtils.disconnect(disconnectReason);
+        });
     }
 }
