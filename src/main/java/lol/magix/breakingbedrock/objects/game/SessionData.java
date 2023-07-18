@@ -3,6 +3,7 @@ package lol.magix.breakingbedrock.objects.game;
 import lol.magix.breakingbedrock.translators.pack.ResourcePackInfo;
 import lombok.Data;
 import org.cloudburstmc.protocol.bedrock.data.AuthoritativeMovementMode;
+import org.cloudburstmc.protocol.bedrock.data.PlayerPermission;
 
 import java.util.*;
 
@@ -20,6 +21,7 @@ public final class SessionData {
 
     /* Player data. */
     private List<String> chain = new ArrayList<>();
+    private PlayerPermission permission = PlayerPermission.MEMBER;
 
     private String displayName = "";
     private String xuid = "";

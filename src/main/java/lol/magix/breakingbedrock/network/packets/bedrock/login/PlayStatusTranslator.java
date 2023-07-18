@@ -3,6 +3,7 @@ package lol.magix.breakingbedrock.network.packets.bedrock.login;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
+import lol.magix.breakingbedrock.utils.ConversionUtils;
 import org.cloudburstmc.protocol.bedrock.packet.PlayStatusPacket;
 import org.cloudburstmc.protocol.bedrock.packet.SetLocalPlayerAsInitializedPacket;
 import org.cloudburstmc.protocol.bedrock.packet.TickSyncPacket;
@@ -48,6 +49,12 @@ public final class PlayStatusTranslator extends Translator<PlayStatusPacket> {
 
                 // Mark the player as spawned.
                 this.data().setSpawned(true);
+
+                // Set the player's permissions.
+                var player = this.player();
+                if (player != null) player.setClientPermissionLevel(
+                        ConversionUtils.typeToPermission(this.data().getPermission())
+                );
             }
         }
     }

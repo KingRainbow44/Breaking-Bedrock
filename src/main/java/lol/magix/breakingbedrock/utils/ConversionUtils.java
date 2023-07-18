@@ -9,6 +9,7 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.DimensionTypes;
 import org.cloudburstmc.protocol.bedrock.data.GameRuleData;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
+import org.cloudburstmc.protocol.bedrock.data.PlayerPermission;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerSlotType;
 
@@ -94,6 +95,15 @@ public interface ConversionUtils {
             case OFFHAND -> ContainerId.OFFHAND;
             case ARMOR -> ContainerId.ARMOR;
             case CURSOR -> ContainerId.UI;
+        };
+    }
+
+    static int typeToPermission(PlayerPermission type) {
+        return switch (type) {
+            case VISITOR -> 0;
+            case MEMBER -> 1;
+            case OPERATOR -> 2;
+            case CUSTOM -> 3;
         };
     }
 }

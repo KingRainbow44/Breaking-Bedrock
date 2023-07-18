@@ -106,6 +106,9 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
                 Collections.emptySet(), 0);
         this.javaClient().processPacket(positionPacket);
 
+        // Set player's default permissions.
+        this.data().setPermission(packet.getDefaultPlayerPermission());
+
         // Set the render center.
         int chunkX = MathHelper.floor(xPos) >> 4;
         int chunkZ = MathHelper.floor(zPos) >> 4;

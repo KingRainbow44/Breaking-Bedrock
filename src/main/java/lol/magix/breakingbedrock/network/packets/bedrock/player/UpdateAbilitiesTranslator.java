@@ -20,6 +20,9 @@ public final class UpdateAbilitiesTranslator extends Translator<UpdateAbilitiesP
         if (packet.getUniqueEntityId() != this.data().getRuntimeId())
             return;
 
+        // Set player permissions.
+        this.data().setPermission(packet.getPlayerPermission());
+
         var abilities = new PlayerAbilities();
         for (var layer : packet.getAbilityLayers()) {
             var values = layer.getAbilityValues();
