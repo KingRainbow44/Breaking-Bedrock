@@ -1,5 +1,6 @@
 plugins {
     id 'fabric-loom' version '1.0.11'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'maven-publish'
 }
 
@@ -43,17 +44,26 @@ dependencies {
 
     // Debug library for Web Sockets.
     implementation "org.java-websocket:Java-WebSocket:1.5.3"
+    shadow "org.java-websocket:Java-WebSocket:1.5.3"
     // Library for handling HTTP requests.
     implementation "tech.xigam:Express.Java:1.2.2"
     implementation "com.squareup.okhttp3:okhttp:4.10.0"
+
+    shadow "tech.xigam:Express.Java:1.2.2"
+    shadow "com.squareup.okhttp3:okhttp:4.10.0"
 
     // Minecraft: Bedrock protocol libraries.
     implementation "org.cloudburstmc.protocol:common:${project.protocol_version}"
     implementation "org.cloudburstmc.protocol:bedrock-codec:${project.protocol_version}"
     implementation "org.cloudburstmc.protocol:bedrock-connection:${project.protocol_version}"
 
+    shadow "org.cloudburstmc.protocol:common:${project.protocol_version}"
+    shadow "org.cloudburstmc.protocol:bedrock-codec:${project.protocol_version}"
+    shadow "org.cloudburstmc.protocol:bedrock-connection:${project.protocol_version}"
+
     // Utility libraries for handling data.
     implementation "org.apache.commons:commons-text:1.10.0"
+    shadow "org.apache.commons:commons-lang3:3.12.0"
 
     // Developer tools. (Reflection + access wideners)
     implementation "org.reflections:reflections:0.10.2"
