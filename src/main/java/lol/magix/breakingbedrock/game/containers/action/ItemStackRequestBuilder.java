@@ -26,10 +26,36 @@ public final class ItemStackRequestBuilder {
         return new ItemStackRequestBuilder(requestId);
     }
 
+    private Runnable callback = () -> {};
+    private boolean shouldUpdate = true;
+
     private final List<ItemStackRequestAction> actions = new LinkedList<>();
     private final List<Triplet<Container, Integer, ItemData>> handleActions = new LinkedList<>();
+    private final List<Triplet<Container, Integer, ItemData>> revertActions = new LinkedList<>();
 
     private final int requestId;
+
+    /**
+     * Sets the callback to be called when the request is completed.
+     *
+     * @param callback The callback.
+     * @return This instance.
+     */
+    public ItemStackRequestBuilder callback(Runnable callback) {
+        this.callback = callback;
+        return this;
+    }
+
+    /**
+     * Sets whether the client should update the container.
+     *
+     * @param shouldUpdate Whether the client should update the container.
+     * @return This instance.
+     */
+    public ItemStackRequestBuilder update(boolean shouldUpdate) {
+        this.shouldUpdate = shouldUpdate;
+        return this;
+    }
 
     /**
      * Takes items from the source slot to the destination slot.
@@ -80,10 +106,6 @@ public final class ItemStackRequestBuilder {
         var destItem = dest.getItem(destSlot);
         var sourceItem = source.getItem(sourceSlot);
 
-        System.out.println("place");
-        System.out.println("Destination network ID: " + destItem.getNetId());
-        System.out.println("Source network ID: " + sourceItem.getNetId());
-
         // Create the action.
         this.actions.add(new PlaceAction(amount,
                 new ItemStackRequestSlotData(sourceType, sourceSlot, sourceItem.getNetId()),
@@ -125,14 +147,13 @@ public final class ItemStackRequestBuilder {
     }
 
     /**
-     * Builds all item stack requests.
-     * Handles each container action.
+     * Runs pending container actions.
+     * This is used to update the container state before sending the request.
      *
-     * @return The item stack requests.
+     * @return This instance.
      */
-    public ItemStackRequestAction[] execute() {
-        // Handle actions.
-        var oldState = new LinkedList<Triplet<Container, Integer, ItemData>>();
+    public ItemStackRequestBuilder update() {
+        // Run pending actions.
         for (var action : this.handleActions) {
             var container = action.a();
             var slot = action.b();
@@ -140,18 +161,35 @@ public final class ItemStackRequestBuilder {
 
             // Save the old item state.
             var oldItem = container.getItem(slot);
-            oldState.add(new Triplet<>(container, slot, oldItem));
+            this.revertActions.add(new Triplet<>(container, slot, oldItem));
 
             // Set the new item.
             container.setBedrockItem(slot, newItem);
         }
+
+        // Clear pending actions.
+        this.handleActions.clear();
+
+        return this;
+    }
+
+    /**
+     * Builds all item stack requests.
+     * Handles each container action.
+     *
+     * @return The item stack requests.
+     */
+    public ItemStackRequestAction[] execute() {
+        // Check if containers need to be updated.
+        if (!this.handleActions.isEmpty())
+            this.update();
 
         // Register a response handler.
         var containers = BedrockNetworkClient.getInstance().getContainerHolder();
         ItemStackResponseTranslator.HANDLERS.put(this.requestId, response -> {
             if (response.getResult() != ItemStackResponseStatus.OK) {
                 // Revert the item changes.
-                for (var previous : oldState) {
+                for (var previous : this.revertActions) {
                     var container = previous.a();
                     var slot = previous.b();
                     var item = previous.c();
@@ -174,9 +212,11 @@ public final class ItemStackRequestBuilder {
                     container.setBedrockItem(slot, newItem);
                 }
 
-                container.updateInventory();
+                if (this.shouldUpdate) container.updateInventory();
             }
 
+            // Invoke the callback.
+            this.callback.run();
             // Remove the handler.
             ItemStackResponseTranslator.HANDLERS.remove(this.requestId);
         });

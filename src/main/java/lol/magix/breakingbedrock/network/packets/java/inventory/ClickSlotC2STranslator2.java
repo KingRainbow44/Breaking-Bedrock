@@ -9,17 +9,17 @@ import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.screen.ScreenHandlerTranslator;
 import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerSlotType;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequest;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.ItemStackRequestAction;
 import org.cloudburstmc.protocol.bedrock.packet.ItemStackRequestPacket;
 
 import java.util.Random;
-
-import static lol.magix.breakingbedrock.utils.GameUtils.itemStackInfo;
 
 @Translate(PacketType.JAVA)
 public final class ClickSlotC2STranslator2 extends Translator<ClickSlotC2SPacket> {
@@ -137,7 +137,7 @@ public final class ClickSlotC2STranslator2 extends Translator<ClickSlotC2SPacket
      * @param packet The packet.
      * @param requestId The item stack request ID.
      *                  This will be passed to the builder.
-     * @return A list of actions.
+     * @return A list of requests.
      */
     private ItemStackRequestAction[] swap(ClickSlotC2SPacket packet, int requestId) {
         // Validate the action.
@@ -159,6 +159,7 @@ public final class ClickSlotC2STranslator2 extends Translator<ClickSlotC2SPacket
         int targetContainerId, targetSlotId = -1;
         Container targetContainer = null;
         ContainerSlotType targetSlotType = null;
+        ItemStack javaTargetStack = null;
 
         for (var entry : packet.getModifiedStacks().int2ObjectEntrySet()) {
             System.out.println("Modified stack: " + entry.getIntKey());
@@ -172,23 +173,75 @@ public final class ClickSlotC2STranslator2 extends Translator<ClickSlotC2SPacket
             targetSlotId = targetContainer.getBedrockSlotId(entry.getIntKey());
             targetSlotType = ScreenHandlerTranslator.bedrockSlotType(
                     player.currentScreenHandler, entry.getIntKey());
+            javaTargetStack = entry.getValue();
         }
         if (targetSlotId == -1) return new ItemStackRequestAction[0];
 
-        System.out.println("-------------------- TARGET --------------------");
-        System.out.println("Target slot: " + targetSlotId);
-        System.out.println("Target slot type: " + targetSlotType);
-        System.out.println("Target slot quantity: " + targetContainer.getItem(targetSlotId).getCount());
-        System.out.println("-------------------- SOURCE --------------------");
-        System.out.println("Source slot: " + packet.getSlot());
-        System.out.println("Source slot type: " + sourceSlotType);
-        System.out.println("Source slot quantity: " + sourceContainer.getItem(packet.getSlot()).getCount());
-        System.out.println("-------------------- END --------------------");
+        var sourceSlotId = sourceContainer.getBedrockSlotId(packet.getSlot());
+        var clientSourceStack = sourceContainer.getItem(sourceSlotId);
+        var clientTargetStack = targetContainer.getItem(targetSlotId);
 
-        var builder = ItemStackRequestBuilder.builder(requestId)
-                .place(sourceContainer.getItem(packet.getSlot()).getCount(),
-                        sourceContainer, sourceSlotType, packet.getSlot(),
-                        targetContainer, targetSlotType, targetSlotId);
+        var builder = ItemStackRequestBuilder.builder(requestId);
+        if (javaTargetStack.getItem() != Items.AIR &&
+                clientSourceStack != ItemData.AIR &&
+                clientTargetStack == ItemData.AIR) {
+            // This is when an item in the inventory is switched into the hotbar.
+            builder.place(clientSourceStack.getCount(),
+                    sourceContainer, sourceSlotType, sourceSlotId,
+                    targetContainer, targetSlotType, targetSlotId);
+        } else if (javaTargetStack.getItem() == Items.AIR &&
+                clientTargetStack != ItemData.AIR) {
+            // This is when an item in the hotbar is switched into the inventory.
+            builder.place(clientTargetStack.getCount(),
+                    targetContainer, targetSlotType, targetSlotId,
+                    sourceContainer, sourceSlotType, sourceSlotId);
+        } else {
+            // Two items are being switched into each other.
+            // This requires three individual inventory request actions.
+
+            final var targetContainerF = targetContainer;
+            final var targetSlotTypeF = targetSlotType;
+            final var targetSlotIdF = targetSlotId;
+
+            // To handle this, we have to place the source item into the cursor.
+            var cursor = this.containers().getCursor();
+            builder.take(clientSourceStack.getCount(),
+                    sourceContainer, sourceSlotType, sourceSlotId, // diamond axe 1
+                    cursor, ContainerSlotType.CURSOR, 0)
+                    .update(false); // air 0
+            builder.callback(() -> this.client().execute(() -> {
+                // Then, we perform a swap to place the cursor item into the target slot.
+                var builder2 = new ItemStackRequestBuilder(requestId);
+                builder2.swap(
+                        cursor, ContainerSlotType.CURSOR, 0, // diamond axe 1
+                        targetContainerF, targetSlotTypeF, targetSlotIdF // diamond pickaxe 1
+                ).update(false);
+
+                builder2.callback(() -> this.client().execute(() -> {
+                    var builder3 = new ItemStackRequestBuilder(requestId);
+                    builder3.place(clientTargetStack.getCount(),
+                            cursor, ContainerSlotType.CURSOR, 0, // diamond pickaxe 1
+                            sourceContainer, sourceSlotType, sourceSlotId); // air 0
+
+                    // Send another request.
+                    var requestPacket = new ItemStackRequestPacket();
+                    requestPacket.getRequests().add(new ItemStackRequest(
+                            requestId, builder3.execute(), new String[0]
+                    ));
+                    this.bedrockClient.sendPacket(requestPacket);
+                }));
+
+                // Send another request.
+                var requestPacket = new ItemStackRequestPacket();
+                requestPacket.getRequests().add(new ItemStackRequest(
+                        requestId, builder2.execute(), new String[0]
+                ));
+                this.bedrockClient.sendPacket(requestPacket);
+            }));
+
+            // Source -> Cursor -> Target (source) -> Cursor -> Source (target)
+        }
+
         return builder.execute();
     }
 
