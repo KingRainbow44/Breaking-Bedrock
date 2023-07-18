@@ -95,10 +95,14 @@ public final class JavaNetworkClient {
      * Loads all resource packs from the server.
      */
     public void loadResourcePacks() {
+        // Check if resource packs should be loaded.
+        var activePacks = this.handle.getData().getActivePacks();
+        if (activePacks.isEmpty()) return;
+
         this.resourcePacks.clear();
 
         // Load all server resource packs.
-        for (var pack : this.handle.getData().getActivePacks()) {
+        for (var pack : activePacks) {
             var packFile = pack.getPackFile();
             if (!packFile.exists()) continue;
 
