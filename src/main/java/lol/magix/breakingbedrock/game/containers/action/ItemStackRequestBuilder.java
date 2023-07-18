@@ -10,6 +10,7 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequestSlotData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.ItemStackRequestAction;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.PlaceAction;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.SwapAction;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.TakeAction;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponseStatus;
 
@@ -91,6 +92,35 @@ public final class ItemStackRequestBuilder {
         // Add the actions to the containers.
         this.handleActions.add(new Triplet<>(source, sourceSlot, destItem));
         this.handleActions.add(new Triplet<>(dest, destSlot, sourceItem));
+        return this;
+    }
+
+    /**
+     * Swaps two items in the inventory.
+     *
+     * @param first The first item.
+     * @param firstType The first item container type.
+     * @param firstSlot The first item slot.
+     * @param second The second item.
+     * @param secondType The second item container type.
+     * @param secondSlot The second item slot.
+     * @return This instance.
+     */
+    public ItemStackRequestBuilder swap(Container first, ContainerSlotType firstType, int firstSlot,
+                                        Container second, ContainerSlotType secondType, int secondSlot) {
+        // Get the item instances.
+        var firstItem = first.getItem(firstSlot);
+        var secondItem = second.getItem(secondSlot);
+
+        // Create the actions.
+        this.actions.add(new SwapAction(
+                new ItemStackRequestSlotData(firstType, firstSlot, firstItem.getNetId()),
+                new ItemStackRequestSlotData(secondType, secondSlot, secondItem.getNetId())
+        ));
+
+        // Add the actions to the containers.
+        this.handleActions.add(new Triplet<>(first, firstSlot, secondItem));
+        this.handleActions.add(new Triplet<>(second, secondSlot, firstItem));
         return this;
     }
 

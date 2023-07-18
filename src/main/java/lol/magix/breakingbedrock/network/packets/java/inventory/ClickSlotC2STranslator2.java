@@ -9,6 +9,7 @@ import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.screen.ScreenHandlerTranslator;
 import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerSlotType;
@@ -16,9 +17,9 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemSt
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.ItemStackRequestAction;
 import org.cloudburstmc.protocol.bedrock.packet.ItemStackRequestPacket;
 
-import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
+
+import static lol.magix.breakingbedrock.utils.GameUtils.itemStackInfo;
 
 @Translate(PacketType.JAVA)
 public final class ClickSlotC2STranslator2 extends Translator<ClickSlotC2SPacket> {
@@ -80,27 +81,49 @@ public final class ClickSlotC2STranslator2 extends Translator<ClickSlotC2SPacket
 
         var inventory = this.containers().getContainer(containerId);
         var cursor = this.containers().getContainer(ContainerId.UI);
-        // Check if the cursor is the source.
-        var cursorSource = !GameUtils.isAir(cursor.getItem(0));
+        var clientCursorStack = cursor.getItem(0);
+        // Check if the cursor has items.
+        var clientHasCursor = !GameUtils.isAir(clientCursorStack);
 
         // Get the appropriate slot type.
         var slotType = ScreenHandlerTranslator.bedrockSlotType(
                 player.currentScreenHandler, packet.getSlot());
 
         // Apply the changed item stacks.
-        var sourceStack = packet.getStack();
+        // NOTE: Items referenced here are the item states *after* the click.
+        var javaCursorStack = packet.getStack();
+        var javaHasCursor = javaCursorStack.getItem() != Items.AIR;
+
         var builder = ItemStackRequestBuilder.builder(requestId);
         for (var entry : packet.getModifiedStacks().int2ObjectEntrySet()) {
             var slotId = inventory.getBedrockSlotId(entry.getIntKey());
+            var javaInventoryStack = entry.getValue();
 
-            if (cursorSource) {
-                builder.take(entry.getValue().getCount(),
+            // Check if the two materials are the same.
+            if (clientHasCursor && javaCursorStack.getItem() == Items.AIR) {
+                // This should perform a place action.
+                builder.place(clientCursorStack.getCount(),
                         cursor, ContainerSlotType.CURSOR, 0,
                         inventory, slotType, slotId);
+            } else if (javaHasCursor &&
+                    javaInventoryStack.getItem() != Items.AIR &&
+                    javaCursorStack.getItem() != javaInventoryStack.getItem()) {
+                // This should perform a swap action.
+                builder.swap(
+                        cursor, ContainerSlotType.CURSOR, 0,
+                        inventory, slotType, slotId
+                );
             } else {
-                builder.take(sourceStack.getCount(),
-                        inventory, slotType, slotId,
-                        cursor, ContainerSlotType.CURSOR, 0);
+                // This should perform a take action.
+                if (clientHasCursor) {
+                    builder.take(entry.getValue().getCount(),
+                            cursor, ContainerSlotType.CURSOR, 0,
+                            inventory, slotType, slotId);
+                } else {
+                    builder.take(javaCursorStack.getCount(),
+                            inventory, slotType, slotId,
+                            cursor, ContainerSlotType.CURSOR, 0);
+                }
             }
         }
 

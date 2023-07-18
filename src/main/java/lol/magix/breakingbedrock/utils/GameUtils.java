@@ -4,6 +4,7 @@ import lol.magix.breakingbedrock.objects.Triplet;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
+ import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -122,5 +123,23 @@ public interface GameUtils {
         try {
             SET_FLAG.invoke(entity, index, value);
         } catch (Exception ignored) { }
+    }
+
+    /**
+     * @param itemStack The item stack to log.
+     * @return The logged item stack.
+     */
+    static String itemStackInfo(ItemStack itemStack) {
+        if (itemStack == null) return "null item stack";
+        return itemStack.getItem() + " q. " + itemStack.getCount();
+    }
+
+    /**
+     * @param itemStack The item stack to log.
+     * @return The logged item stack.
+     */
+    static String itemStackInfo(ItemData itemStack) {
+        if (itemStack == null) return "null item stack";
+        return itemStack.getDefinition().getIdentifier() + " q. " + itemStack.getCount();
     }
 }
