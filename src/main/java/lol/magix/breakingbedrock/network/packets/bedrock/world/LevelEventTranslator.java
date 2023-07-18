@@ -66,7 +66,7 @@ public final class LevelEventTranslator extends Translator<LevelEventPacket> {
                             .put(GameUtils.asLong(position), sortedSet);
                 }
                 case BLOCK_UPDATE_BREAK -> {
-                    BlockBreakingWrapper blockBreakingWrapper = BLOCK_BREAKING_INFOS.get(packet.getPosition().toInt());
+                    var blockBreakingWrapper = BLOCK_BREAKING_INFOS.get(packet.getPosition().toInt());
                     if (blockBreakingWrapper == null) {
                         break;
                     }
@@ -75,11 +75,11 @@ public final class LevelEventTranslator extends Translator<LevelEventPacket> {
                 case BLOCK_STOP_BREAK -> {
                     if (packet.getPosition().equals(Vector3f.ZERO)) {
                         if (BLOCK_BREAKING_INFOS.containsKey(packet.getPosition().toInt())) {
-                            long key = ((IMixinClientPlayerInteractionManager) interactionManager).getCurrentBreakingPos().asLong();
+                            var key = ((IMixinClientPlayerInteractionManager) interactionManager).getCurrentBreakingPos().asLong();
                             TO_REMOVE.add(key);
                         }
                     } else {
-                        Vector3i position = packet.getPosition().toInt();
+                        var position = packet.getPosition().toInt();
                         if (BLOCK_BREAKING_INFOS.containsKey(position)) {
                             long key = BlockPos.asLong(position.getX(), position.getY(), position.getZ());
                             TO_REMOVE.add(key);

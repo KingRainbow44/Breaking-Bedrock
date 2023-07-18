@@ -36,13 +36,14 @@ public final class UpdateBlockTranslator extends Translator<UpdateBlockPacket> {
             newState = GameConstants.FALLBACK_BLOCK.getDefaultState();
         }
 
+        // Get the player's world.
+        var world = this.client().world;
+        Objects.requireNonNull(world, "Player is not in a world");
+
         switch (packet.getDataLayer()) {
             case 0 -> this.javaClient().processPacket(
                     new BlockUpdateS2CPacket(blockPos, newState));
             case 1 -> {
-                var world = this.client().world;
-                Objects.requireNonNull(world, "Player is not in a world");
-
                 var existing = world.getBlockState(blockPos);
                 if (!existing.isAir()) {
                     if (existing.contains(Properties.WATERLOGGED))
@@ -54,5 +55,8 @@ public final class UpdateBlockTranslator extends Translator<UpdateBlockPacket> {
                         new BlockUpdateS2CPacket(blockPos, newState));
             }
         }
+
+        // Update the block in the world.
+        world.setBlockState(blockPos, newState);
     }
 }

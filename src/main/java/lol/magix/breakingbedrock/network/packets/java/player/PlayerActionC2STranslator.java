@@ -6,7 +6,10 @@ import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
 import lol.magix.breakingbedrock.utils.GameUtils;
+import lombok.Getter;
+import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameMode;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -19,8 +22,17 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTra
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerActionPacket;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 @Translate(PacketType.JAVA)
 public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SPacket> {
+    @Getter private static List<Vector3i> brokenBlocks
+            = Collections.synchronizedList(new LinkedList<>());
+
+    private long ticks = 0;
     private Direction lastDirection;
     private Vector3i lastBlockPos;
 
@@ -76,6 +88,7 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
                     creativeActionPacket.setFace(packet.getDirection().ordinal());
 
                     this.bedrockClient.sendPacket(creativeActionPacket);
+                    return;
                 }
 
                 // Stop breaking the block.
@@ -103,6 +116,11 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
                         world.getBlockState(packet.getPos())));
 
                 this.bedrockClient.sendPacket(transactionPacket);
+
+                // Remove the block from the client.
+                 this.javaClient().processPacket(new BlockUpdateS2CPacket(
+                         packet.getPos(), Blocks.AIR.getDefaultState()
+                 ));
             }
             case ABORT_DESTROY_BLOCK -> {
                 var actionPacket = new PlayerActionPacket();
@@ -151,11 +169,29 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
      * @param event The event.
      */
     private void onPlayerTick(PlayerTickEvent event) {
-        var player = this.player();
+        if (this.ticks++ % 5 != 0) return; // Run every 5 ticks.
+
+        var client = this.client();
+        var player = client.player;
         if (player == null) return;
 
         if (this.lastDirection == null ||
                 this.lastBlockPos == null) return;
+
+        // Check if the block was broken.
+        var copy = Collections.unmodifiableList(brokenBlocks);
+        for (var block : copy) {
+            if (GameUtils.equals(block, this.lastBlockPos)) {
+                this.translate(new PlayerActionC2SPacket(
+                        PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
+                        GameUtils.toBlockPos(block), this.lastDirection
+                ));
+
+                // Remove the block from the list.
+                brokenBlocks.remove(block);
+                return;
+            }
+        }
 
         var actionPacket = new PlayerActionPacket();
         actionPacket.setAction(PlayerActionType.CONTINUE_BREAK);

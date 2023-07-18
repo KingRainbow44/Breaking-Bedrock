@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.translators.pack.ResourcePackTranslator;
+import lol.magix.breakingbedrock.utils.EncodingUtils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
@@ -56,6 +57,8 @@ public interface DebugCommand {
                                 .executes(DebugCommand::translateResourcePack))
                         .then(literal("entity")
                                 .executes(DebugCommand::enableEntityLogging))
+                        .then(literal("blockactions")
+                                .executes(DebugCommand::listBlockActions))
                 .executes(DebugCommand::showUsage));
     }
 
@@ -142,6 +145,19 @@ public interface DebugCommand {
         context.getSource().sendFeedback(translate("commands.debug.entity")
                 .args(newValue ? "enabled" : "disabled").color(newValue ? 0x00FF6D : 0xFF462E).get());
 
+        return Command.SINGLE_SUCCESS;
+    }
+
+    /**
+     * Called when the command is used with the 'blockactions' argument.
+     * Lists all block actions.
+     *
+     * @param context The command context.
+     * @return The command result.
+     */
+    static int listBlockActions(CommandContext<FabricClientCommandSource> context) {
+        var client = BedrockNetworkClient.getInstance();
+        client.getLogger().info(EncodingUtils.jsonEncode(client.getBlockActions()));
         return Command.SINGLE_SUCCESS;
     }
 }

@@ -239,7 +239,7 @@ public final class BedrockNetworkClient {
      */
     public void addBlockAction(PlayerBlockActionData data) {
         if (this.getBlockActions().size() >= 100) {
-            this.getLogger().warn("Block action queue is full, dropping packet.");
+            this.getLogger().debug("Block action queue is full, dropping packet.");
             return;
         }
 

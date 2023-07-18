@@ -58,6 +58,17 @@ public interface GameUtils {
     }
 
     /**
+     * @param source The source vector.
+     * @param compare The vector to compare to.
+     * @return Whether the vectors are equal.
+     */
+    static boolean equals(Vector3i source, Vector3i compare) {
+        return source.getX() == compare.getX()
+                && source.getY() == compare.getY()
+                && source.getZ() == compare.getZ();
+    }
+
+    /**
      * Get the block the player is looking at.
      *
      * @param player The player to get the block from.

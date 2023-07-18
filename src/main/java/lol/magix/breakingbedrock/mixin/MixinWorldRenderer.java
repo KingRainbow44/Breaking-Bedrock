@@ -3,6 +3,7 @@ package lol.magix.breakingbedrock.mixin;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.network.packets.bedrock.world.LevelEventTranslator;
+import lol.magix.breakingbedrock.network.packets.java.player.PlayerActionC2STranslator;
 import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
@@ -55,6 +56,13 @@ public final class MixinWorldRenderer {
             z = MathHelper.clamp(z, 0, 10);
             var key = GameUtils.asLong(entry.getKey());
             if (LevelEventTranslator.TO_REMOVE.remove(key) || z == 10) {
+                if (z >= 7) { // Why is this the case?
+                    // Add the block to the broken queue.
+                    var blocks = PlayerActionC2STranslator.getBrokenBlocks();
+                    if (blocks.size() > 100) blocks.clear();
+                    blocks.add(entry.getKey());
+                }
+
                 iterator.remove();
                 this.blockBreakingProgressions.remove(key);
                 continue;
