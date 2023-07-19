@@ -29,7 +29,9 @@ public interface ReflectionUtils {
      */
     static Field getField(Class<?> type, String fieldName) {
         try {
-            return type.getDeclaredField(fieldName);
+            var field = type.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field;
         } catch (Exception ignored) {
             throw new RuntimeException("Failed to get field " + fieldName + " from " + type.getName() + "!");
         }
