@@ -7,13 +7,19 @@ import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
 import lol.magix.breakingbedrock.utils.GameUtils;
+import lol.magix.breakingbedrock.utils.ReflectionUtils;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 
+import java.lang.reflect.Field;
+import java.util.Objects;
+
 @Translate(PacketType.JAVA)
 public final class PlayerInteractEntityC2STranslator extends Translator<PlayerInteractEntityC2SPacket> {
+    private static final Field TYPE_FIELD = ReflectionUtils.getField(PlayerInteractEntityC2SPacket.class, "type");
+
     @Override
     public Class<PlayerInteractEntityC2SPacket> getPacketClass() {
         return PlayerInteractEntityC2SPacket.class;
@@ -21,6 +27,9 @@ public final class PlayerInteractEntityC2STranslator extends Translator<PlayerIn
 
     @Override
     public void translate(PlayerInteractEntityC2SPacket packet) {
+        // Check the packet type.
+        if (!Objects.equals(getInteractType(packet).toString(), "ATTACK")) return;
+
         var player = this.player();
         var world = this.client().world;
         if (player == null || world == null) return;
@@ -58,5 +67,28 @@ public final class PlayerInteractEntityC2STranslator extends Translator<PlayerIn
         }
 
         this.bedrockClient.sendPacket(transactionPacket);
+    }
+
+    /**
+     * Fetches the type of interaction.
+     *
+     * @param packet The packet.
+     * @return The type of interaction.
+     */
+    private static Object getInteractType(PlayerInteractEntityC2SPacket packet) {
+        try {
+            // Get the type class.
+            var type = TYPE_FIELD.get(packet);
+            // Get the accessor.
+            var typeClass = type.getClass();
+            var accessor = typeClass.getDeclaredMethod("getType");
+            accessor.setAccessible(true);
+
+            // Get the type.
+            return accessor.invoke(type);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return new Object();
+        }
     }
 }
