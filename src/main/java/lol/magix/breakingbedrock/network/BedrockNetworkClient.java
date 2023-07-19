@@ -133,7 +133,7 @@ public final class BedrockNetworkClient {
         this.connectionDetails = connectTo;
 
         this.connect().addListener((Promise<BedrockClientSession> promise) -> {
-            if (isCanceled.get()){
+            if (isCanceled.get()) {
                 MinecraftClient.getInstance().execute(() ->
                         promise.getNow().close("Connection closed."));
                 return;
@@ -199,8 +199,10 @@ public final class BedrockNetworkClient {
                 .connect(this.connectionDetails.toSocketAddress())
                 .addListener((ChannelFuture future) -> {
                     if (!future.isSuccess()) {
-                        promise.tryFailure(future.cause());
-                        future.channel().close();
+                        MinecraftClient.getInstance().execute(() -> {
+                            promise.tryFailure(future.cause());
+                            future.channel().close();
+                        });
                     }
                 });
 
@@ -385,7 +387,7 @@ public final class BedrockNetworkClient {
     public void disconnect(String reason) {
         // Display a disconnect screen.
         if (this.getJavaNetworkClient() != null)
-            this.getJavaNetworkClient().disconnect(reason);
+            this.getJavaNetworkClient().disconnect();
 
         // Disconnect from the server.
         if (this.session != null && this.session.isConnected())
@@ -415,9 +417,8 @@ public final class BedrockNetworkClient {
      */
     public void onDisconnect(String reason) {
         // Display a client disconnect screen.
-        if (this.data != null && this.data.isInitialized())
-            MinecraftClient.getInstance().execute(() ->
-                    ScreenUtils.disconnect(Text.of(reason)));
+        MinecraftClient.getInstance().execute(() ->
+                ScreenUtils.disconnect(Text.of(reason)));
 
         // Un-register the input handler listener.
         if (this.inputHandler != null)
@@ -426,6 +427,13 @@ public final class BedrockNetworkClient {
         // Clear the block actions.
         if (this.blockActions != null)
             this.blockActions.clear();
+
+        // Clear resource packs.
+        if (this.data.getActivePacks().size() > 0) {
+            var client = MinecraftClient.getInstance();
+            client.getResourcePackManager().scanPacks();
+            client.reloadResourcesConcurrently();
+        }
 
         // Invalidate client properties.
         this.hasLoggedIn = false;

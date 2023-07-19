@@ -142,33 +142,10 @@ public final class JavaNetworkClient {
      * Disconnects from the server.
      */
     public void disconnect() {
-        this.disconnect("Disconnected");
-    }
-
-    /**
-     * Disconnects from the server.
-     *
-     * @param reason The reason for disconnecting.
-     */
-    public void disconnect(String reason) {
         var world = this.client.world;
         if (world == null) return;
 
         // Disconnect from the world.
         world.disconnect();
-
-        // Show disconnect screen.
-        MinecraftClient.getInstance().execute(() -> {
-            // Check if the player is in game.
-            if (this.client.player == null) return;
-            if (this.client.cameraEntity == null) return;
-
-            // Get the disconnect reason.
-            Text disconnectReason = Text.literal(reason);
-            if (TranslationStorage.getInstance().hasTranslation(reason))
-                disconnectReason = Text.translatable(reason);
-
-            ScreenUtils.disconnect(disconnectReason);
-        });
     }
 }
