@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  * Utility class for network-related functions.
  */
 public interface NetworkUtils {
-    static short[] OFFLINE_DATA = {0x00, 0xFF, 0xFF, 0x00, 0xFE, 0xFE, 0xFE, 0xFE, 0xFD, 0xFD, 0xFD, 0xFD, 0x12, 0x34, 0x56, 0x78};
+    short[] OFFLINE_DATA = {0x00, 0xFF, 0xFF, 0x00, 0xFE, 0xFE, 0xFE, 0xFE, 0xFD, 0xFD, 0xFD, 0xFD, 0x12, 0x34, 0x56, 0x78};
 
     /**
      * Finds an open port on the local machine.
@@ -147,7 +147,8 @@ public interface NetworkUtils {
 
         // Send the ping.
         var input = buffer.array();
-        socket.send(new DatagramPacket(input, input.length, socketAddress));
+        socket.send(new DatagramPacket(input,
+                buffer.writerIndex(), socketAddress));
         // Receive the pong.
         var output = new byte[4096];
         var received = new DatagramPacket(output, output.length);
