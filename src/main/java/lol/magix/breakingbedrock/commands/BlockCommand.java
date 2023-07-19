@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import lol.magix.breakingbedrock.translators.blockstate.BlockPaletteTranslator;
+import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -57,17 +58,23 @@ public interface BlockCommand {
      */
     static int fetchByRuntimeId(CommandContext<FabricClientCommandSource> context) {
         var runtimeId = getInteger(context, "runtimeId");
-        var bedrockBlock = BlockPaletteTranslator.getRuntime2Bedrock().get(runtimeId);
+        var bedrockBlockState = BlockPaletteTranslator.getRuntime2Bedrock().get(runtimeId);
+        var javaBlockState = BlockStateTranslator.getRuntime2Java().get(runtimeId);
 
         var source = context.getSource();
-        if (bedrockBlock == null) {
-            source.sendFeedback(Text.literal("The runtime ID is invalid.")
-                    .setStyle(Style.EMPTY.withColor(0xC03714)));
-        } else {
-            source.sendFeedback(Text.literal("The Bedrock state is " + bedrockBlock)
+        if (bedrockBlockState != null) {
+            source.sendFeedback(Text.literal("The Bedrock state is " + bedrockBlockState)
                     .setStyle(Style.EMPTY.withColor(0x1EC057)));
-            source.sendFeedback(Text.literal("The Java state is " + bedrockBlock.toJavaBlockState())
+        } else {
+            source.sendFeedback(Text.literal("Unable to identify the Bedrock block state.")
+                    .setStyle(Style.EMPTY.withColor(0xC03714)));
+        }
+        if (javaBlockState != null) {
+            source.sendFeedback(Text.literal("The Java state is " + javaBlockState  )
                     .setStyle(Style.EMPTY.withColor(0xFFF710)));
+        } else {
+            source.sendFeedback(Text.literal("Unable to identify the Java block state.")
+                    .setStyle(Style.EMPTY.withColor(0xC03714)));
         }
 
         return Command.SINGLE_SUCCESS;
