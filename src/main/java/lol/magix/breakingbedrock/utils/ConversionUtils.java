@@ -1,6 +1,7 @@
 package lol.magix.breakingbedrock.utils;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.texture.NativeImage;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
@@ -12,7 +13,10 @@ import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerPermission;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerSlotType;
+import org.cloudburstmc.protocol.bedrock.data.skin.ImageData;
 
+import java.awt.*;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 /**
@@ -98,6 +102,12 @@ public interface ConversionUtils {
         };
     }
 
+    /**
+     * Converts a player permission enum into a permission level.
+     *
+     * @param type The player permission enum.
+     * @return The permission level as an integer.
+     */
     static int typeToPermission(PlayerPermission type) {
         return switch (type) {
             case VISITOR -> 0;
@@ -105,5 +115,27 @@ public interface ConversionUtils {
             case OPERATOR -> 2;
             case CUSTOM -> 3;
         };
+    }
+
+    /**
+     * Converts a Bedrock image to a Java native image.
+     *
+     * @param image The Bedrock image.
+     * @return The Java native image.
+     */
+    static NativeImage imageToNative(ImageData image) {
+        var nativeImage = new NativeImage(image.getWidth(), image.getHeight(), true);
+        var inputStream = new ByteArrayInputStream(image.getImage());
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                var r = inputStream.read();
+                var g = inputStream.read();
+                var b = inputStream.read();
+                var a = inputStream.read();
+                nativeImage.setColor(x, y, new Color(r, g, b, a).getRGB());
+            }
+        }
+
+        return nativeImage;
     }
 }

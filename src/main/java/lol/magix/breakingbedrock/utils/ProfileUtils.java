@@ -1,10 +1,15 @@
 package lol.magix.breakingbedrock.utils;
 
 import com.google.gson.JsonObject;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import lol.magix.breakingbedrock.BreakingBedrock;
 import lol.magix.breakingbedrock.network.BedrockNetworkClient;
+import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.objects.game.ClientData;
+import lol.magix.breakingbedrock.objects.game.ClientData.ArmSizeType;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket.Action;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket.Action.Writer;
@@ -14,8 +19,10 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.Base64;
-import java.util.EnumSet;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -38,17 +45,72 @@ public interface ProfileUtils {
         // Get properties.
         var publicKey = EncodingUtils.base64Encode(authData.getPublicKey().getEncoded());
         var displayName = authData.getDisplayName();
-        var serverAddress = client.getConnectionDetails().address();
+        var serverAddress = client.getConnectionDetails().javaAddress();
 
         // Create a JWT header.
         var jwtHeader = new JsonObject();
         jwtHeader.addProperty("alg", "ES384");
         jwtHeader.addProperty("x5u", publicKey);
         // Create client data.
+        var mcClient = MinecraftClient.getInstance();
+        var uuid = mcClient.getSession().getUuidOrNull();
+        Objects.requireNonNull(uuid, "Invalid UUID provided to client.");
+
+        var armSize = ArmSizeType.fromUUID(uuid);
+        var version = NetworkConstants.PACKET_CODEC.getMinecraftVersion();
+
         var clientData = ClientData.builder()
                 .serverAddress(serverAddress)
                 .thirdPartyName(displayName)
+                .armSize(armSize)
+                .selfSignedId(uuid.toString())
+                .languageCode(mcClient.getLanguageManager().getLanguage())
+                .gameVersion(version)
+                .currentInputMode(1)
+                .defaultInputMode(1)
+                .deviceId(String.valueOf(uuid.getMostSignificantBits()))
+                .clientRandomId(uuid.getLeastSignificantBits())
+                .skinGeometryData(EncodingUtils.base64Encode(
+                        version.getBytes(StandardCharsets.UTF_8)))
+                .skinResourcePatch(armSize.getEncodedGeometryData())
+                .trustedSkin(true)
                 .build();
+
+        // Set client skin data.
+        mcClient.getSession().getProfile().getProperties()
+                .putAll(mcClient.getSessionProperties());
+
+        var textures = mcClient.getSessionService().getTextures(
+                mcClient.getSession().getProfile(), false);
+        if (textures.isEmpty()) {
+            var profile = mcClient.getSessionService().fillProfileProperties(
+                    mcClient.getSession().getProfile(), false);
+            textures = mcClient.getSessionService().getTextures(profile, false);
+        }
+
+        try {
+            // Pull the skin texture.
+            var skinTexture = Optional.ofNullable(textures.get(Type.SKIN))
+                    .orElse(new MinecraftProfileTexture(armSize.getDefaultSkinUrl(), new HashMap<>()));
+            clientData.setSkin(ImageIO.read(new URL(skinTexture.getUrl())));
+
+            // Set the geometry data.
+            clientData.skinGeometryData = EncodingUtils.base64Encode(
+                    ResourceUtils.getResourceAsString(
+                            "skin_geometry_data.json").getBytes());
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+
+        // Apply cape data, if applicable.
+        Optional.ofNullable(textures.get(Type.CAPE))
+                .ifPresent(cape -> {
+                    try {
+                        clientData.setCape(ImageIO.read(new URL(cape.getUrl())));
+                    } catch (Exception exception) {
+                        throw new RuntimeException(exception);
+                    }
+                });
 
         // Create a header & payload.
         var encoder = Base64.getUrlEncoder().withoutPadding();

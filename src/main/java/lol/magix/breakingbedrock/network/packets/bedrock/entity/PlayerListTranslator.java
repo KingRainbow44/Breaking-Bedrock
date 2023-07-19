@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
+import lol.magix.breakingbedrock.translators.SkinTranslator;
 import lol.magix.breakingbedrock.utils.ProfileUtils;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket.Action;
@@ -37,6 +38,8 @@ public final class PlayerListTranslator extends Translator<PlayerListPacket> {
                     Text.of(profile.getName()), null);
 
             if (action == Action.ADD_PLAYER) {
+                SkinTranslator.addSerializedSkin(profile.getId(), entry.getSkin());
+
                 var existingEntry = this.javaClient()
                         .getLocalNetwork().getPlayerListEntry(profile.getId());
                 if (existingEntry != null) toRemove.add(listEntry);

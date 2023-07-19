@@ -5,11 +5,15 @@ import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.utils.EncodingUtils;
 import lol.magix.breakingbedrock.utils.ProfileUtils;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.protocol.bedrock.data.skin.AnimatedTextureType;
+import org.cloudburstmc.protocol.bedrock.data.skin.AnimationExpressionType;
+import org.cloudburstmc.protocol.bedrock.data.skin.ImageData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.awt.image.BufferedImage;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * Minecraft Skin data.
@@ -17,10 +21,10 @@ import java.util.UUID;
 @Builder
 public final class ClientData {
     @SerializedName("AnimatedImageData")
-    @Builder.Default public List<Object> animatedImageData = new ArrayList<>();
+    @Builder.Default public List<SkinAnimation> animatedImageData = new ArrayList<>();
 
     @SerializedName("ArmSize")
-    @Builder.Default public String armSize = "";
+    @Builder.Default public ArmSizeType armSize = ArmSizeType.WIDE;
 
     @SerializedName("CapeData")
     @Builder.Default public String capeData = "";
@@ -71,13 +75,13 @@ public final class ClientData {
     @Builder.Default public String languageCode = "en_US";
 
     @SerializedName("PersonaPieces")
-    @Builder.Default public List<Object> personaPieces = new ArrayList<>();
+    @Builder.Default public List<PersonaPiece> personaPieces = new ArrayList<>();
 
     @SerializedName("PersonaSkin")
     @Builder.Default public boolean personaSkin = false;
 
     @SerializedName("PieceTintColors")
-    @Builder.Default public List<Object> pieceTintColors = new ArrayList<>();
+    @Builder.Default public List<PersonaPieceTintColor> pieceTintColors = new ArrayList<>();
 
     @SerializedName("PlatformOfflineId")
     @Builder.Default public String platformOfflineId = "";
@@ -135,4 +139,69 @@ public final class ClientData {
 
     @SerializedName("UIProfile")
     @Builder.Default public int uiProfile = 0;
+
+    /**
+     * Applies the data from the image to the client data.
+     *
+     * @param image The image to apply.
+     */
+    public void setSkin(BufferedImage image) {
+        var imageData = ImageData.from(image);
+        this.skinData = Base64.getEncoder().encodeToString(imageData.getImage());
+        this.skinImageHeight = imageData.getHeight();
+        this.skinImageWidth = imageData.getWidth();
+        this.skinId = UUID.randomUUID() + "_Custom";
+    }
+
+    /**
+     * Applies the data from the image to the client data.
+     *
+     * @param image The image to apply.
+     */
+    public void setCape(BufferedImage image) {
+        var imageData = ImageData.from(image);
+        this.capeData = Base64.getEncoder().encodeToString(imageData.getImage());
+        this.capeImageHeight = imageData.getHeight();
+        this.capeImageWidth = imageData.getWidth();
+        this.capeId = UUID.randomUUID().toString();
+        this.capeOnClassicSkin = true;
+    }
+
+    public record SkinAnimation(@SerializedName("Frames") float frames,
+                                @SerializedName("Image") String image,
+                                @SerializedName("ImageHeight") int height,
+                                @SerializedName("ImageWidth") int width,
+                                @SerializedName("Type") AnimatedTextureType animatedTexture,
+                                @SerializedName("AnimationExpression") AnimationExpressionType animationExpression) {
+    }
+
+    public record PersonaPiece(@SerializedName("IsDefault") boolean isDefault,
+                               @SerializedName("PackId") String packId,
+                               @SerializedName("PieceId") String pieceId,
+                               @SerializedName("PieceType") String pieceType,
+                               @SerializedName("ProductId") String productId) {
+    }
+
+    public record PersonaPieceTintColor(@SerializedName("PieceType") boolean pieceType,
+                                        @SerializedName("Colors") List<String> colors) {
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public enum ArmSizeType {
+        @SerializedName("wide") WIDE("geometry.humanoid.custom", "default", "https://raw.githubusercontent.com/Flonja/TunnelMC/master/resources/steve.png"),
+        @SerializedName("slim") SLIM("geometry.humanoid.customSlim", "slim", "https://raw.githubusercontent.com/Flonja/TunnelMC/master/resources/alex.png");
+
+        private final String geometryName;
+        private final String model;
+        private final String defaultSkinUrl;
+
+        public String getEncodedGeometryData() {
+            return Base64.getEncoder().encodeToString(("{\"geometry\":{\"default\":\"" + geometryName + "\"}}").getBytes(StandardCharsets.UTF_8));
+        }
+
+        public static ArmSizeType fromUUID(UUID uuid) {
+            return (uuid.hashCode() & 1) == 1 ? SLIM : WIDE;
+        }
+    }
 }
