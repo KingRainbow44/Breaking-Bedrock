@@ -222,6 +222,8 @@ public interface EncodingUtils {
                 zipStream.closeEntry();
                 entry = zipStream.getNextEntry();
             }
+        } catch (Exception ignored) {
+            BreakingBedrock.getLogger().warn("Unable to unzip file: " + source.getAbsolutePath());
         }
     }
 
