@@ -24,7 +24,8 @@
     "serverlist.MixinConnectScreen",
     "serverlist.MixinMultiplayerScreen",
     "serverlist.MixinMultiplayerServerListWidget",
-    "serverlist.MixinServerList"
+    "serverlist.MixinServerList",
+    "protocol.MixinStartGameSerializer_v428"
   ],
   "injectors": {
     "defaultRequire": 1
