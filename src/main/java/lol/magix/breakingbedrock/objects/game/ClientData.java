@@ -57,10 +57,10 @@ public final class ClientData {
     @Builder.Default public String deviceId = UUID.randomUUID().toString();
 
     @SerializedName("DeviceModel")
-    @Builder.Default public String deviceModel = "";
+    @Builder.Default public String deviceModel = "Generic Android 10 Device";
 
     @SerializedName("DeviceOS")
-    @Builder.Default public int deviceOS = 7;
+    @Builder.Default public int deviceOS = 1; // 7 = Windows 10, 1 = Android
 
     @SerializedName("GameVersion")
     @Builder.Default public String gameVersion = NetworkConstants.PACKET_CODEC.getMinecraftVersion();
@@ -73,6 +73,9 @@ public final class ClientData {
 
     @SerializedName("LanguageCode")
     @Builder.Default public String languageCode = "en_US";
+
+    @SerializedName("OverrideSkin")
+    @Builder.Default public boolean overrideSkin = false;
 
     @SerializedName("PersonaPieces")
     @Builder.Default public List<PersonaPiece> personaPieces = new ArrayList<>();
@@ -114,10 +117,10 @@ public final class ClientData {
     @Builder.Default public String skinGeometryData = EncodingUtils.base64Encode(ProfileUtils.SKIN_GEOMETRY_DATA.getBytes());
 
     @SerializedName("SkinGeometryDataEngineVersion")
-    @Builder.Default public String skinGeometryDataEngineVersion = "MQ";
+    @Builder.Default public String skinGeometryDataEngineVersion = "MC4wLjA=";
 
     @SerializedName("SkinId")
-    @Builder.Default public String skinId = UUID.randomUUID() + ".Custom" + UUID.randomUUID();
+    @Builder.Default public String skinId = UUID.randomUUID() + ".Custom";
 
     @SerializedName("SkinImageHeight")
     @Builder.Default public int skinImageHeight = 64;
@@ -150,7 +153,7 @@ public final class ClientData {
         this.skinData = Base64.getEncoder().encodeToString(imageData.getImage());
         this.skinImageHeight = imageData.getHeight();
         this.skinImageWidth = imageData.getWidth();
-        this.skinId = UUID.randomUUID() + "_Custom";
+        this.skinId = UUID.randomUUID() + ".Custom";
     }
 
     /**
@@ -197,7 +200,7 @@ public final class ClientData {
         private final String defaultSkinUrl;
 
         public String getEncodedGeometryData() {
-            return Base64.getEncoder().encodeToString(("{\"geometry\":{\"default\":\"" + geometryName + "\"}}").getBytes(StandardCharsets.UTF_8));
+            return EncodingUtils.base64Encode(("{\"geometry\":{\"default\":\"" + geometryName + "\"}}").getBytes(StandardCharsets.UTF_8));
         }
 
         public static ArmSizeType fromUUID(UUID uuid) {
