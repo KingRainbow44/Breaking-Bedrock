@@ -14,6 +14,7 @@ public final class DisconnectTranslator extends Translator<DisconnectPacket> {
 
     @Override
     public void translate(DisconnectPacket packet) {
+        this.logger.info("Disconnected from server for " + packet.getKickMessage());
         this.bedrockClient.disconnect(packet.getKickMessage());
     }
 }
