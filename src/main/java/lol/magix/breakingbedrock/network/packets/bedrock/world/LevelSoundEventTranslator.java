@@ -27,6 +27,7 @@ public final class LevelSoundEventTranslator extends Translator<LevelSoundEventP
             case HIT -> {
                 var blockState = BlockStateTranslator.getRuntime2Java()
                         .get(packet.getExtraData());
+                if (blockState == null) return;
                 var soundGroup = blockState.getSoundGroup();
 
                 soundManager.play(new PositionedSoundInstance(soundGroup.getHitSound(), SoundCategory.BLOCKS,
