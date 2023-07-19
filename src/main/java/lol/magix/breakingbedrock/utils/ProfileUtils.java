@@ -59,20 +59,21 @@ public interface ProfileUtils {
         var armSize = ArmSizeType.fromUUID(uuid);
         var version = NetworkConstants.PACKET_CODEC.getMinecraftVersion();
 
+        var language = mcClient.getLanguageManager().getLanguage();
+        language = language.substring(0, 2) + language.substring(2).toUpperCase();
+
         var clientData = ClientData.builder()
                 .serverAddress(serverAddress)
                 .thirdPartyName(displayName)
                 .armSize(armSize)
                 .selfSignedId(uuid.toString())
-                .languageCode(mcClient.getLanguageManager().getLanguage())
+                .languageCode(language)
                 .gameVersion(version)
-                .currentInputMode(1)
-                .defaultInputMode(1)
-                .deviceId(String.valueOf(uuid.getMostSignificantBits()))
                 .clientRandomId(uuid.getLeastSignificantBits())
                 .skinGeometryData(EncodingUtils.base64Encode(
                         version.getBytes(StandardCharsets.UTF_8)))
                 .skinResourcePatch(armSize.getEncodedGeometryData())
+                .playFabId(System.getProperty("PlayFabId", ""))
                 .trustedSkin(true)
                 .build();
 
