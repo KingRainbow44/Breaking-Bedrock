@@ -10,8 +10,11 @@ public final class NameTagMetadataTranslator extends EntityMetadataTranslator<St
     @Override
     public void translate(EntityMetadata<String> data) {
         var entity = data.entity();
+        var name = data.value();
+        if (name.isEmpty()) return;
+
         if (entity instanceof NameableEntity mixinEntity) {
-            mixinEntity.setName(data.value());
+            mixinEntity.setName(name);
         }
     }
 }
