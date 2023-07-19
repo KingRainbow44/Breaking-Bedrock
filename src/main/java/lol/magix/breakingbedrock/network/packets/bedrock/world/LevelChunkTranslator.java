@@ -169,13 +169,21 @@ public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
                         for (var y = 0; y < 16; y++) {
                             var id = storage.get(x, y, z);
                             if (id != null && id != BlockPaletteTranslator.AIR_BLOCK_ID) {
-                                var blockState = BlockStateTranslator.getRuntime2Java().get(id);
-                                if (blockState == null) {
-                                    logger.debug("Missing block state for {}.", id);
-                                    blockState = GameConstants.FALLBACK_BLOCK.getDefaultState();
+                                var javaBlockState = BlockStateTranslator.getRuntime2Java().get(id);
+                                if (javaBlockState == null) {
+                                    // Fallback to the Bedrock block state.
+                                    var bedrockBlockState = BlockPaletteTranslator.getRuntime2Bedrock().get(id);
+                                    if (bedrockBlockState != null) {
+                                        javaBlockState = bedrockBlockState.toJavaBlockState();
+                                    }
+
+                                    if (javaBlockState == null) {
+                                        logger.debug(">>> Missing block state for {}.", id);
+                                        javaBlockState = GameConstants.FALLBACK_BLOCK.getDefaultState();
+                                    }
                                 }
 
-                                section.setBlockState(x, y, z, blockState);
+                                section.setBlockState(x, y, z, javaBlockState);
                             }
                         }
                     }
