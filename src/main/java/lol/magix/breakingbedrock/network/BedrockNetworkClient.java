@@ -134,7 +134,8 @@ public final class BedrockNetworkClient {
 
         this.connect().addListener((Promise<BedrockClientSession> promise) -> {
             if (isCanceled.get()){
-                promise.getNow().close("Connection closed.");
+                MinecraftClient.getInstance().execute(() ->
+                        promise.getNow().close("Connection closed."));
                 return;
             }
 
@@ -144,7 +145,8 @@ public final class BedrockNetworkClient {
                 MinecraftClient.getInstance().execute(() ->
                         ScreenUtils.disconnect(Text.of(throwable.getMessage())));
             } else {
-                statusUpdate.accept(Text.of("Logging in..."));
+                MinecraftClient.getInstance().execute(() ->
+                        statusUpdate.accept(Text.of("Logging in...")));
 
                 this.session = promise.getNow();
                 this.onSessionInitialized();
