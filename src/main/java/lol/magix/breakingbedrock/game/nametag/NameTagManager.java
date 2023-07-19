@@ -13,6 +13,9 @@ public final class NameTagManager {
     private static final Map<Integer, NameTag> nameTags
             = new ConcurrentHashMap<>();
 
+    /**
+     * Initializes the name tag manager.
+     */
     public static void initialize() {
         // Create a ticking thread.
         new Thread(() -> {
@@ -90,12 +93,6 @@ public final class NameTagManager {
             if (!entity.isAlive() && nameTag.isDisplayed()) {
                 nameTag.hide(); return;
             } else if (entity.isAlive() && !nameTag.isDisplayed()) {
-                nameTag.show(); return;
-            }
-
-            if (entity.isInvisible() && nameTag.isDisplayed()) {
-                nameTag.hide(); return;
-            } else if (!entity.isInvisible() && !nameTag.isDisplayed()) {
                 nameTag.show(); return;
             }
 
