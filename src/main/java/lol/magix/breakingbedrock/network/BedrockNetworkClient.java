@@ -9,6 +9,7 @@ import lol.magix.breakingbedrock.events.EventManager;
 import lol.magix.breakingbedrock.game.containers.PlayerContainerHolder;
 import lol.magix.breakingbedrock.game.scoreboards.ScoreboardHolder;
 import lol.magix.breakingbedrock.network.auth.Authentication;
+import lol.magix.breakingbedrock.network.translation.PacketTranslator;
 import lol.magix.breakingbedrock.objects.ConnectionDetails;
 import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
@@ -460,6 +461,13 @@ public final class BedrockNetworkClient {
         // Attempt to load resource packs.
         if (this.getData().isPacksDownloaded()) {
             this.getJavaNetworkClient().loadResourcePacks();
+        }
+
+        // Add all pending players.
+        var pending = this.getData().getPendingPlayers();
+        if (!pending.isEmpty()) {
+            pending.forEach(PacketTranslator.getBedrockTranslator()::translatePacket);
+            pending.clear();
         }
 
         this.getLogger().debug("Player has finished connecting.");

@@ -32,7 +32,10 @@ public final class AddPlayerTranslator extends Translator<AddPlayerPacket> {
     @Override
     public void translate(AddPlayerPacket packet) {
         var world = this.client().world;
-        if (world == null) return;
+        if (world == null) {
+            this.data().getPendingPlayers().add(packet);
+            return;
+        }
 
         var runtimeId = (int) packet.getRuntimeEntityId();
         var identity = packet.getUuid();

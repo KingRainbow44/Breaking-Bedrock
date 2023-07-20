@@ -4,6 +4,7 @@ import lol.magix.breakingbedrock.translators.pack.ResourcePackInfo;
 import lombok.Data;
 import org.cloudburstmc.protocol.bedrock.data.AuthoritativeMovementMode;
 import org.cloudburstmc.protocol.bedrock.data.PlayerPermission;
+import org.cloudburstmc.protocol.bedrock.packet.AddPlayerPacket;
 
 import java.util.*;
 
@@ -12,6 +13,7 @@ public final class SessionData {
     /* Server data. */
     private final Map<String, Integer> id2Runtime = new HashMap<>();
     private final List<ResourcePackInfo> activePacks = new ArrayList<>();
+    private final List<AddPlayerPacket> pendingPlayers = new ArrayList<>();
     private boolean packsDownloaded = true;
 
     /* Entity data. */
