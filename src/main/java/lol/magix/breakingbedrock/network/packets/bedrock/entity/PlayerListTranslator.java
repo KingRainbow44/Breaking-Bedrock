@@ -28,34 +28,22 @@ public final class PlayerListTranslator extends Translator<PlayerListPacket> {
                 Action.ADD_PLAYER :
                 Action.UPDATE_LISTED;
 
-        var toAdd = new ArrayList<Entry>();
-        var toRemove = new ArrayList<Entry>();
-
+        var entries = new ArrayList<Entry>();
         for (var entry : packet.getEntries()) {
             var profile = new GameProfile(entry.getUuid(), entry.getName());
-            var listEntry = new PlayerListS2CPacket.Entry(
-                    entry.getUuid(), profile, true, 0, GameMode.SURVIVAL,
-                    Text.of(profile.getName()), null);
+            var shouldList = action == Action.ADD_PLAYER;
 
-            if (action == Action.ADD_PLAYER) {
+            entries.add(new PlayerListS2CPacket.Entry(
+                    entry.getUuid(), profile, shouldList, 0, GameMode.SURVIVAL,
+                    Text.of(profile.getName()), null));
+
+            if (shouldList) {
                 SkinTranslator.addSerializedSkin(profile.getId(), entry.getSkin());
-
-                var existingEntry = this.javaClient()
-                        .getLocalNetwork().getPlayerListEntry(profile.getId());
-                if (existingEntry != null) toRemove.add(listEntry);
             }
-
-            toAdd.add(listEntry);
-        }
-
-        if (!toRemove.isEmpty()) {
-            this.javaClient().processPacket(new PlayerListS2CPacket(
-                    ProfileUtils.asPacket(toRemove, Action.UPDATE_LISTED)
-            ));
         }
 
         this.javaClient().processPacket(new PlayerListS2CPacket(
-                ProfileUtils.asPacket(toAdd, action)
+                ProfileUtils.asPacket(entries, action)
         ));
     }
 }

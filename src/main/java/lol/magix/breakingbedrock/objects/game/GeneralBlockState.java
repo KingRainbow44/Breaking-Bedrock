@@ -119,13 +119,13 @@ public final class GeneralBlockState {
             // Find the property object.
             var propertyObject = block.getStateManager().getProperty(property.getKey());
             if (propertyObject == null) {
-                BreakingBedrock.getLogger().warn("Unknown block property: " + property.getKey());
+                BreakingBedrock.getLogger().debug("Unknown block property: " + property.getKey());
                 continue;
             }
 
             state = BlockStateTranslator.parsePropertyValue(state, propertyObject, property.getValue());
             if (state == null) {
-                BreakingBedrock.getLogger().warn("Unknown block property value: " + property.getValue());
+                BreakingBedrock.getLogger().debug("Unknown block property value: " + property.getValue());
                 return null;
             }
         }
