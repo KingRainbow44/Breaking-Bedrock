@@ -21,13 +21,16 @@
     "interfaces.IMixinPlayerInteractEntityC2SPacket",
     "interfaces.IMixinTntEntity",
     "interfaces.IMixinWorldRenderer",
+    "protocol.MixinStartGameSerializer_v428",
     "serverlist.MixinConnectScreen",
     "serverlist.MixinMultiplayerScreen",
     "serverlist.MixinMultiplayerServerListWidget",
-    "serverlist.MixinServerList",
-    "protocol.MixinStartGameSerializer_v428"
+    "serverlist.MixinServerList"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "MixinPlayerEntity"
+  ]
 }
