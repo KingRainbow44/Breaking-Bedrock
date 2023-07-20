@@ -57,6 +57,7 @@ public final class UpdateBlockTranslator extends Translator<UpdateBlockPacket> {
         }
 
         // Update the block in the world.
-        world.setBlockState(blockPos, newState);
+        final var newStateF = newState;
+        this.run(() -> world.setBlockState(blockPos, newStateF));
     }
 }
