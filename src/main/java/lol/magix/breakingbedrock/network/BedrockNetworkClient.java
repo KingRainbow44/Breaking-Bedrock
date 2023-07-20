@@ -429,7 +429,7 @@ public final class BedrockNetworkClient {
             this.blockActions.clear();
 
         // Clear resource packs.
-        if (this.data.getActivePacks().size() > 0) {
+        if (this.data != null && this.data.getActivePacks().size() > 0) {
             var client = MinecraftClient.getInstance();
             client.getResourcePackManager().scanPacks();
             client.reloadResourcesConcurrently();
