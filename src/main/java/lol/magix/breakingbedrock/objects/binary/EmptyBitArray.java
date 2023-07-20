@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EmptyBitArray implements BitArray {
-    private static final BitArray INSTANCE = new EmptyBitArray();
+    public static final BitArray INSTANCE = new EmptyBitArray();
 
     @Override
     public void set(int index, int value) {

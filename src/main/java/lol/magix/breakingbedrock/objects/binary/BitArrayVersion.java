@@ -41,6 +41,8 @@ public enum BitArrayVersion {
     }
 
     public int getWordsForSize(int size) {
+        if (this.entriesPerWord == 0) return 0;
+
         return (size / entriesPerWord) + (size % entriesPerWord == 0 ? 0 : 1);
     }
 
@@ -53,6 +55,10 @@ public enum BitArrayVersion {
     }
 
     public BitArray createPalette(int size, int[] words) {
+        if (this == V0) {
+            return EmptyBitArray.INSTANCE;
+        }
+
         if (this == V3 || this == V5 || this == V6) {
             // Padded palettes aren't able to use bitwise operations due to their padding.
             return new PaddedBitArray(this, size, words);
