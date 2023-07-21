@@ -89,6 +89,10 @@ public final class ItemTranslator {
      */
     public static ItemStack bedrock2Java(ItemData data) {
         var definition = data.getDefinition();
+
+        // noinspection ConstantValue
+        if (definition == null) return ItemStack.EMPTY;
+
         var item = bedrock2Java.get(
                 definition.getIdentifier() + ":" + data.getDamage());
         if (item == null) {
