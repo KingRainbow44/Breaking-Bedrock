@@ -4,6 +4,7 @@ import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.Pair;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
+import lol.magix.breakingbedrock.translators.ItemTranslator;
 import lol.magix.breakingbedrock.translators.entity.EntityMetadataTranslator;
 import lol.magix.breakingbedrock.utils.GameUtils;
 import net.minecraft.entity.EntityType;
@@ -32,6 +33,7 @@ public final class AddItemEntityTranslator extends Translator<AddItemEntityPacke
             entity.setId(uniqueId);
             entity.setPosition(GameUtils.convert(packet.getPosition()));
             entity.setVelocity(GameUtils.convert(packet.getMotion()));
+            entity.setStack(ItemTranslator.bedrock2Java(packet.getItemInHand()));
 
             // Spawn the entity on the client.
             this.javaClient().processPacket(entity.createSpawnPacket());
