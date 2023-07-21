@@ -14,7 +14,10 @@ import lol.magix.breakingbedrock.utils.EncodingUtils;
 import lol.magix.breakingbedrock.utils.NetworkUtils;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import okhttp3.*;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
