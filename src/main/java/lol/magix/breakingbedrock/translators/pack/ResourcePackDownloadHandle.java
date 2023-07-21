@@ -49,6 +49,7 @@ public final class ResourcePackDownloadHandle {
                 // Delete the file.
                 if (!file.delete()) {
                     BreakingBedrock.getLogger().warn("Unable to delete existing resource pack.");
+                    return;
                 }
             }
             // Write the resource pack to the file system.
