@@ -2,6 +2,7 @@ package lol.magix.breakingbedrock.network.packets.bedrock.entity;
 
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.translation.Translator;
+import lol.magix.breakingbedrock.objects.absolute.GameConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import net.minecraft.entity.player.PlayerEntity;
 import org.cloudburstmc.protocol.bedrock.packet.MoveEntityAbsolutePacket;
@@ -31,7 +32,7 @@ public final class MoveEntityAbsoluteTranslator extends Translator<MoveEntityAbs
 
         // Adjust the Y level by offsetting the player height.
         if (entity instanceof PlayerEntity)
-            y -= 1.62f;
+            y -= GameConstants.PLAYER_OFFSET;
 
         var rotation = packet.getRotation();
         var pitch = rotation.getX();
