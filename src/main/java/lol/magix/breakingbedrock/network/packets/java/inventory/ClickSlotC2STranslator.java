@@ -164,7 +164,6 @@ public final class ClickSlotC2STranslator extends Translator<ClickSlotC2SPacket>
         ItemStack javaTargetStack = null;
 
         for (var entry : packet.getModifiedStacks().int2ObjectEntrySet()) {
-            System.out.println("Modified stack: " + entry.getIntKey());
             if (packet.getSlot() == entry.getIntKey()) continue;
 
             targetContainerId = ScreenHandlerTranslator.bedrock2Java(
