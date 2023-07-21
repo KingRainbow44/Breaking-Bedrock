@@ -30,7 +30,7 @@ public final class MovePlayerTranslator extends Translator<MovePlayerPacket> {
         var rotation = packet.getRotation();
 
         var x = position.getX();
-        var y = position.getY();
+        var y = position.getY() - GameConstants.PLAYER_OFFSET;
         var z = position.getZ();
 
         var pitch = rotation.getX();
@@ -53,8 +53,7 @@ public final class MovePlayerTranslator extends Translator<MovePlayerPacket> {
             if (entity == null) return;
 
             // Update the entity's position.
-            entity.updateTrackedPositionAndAngles(x, y - GameConstants.PLAYER_OFFSET,
-                    z, yaw, pitch, 3, true);
+            entity.updateTrackedPositionAndAngles(x, y, z, yaw, pitch, 3, true);
             entity.updateTrackedHeadRotation(headYaw, 3);
             entity.setOnGround(packet.isOnGround());
         });
