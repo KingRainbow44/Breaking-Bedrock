@@ -49,6 +49,11 @@ public final class UpdateAttributesTranslator extends Translator<UpdateAttribute
                 }
             }
 
+            // Validate experience.
+            if (experience < 0 ||
+                    experience > 1)
+                experience = 0;
+
             // Send the client packets to update the attributes.
             this.javaClient().processPacket(new HealthUpdateS2CPacket(
                     health, food, saturation));
