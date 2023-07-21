@@ -14,6 +14,8 @@ public final class SessionData {
     private final Map<String, Integer> id2Runtime = new HashMap<>();
     private final List<ResourcePackInfo> activePacks = new ArrayList<>();
     private final List<AddPlayerPacket> pendingPlayers = new ArrayList<>();
+
+    private String serverBrand = "Bedrock";
     private boolean packsDownloaded = true;
 
     /* Entity data. */

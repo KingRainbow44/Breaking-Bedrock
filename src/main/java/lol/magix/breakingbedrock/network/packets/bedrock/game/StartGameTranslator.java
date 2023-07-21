@@ -77,6 +77,9 @@ public final class StartGameTranslator extends Translator<StartGamePacket> {
         );
         this.javaClient().processPacket(gameJoinPacket);
 
+        // Set the server brand.
+        this.data().setServerBrand(packet.getServerEngine());
+
         // Set the spawn position.
         this.javaClient().processPacket(new PlayerSpawnPositionS2CPacket(
                 GameUtils.toBlockPos(packet.getDefaultSpawn()), 0f

@@ -470,6 +470,9 @@ public final class BedrockNetworkClient {
             pending.clear();
         }
 
+        // Set the server brand.
+        player.setServerBrand(this.getData().getServerBrand());
+
         this.getLogger().debug("Player has finished connecting.");
     }
 
