@@ -1,12 +1,11 @@
 package lol.magix.breakingbedrock.network;
 
 import com.mojang.authlib.GameProfile;
-import lol.magix.breakingbedrock.utils.ScreenUtils;
+import lol.magix.breakingbedrock.utils.TextUtils;
 import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.client.util.telemetry.TelemetrySender;
 import net.minecraft.client.util.telemetry.WorldSession;
 import net.minecraft.entity.EntityPose;
@@ -15,6 +14,7 @@ import net.minecraft.network.NetworkSide;
 import net.minecraft.network.OffThreadException;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.resource.DirectoryResourcePack;
 import net.minecraft.resource.ResourcePackProfile;
 import net.minecraft.resource.ResourcePackProfile.InsertionPosition;
@@ -140,12 +140,18 @@ public final class JavaNetworkClient {
 
     /**
      * Disconnects from the server.
+     *
+     * @param reason The reason for disconnecting.
      */
-    public void disconnect() {
+    public void disconnect(String reason) {
         var world = this.client.world;
-        if (world == null) return;
+        if (world != null) {
+            // Disconnect from the world.
+            world.disconnect();
+        }
 
-        // Disconnect from the world.
-        world.disconnect();
+        // Process the disconnected packet.
+        this.localNetwork.onDisconnect(new DisconnectS2CPacket(
+                TextUtils.translate(reason)));
     }
 }

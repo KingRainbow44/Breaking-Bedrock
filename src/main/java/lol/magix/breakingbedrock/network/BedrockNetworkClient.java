@@ -388,13 +388,15 @@ public final class BedrockNetworkClient {
     public void disconnect(String reason) {
         // Display a disconnect screen.
         if (this.getJavaNetworkClient() != null)
-            this.getJavaNetworkClient().disconnect();
+            this.getJavaNetworkClient().disconnect(reason);
 
         // Disconnect from the server.
         if (this.session != null && this.session.isConnected())
             this.session.close(reason);
 
-        this.onDisconnect(reason);
+        // Disconnect the client.
+
+        this.onDisconnect();
     }
 
     /*
@@ -414,13 +416,8 @@ public final class BedrockNetworkClient {
 
     /**
      * Invoked when the client is disconnected.
-     * @param reason The reason for disconnection.
      */
-    public void onDisconnect(String reason) {
-        // Display a client disconnect screen.
-        MinecraftClient.getInstance().execute(() ->
-                ScreenUtils.disconnect(Text.of(reason)));
-
+    public void onDisconnect() {
         // Un-register the input handler listener.
         if (this.inputHandler != null)
             this.inputHandler.unregisterHandler();
