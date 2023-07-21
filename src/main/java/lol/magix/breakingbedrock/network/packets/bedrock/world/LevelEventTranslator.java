@@ -19,6 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.WorldEvents;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.LevelEvent;
@@ -123,10 +124,15 @@ public final class LevelEventTranslator extends Translator<LevelEventPacket> {
                         } catch (UnsupportedOperationException ignored) { }
                     }
                 }
-                case PARTICLE_DESTROY_BLOCK -> MinecraftClient.getInstance()
-                        .execute(() -> world.syncWorldEvent(client.player, 2001,
+                case PARTICLE_DESTROY_BLOCK -> this.run(() ->
+                        world.syncWorldEvent(client.player, 2001,
                                 GameUtils.toBlockPos(packet.getPosition().toInt()),
                                 Block.getRawIdFromState(BlockStateTranslator.getRuntime2Java().get(packet.getData()))));
+                case PARTICLE_POTION_SPLASH -> this.run(() ->
+                        world.syncWorldEvent(client.player,
+                                WorldEvents.SPLASH_POTION_SPLASHED,
+                                GameUtils.toBlockPos(packet.getPosition().toInt()),
+                                packet.getData()));
             }
         }
     }
