@@ -8,6 +8,7 @@ import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.entity.EntityMetadataTranslator;
 import lol.magix.breakingbedrock.translators.entity.EntityTranslator;
 import lol.magix.breakingbedrock.utils.GameUtils;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
@@ -27,23 +28,24 @@ public final class AddEntityTranslator extends Translator<AddEntityPacket> {
                 .get(packet.getIdentifier());
         if (type == null) {
             this.logger.error("Invalid entity type: {}.", packet.getIdentifier());
-            return;
+            type = EntityType.ZOMBIE;
         }
 
         // Create the entity on the client.
         var entityId = (int) packet.getUniqueEntityId();
         var rotation = packet.getRotation();
 
+        final var typeF = type;
         this.run(() -> {
             var world = this.client().world;
             if (world == null) {
-                this.logger.error("Failed to create entity: {}.", type);
+                this.logger.error("Failed to create entity: {}.", typeF);
                 return;
             }
 
-            var entity = type.create(world);
+            var entity = typeF.create(world);
             if (entity == null) {
-                this.logger.error("Failed to create entity: {}.", type);
+                this.logger.error("Failed to create entity: {}.", typeF);
                 return;
             }
 
