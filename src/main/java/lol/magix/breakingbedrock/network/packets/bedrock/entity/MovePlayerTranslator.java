@@ -3,6 +3,7 @@ package lol.magix.breakingbedrock.network.packets.bedrock.entity;
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.network.packets.java.movement.TeleportConfirmC2STranslator;
 import lol.magix.breakingbedrock.network.translation.Translator;
+import lol.magix.breakingbedrock.objects.absolute.GameConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
@@ -52,7 +53,8 @@ public final class MovePlayerTranslator extends Translator<MovePlayerPacket> {
             if (entity == null) return;
 
             // Update the entity's position.
-            entity.updateTrackedPositionAndAngles(x, y, z, yaw, pitch, 3, true);
+            entity.updateTrackedPositionAndAngles(x, y - GameConstants.PLAYER_OFFSET,
+                    z, yaw, pitch, 3, true);
             entity.updateTrackedHeadRotation(headYaw, 3);
             entity.setOnGround(packet.isOnGround());
         });
