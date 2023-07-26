@@ -62,10 +62,15 @@ public final class AddPlayerTranslator extends Translator<AddPlayerPacket> {
             var networkHandler = this.javaClient().getLocalNetwork();
             if (networkHandler.getPlayerListEntry(identity) == null) {
                 // Create a player list entry.
+                var shortened = profile.getName();
+                if (shortened.length() > 16) {
+                    shortened = shortened.substring(0, 16);
+                }
+
                 var entry = new PlayerListS2CPacket.Entry(
                         identity, profile, true, 0,
                         ConversionUtils.convertBedrockGameMode(packet.getGameType()),
-                        Text.of(profile.getName()), null);
+                        Text.of(shortened), null);
                 this.javaClient().processPacket(new PlayerListS2CPacket(
                         ProfileUtils.asPacket(List.of(entry), Action.ADD_PLAYER)
                 ));

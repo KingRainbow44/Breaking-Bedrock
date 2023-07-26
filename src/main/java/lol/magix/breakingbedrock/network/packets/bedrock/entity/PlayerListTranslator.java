@@ -33,9 +33,14 @@ public final class PlayerListTranslator extends Translator<PlayerListPacket> {
             var profile = new GameProfile(entry.getUuid(), entry.getName());
             var shouldList = action == Action.ADD_PLAYER;
 
+            var shortened = profile.getName();
+            if (shortened.length() > 16) {
+                shortened = shortened.substring(0, 16);
+            }
+
             entries.add(new PlayerListS2CPacket.Entry(
                     entry.getUuid(), profile, shouldList, 0, GameMode.SURVIVAL,
-                    Text.of(profile.getName()), null));
+                    Text.of(shortened), null));
 
             if (shouldList) {
                 SkinTranslator.addSerializedSkin(profile.getId(), entry.getSkin());
