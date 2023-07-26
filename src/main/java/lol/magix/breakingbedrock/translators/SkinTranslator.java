@@ -105,7 +105,7 @@ public final class SkinTranslator {
         // Check the skin geometry type.
         if (!skin.getGeometryName().equals("geometry.humanoid.custom") &&
                 !skin.getGeometryName().equals("geometry.humanoid.customSlim")) {
-            BreakingBedrock.getLogger().warn("Discarding unknown geometry skin: {}", skin.getGeometryName());
+            BreakingBedrock.getLogger().debug("Discarding unknown geometry skin: {}", skin.getGeometryName());
             return;
         }
 

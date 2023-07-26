@@ -27,7 +27,7 @@ public final class AddEntityTranslator extends Translator<AddEntityPacket> {
         var type = EntityTranslator.bedrock2Entity
                 .get(packet.getIdentifier());
         if (type == null) {
-            this.logger.error("Invalid entity type: {}.", packet.getIdentifier());
+            this.logger.warn("Invalid entity type: {}.", packet.getIdentifier());
             type = EntityType.ZOMBIE;
         }
 
