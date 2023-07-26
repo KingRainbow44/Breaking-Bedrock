@@ -108,8 +108,12 @@ public final class LevelChunkTranslator extends Translator<LevelChunkPacket> {
             var chunk = new WorldChunk(world, new ChunkPos(chunkX, chunkZ),
                     UpgradeData.NO_UPGRADE_DATA, new ChunkTickScheduler<>(), new ChunkTickScheduler<>(),
                     0, processedSections, null, null);
-            this.javaClient().processPacket(new ChunkDataS2CPacket(
-                    chunk, world.getLightingProvider(), null, null));
+            try {
+                this.javaClient().processPacket(new ChunkDataS2CPacket(
+                        chunk, world.getLightingProvider(), null, null));
+            } catch (Exception exception) {
+                this.logger.debug("Failed to process chunk packet", exception);
+            }
 
             // Check the bedrock client ready state.
             this.bedrockClient.checkReadyState();
