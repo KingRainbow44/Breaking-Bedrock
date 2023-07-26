@@ -5,13 +5,11 @@ import lol.magix.breakingbedrock.network.BedrockNetworkClient;
 import lol.magix.breakingbedrock.network.packets.bedrock.inventory.ItemStackResponseTranslator;
 import lol.magix.breakingbedrock.objects.Triplet;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.util.math.MathHelper;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerSlotType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequestSlotData;
-import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.ItemStackRequestAction;
-import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.PlaceAction;
-import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.SwapAction;
-import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.TakeAction;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.*;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponseStatus;
 
 import java.util.*;
@@ -76,14 +74,49 @@ public final class ItemStackRequestBuilder {
         var destItem = dest.getItem(destSlot);
         var sourceItem = source.getItem(sourceSlot);
 
+        // Calculate the new item counts.
+        var newSourceCount = MathHelper.clamp(sourceItem.getCount() - amount, 0, sourceItem.getCount());
+        var newDestCount = MathHelper.clamp(destItem.getCount() + amount, 0, 64);
+
         // Create the action.
         this.actions.add(new TakeAction(amount,
                 new ItemStackRequestSlotData(sourceType, sourceSlot, sourceItem.getNetId()),
                 new ItemStackRequestSlotData(destType, destSlot, destItem.getNetId())));
 
         // Add the actions to the containers.
-        this.handleActions.add(new Triplet<>(source, sourceSlot, destItem));
-        this.handleActions.add(new Triplet<>(dest, destSlot, sourceItem));
+        this.handleActions.add(new Triplet<>(source, sourceSlot, destItem
+                .toBuilder().count(newDestCount).build()));
+        this.handleActions.add(new Triplet<>(dest, destSlot, sourceItem
+                .toBuilder().count(newSourceCount).build()));
+        return this;
+    }
+
+    /**
+     * Takes items from the created output slot to the destination slot.
+     *
+     * @param amount The amount of items to take.
+     * @param netId The net ID of the created item.
+     * @param dest The destination container.
+     * @param destType The destination container type.
+     * @param destSlot The destination slot.
+     * @return This instance.
+     */
+    public ItemStackRequestBuilder take(int amount, int netId,
+                                        Container dest, ContainerSlotType destType, int destSlot) {
+        // Get the item instances.
+        var destItem = dest.getItem(destSlot);
+
+        // Calculate the new item counts.
+        var newDestCount = MathHelper.clamp(destItem.getCount() + amount, 0, 64);
+
+        // Create the action.
+        this.actions.add(new TakeAction(amount,
+                new ItemStackRequestSlotData(ContainerSlotType.CREATED_OUTPUT, 50, netId),
+                new ItemStackRequestSlotData(destType, destSlot, destItem.getNetId())));
+
+        // Add the actions to the containers.
+        this.handleActions.add(new Triplet<>(dest, destSlot, destItem
+                .toBuilder().count(newDestCount).build()));
         return this;
     }
 
@@ -143,6 +176,71 @@ public final class ItemStackRequestBuilder {
         // Add the actions to the containers.
         this.handleActions.add(new Triplet<>(first, firstSlot, secondItem));
         this.handleActions.add(new Triplet<>(second, secondSlot, firstItem));
+        return this;
+    }
+
+    /**
+     * Drops an item from the inventory.
+     *
+     * @param amount The amount of items to drop. Use -1 to specify all.
+     * @param source The source container.
+     * @param sourceType The source container type.
+     * @param sourceSlot The source slot.
+     * @return This instance.
+     */
+    public ItemStackRequestBuilder drop(int amount, Container source, ContainerSlotType sourceType, int sourceSlot) {
+        // Get the item instance.
+        var sourceItem = source.getItem(sourceSlot);
+
+        // Calculate the amount of items to drop.
+        if (amount == -1) amount = sourceItem.getCount();
+        else amount = MathHelper.clamp(amount, 0, sourceItem.getCount());
+        if (amount == 0) return this; // Nothing to drop.
+
+        // Create the action.
+        this.actions.add(new DropAction(amount,
+                new ItemStackRequestSlotData(sourceType, sourceSlot, sourceItem.getNetId()),
+                false));
+
+        // Add the action to the container.
+        this.handleActions.add(new Triplet<>(source, sourceSlot, sourceItem
+                .toBuilder().count(sourceItem.getCount() - amount).build()));
+        return this;
+    }
+
+    /**
+     * "Crafts" an item from the creative inventory.
+     *
+     * @param creativeItemId The item ID of the item.
+     *                       This ID can be found in the creative inventory packet.
+     * @return This instance.
+     */
+    public ItemStackRequestBuilder create(int creativeItemId) {
+        // Create the action.
+        this.actions.add(new CraftCreativeAction(creativeItemId));
+        return this;
+    }
+
+    /**
+     * Destroys an item in the inventory.
+     *
+     * @param amount The amount of items to destroy.
+     * @param source The source container.
+     * @param sourceType The source container type.
+     * @param sourceSlot The source slot.
+     * @return This instance.
+     */
+    public ItemStackRequestBuilder destroy(int amount, Container source, ContainerSlotType sourceType, int sourceSlot) {
+        // Get the item instance.
+        var sourceItem = source.getItem(sourceSlot);
+
+        // Create the action.
+        this.actions.add(new DestroyAction(amount,
+                new ItemStackRequestSlotData(sourceType, sourceSlot, sourceItem.getNetId())));
+
+        // Add the action to the container.
+        this.handleActions.add(new Triplet<>(source, sourceSlot, sourceItem
+                .toBuilder().count(sourceItem.getCount() - amount).build()));
         return this;
     }
 

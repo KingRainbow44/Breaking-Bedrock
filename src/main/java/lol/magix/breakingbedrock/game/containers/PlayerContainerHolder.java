@@ -1,5 +1,6 @@
 package lol.magix.breakingbedrock.game.containers;
 
+import lol.magix.breakingbedrock.game.containers.generic.CreativeContainer;
 import lol.magix.breakingbedrock.game.containers.player.ArmorContainer;
 import lol.magix.breakingbedrock.game.containers.player.CursorContainer;
 import lol.magix.breakingbedrock.game.containers.player.InventoryContainer;
@@ -24,6 +25,8 @@ public final class PlayerContainerHolder {
         this.containers.put(ContainerId.OFFHAND, new OffhandContainer());
         this.containers.put(ContainerId.ARMOR, new ArmorContainer());
         this.containers.put(ContainerId.UI, new CursorContainer());
+
+        this.containers.put(ContainerId.CREATIVE, new CreativeContainer());
     }
 
     /**
@@ -69,6 +72,13 @@ public final class PlayerContainerHolder {
      */
     public Container getCursor() {
         return this.getContainer(ContainerId.UI);
+    }
+
+    /**
+     * @return The creative container.
+     */
+    public Container getCreative() {
+        return this.getContainer(ContainerId.CREATIVE);
     }
 
     /**

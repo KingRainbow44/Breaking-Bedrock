@@ -9,9 +9,9 @@ import lol.magix.breakingbedrock.utils.GameUtils;
 import lombok.Getter;
 import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.GameMode;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.AuthoritativeMovementMode;
@@ -22,7 +22,6 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTra
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerActionPacket;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,9 +50,24 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
         var player = this.player();
         if (player == null) return;
 
+        var gameMode = interactionManager.getCurrentGameMode();
         var blockPos = GameUtils.toBlockPos(packet.getPos());
+
         switch (packet.getAction()) {
             case START_DESTROY_BLOCK -> {
+                // Check if the player is in creative.
+                if (gameMode.isCreative()) {
+                    // Send the creative interaction.
+                    var creativeActionPacket = new PlayerActionPacket();
+                    creativeActionPacket.setRuntimeEntityId(this.data().getRuntimeId());
+                    creativeActionPacket.setAction(PlayerActionType.DIMENSION_CHANGE_REQUEST_OR_CREATIVE_DESTROY_BLOCK);
+                    creativeActionPacket.setBlockPosition(blockPos);
+                    creativeActionPacket.setResultPosition(blockPos);
+                    creativeActionPacket.setFace(packet.getDirection().ordinal());
+
+                    this.bedrockClient.sendPacket(creativeActionPacket);
+                }
+
                 this.lastDirection = packet.getDirection();
                 this.lastBlockPos = blockPos;
 
@@ -68,8 +82,17 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
                 // Send continue breaking packets.
                 this.bedrockClient.getEventManager().registerListener(
                         PlayerTickEvent.class, this::onPlayerTick);
+
+                if (gameMode.isCreative()) {
+                    // Queue a stop destroy block.
+                    this.translate(new PlayerActionC2SPacket(
+                            Action.STOP_DESTROY_BLOCK,
+                            packet.getPos(),
+                            packet.getDirection()));
+                }
             }
             case STOP_DESTROY_BLOCK -> {
+                // Stop breaking the block.
                 var actionPacket = new PlayerActionPacket();
                 actionPacket.setAction(PlayerActionType.STOP_BREAK);
                 actionPacket.setBlockPosition(blockPos);
@@ -77,19 +100,6 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
                 actionPacket.setFace(packet.getDirection().ordinal());
 
                 this.sendPacket(actionPacket);
-
-                // Send a different packet if the player is in creative.
-                if (interactionManager.getCurrentGameMode() == GameMode.CREATIVE) {
-                    var creativeActionPacket = new PlayerActionPacket();
-                    creativeActionPacket.setRuntimeEntityId(this.data().getRuntimeId());
-                    creativeActionPacket.setAction(PlayerActionType.DIMENSION_CHANGE_REQUEST_OR_CREATIVE_DESTROY_BLOCK);
-                    creativeActionPacket.setBlockPosition(blockPos);
-                    creativeActionPacket.setResultPosition(blockPos);
-                    creativeActionPacket.setFace(packet.getDirection().ordinal());
-
-                    this.bedrockClient.sendPacket(creativeActionPacket);
-                    return;
-                }
 
                 // Stop breaking the block.
                 this.bedrockClient.getEventManager().removeListener(
@@ -118,9 +128,9 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
                 this.bedrockClient.sendPacket(transactionPacket);
 
                 // Remove the block from the client.
-                 this.javaClient().processPacket(new BlockUpdateS2CPacket(
-                         packet.getPos(), Blocks.AIR.getDefaultState()
-                 ));
+                this.javaClient().processPacket(new BlockUpdateS2CPacket(
+                        packet.getPos(), Blocks.AIR.getDefaultState()
+                ));
             }
             case ABORT_DESTROY_BLOCK -> {
                 var actionPacket = new PlayerActionPacket();
@@ -183,7 +193,7 @@ public final class PlayerActionC2STranslator extends Translator<PlayerActionC2SP
         for (var block : copy) {
             if (GameUtils.equals(block, this.lastBlockPos)) {
                 this.translate(new PlayerActionC2SPacket(
-                        PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
+                        Action.STOP_DESTROY_BLOCK,
                         GameUtils.toBlockPos(block), this.lastDirection
                 ));
 
