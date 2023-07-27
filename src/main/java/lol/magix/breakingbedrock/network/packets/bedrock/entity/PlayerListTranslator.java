@@ -34,7 +34,7 @@ public final class PlayerListTranslator extends Translator<PlayerListPacket> {
             var shouldList = action == Action.ADD_PLAYER;
 
             var shortened = profile.getName();
-            if (shortened.length() > 16) {
+            if (shortened != null && shortened.length() > 16) {
                 shortened = shortened.substring(0, 16);
             }
 

@@ -1,6 +1,7 @@
 package lol.magix.breakingbedrock.network;
 
 import lol.magix.breakingbedrock.network.translation.PacketTranslator;
+import lol.magix.breakingbedrock.objects.absolute.NetworkConstants;
 import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
 import lol.magix.breakingbedrock.objects.definitions.visualizer.PacketVisualizerData;
 import lombok.Data;
@@ -17,7 +18,8 @@ public final class BedrockPacketHandler
         var session = BedrockNetworkClient.getHandle();
         if (session == null) return PacketSignal.UNHANDLED;
 
-        if (session.isLogging()) {
+        var packetName = packet.getClass().getSimpleName();
+        if (session.isLogging() && !NetworkConstants.IGNORED_PACKETS.contains(packetName)) {
             // Visualize inbound packet.
             PacketVisualizer.getInstance().sendMessage(
                     PacketVisualizerData.toMessage(packet, false));

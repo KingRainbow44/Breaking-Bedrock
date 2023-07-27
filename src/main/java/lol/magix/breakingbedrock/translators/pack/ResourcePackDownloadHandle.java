@@ -34,6 +34,18 @@ public final class ResourcePackDownloadHandle {
 
         // Send chunk request packet.
         this.client.sendPacket(chunkPacket, true);
+        BreakingBedrock.getLogger().debug("Requested chunk {} of {} for resource pack {}.",
+                this.getCurrentChunk(), this.getChunks(), packInfo.getPackId());
+    }
+
+    /**
+     * @return True if there are more chunks to request.
+     */
+    public boolean hasMore() {
+        return this.getCurrentChunk() < this.getChunks() ||
+                (this.getChunks() == 0 &&
+                        this.getPackData().writerIndex() <
+                                this.getPackInfo().getPackSize());
     }
 
     /**
@@ -54,6 +66,9 @@ public final class ResourcePackDownloadHandle {
             }
             // Write the resource pack to the file system.
             Files.write(file.toPath(), this.getPackData().array());
+
+            BreakingBedrock.getLogger().debug("Finished downloading resource pack {}. (total chunks: {})",
+                    this.getPackInfo().getPackId(), this.getCurrentChunk());
         } catch (Exception exception) {
             BreakingBedrock.getLogger().warn("Unable to save resource pack.", exception);
         } finally {

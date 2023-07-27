@@ -5,7 +5,6 @@ import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import lol.magix.breakingbedrock.translators.pack.ResourcePackInfo;
 import lol.magix.breakingbedrock.translators.pack.ResourcePackTranslator;
-import lol.magix.breakingbedrock.utils.EncodingUtils;
 import org.cloudburstmc.protocol.bedrock.packet.ClientCacheStatusPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ResourcePackClientResponsePacket;
 import org.cloudburstmc.protocol.bedrock.packet.ResourcePackClientResponsePacket.Status;

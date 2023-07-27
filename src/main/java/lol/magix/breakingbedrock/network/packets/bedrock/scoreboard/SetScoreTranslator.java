@@ -52,7 +52,7 @@ public final class SetScoreTranslator extends Translator<SetScorePacket> {
                     action == Action.SET ? UpdateMode.CHANGE : UpdateMode.REMOVE,
                     entry.getObjectiveId(),
                     Objects.requireNonNullElse(name, ""),
-                    15 - entry.getScore()
+                    entry.getScore()
             ));
         }
     }

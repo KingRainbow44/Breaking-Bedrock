@@ -2,7 +2,6 @@ package lol.magix.breakingbedrock.network.packets.bedrock.scoreboard;
 
 import lol.magix.breakingbedrock.annotations.Translate;
 import lol.magix.breakingbedrock.game.scoreboards.ScoreboardContainer;
-import lol.magix.breakingbedrock.game.scoreboards.ScoreboardHolder;
 import lol.magix.breakingbedrock.network.translation.Translator;
 import lol.magix.breakingbedrock.objects.absolute.PacketType;
 import net.minecraft.network.packet.s2c.play.ScoreboardDisplayS2CPacket;

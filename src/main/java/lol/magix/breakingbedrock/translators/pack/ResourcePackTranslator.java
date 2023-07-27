@@ -93,9 +93,16 @@ public final class ResourcePackTranslator {
         // Try to request the first chunk.
         if (currentDownload == null) {
             currentDownload = info;
+
+            BreakingBedrock.getLogger().debug("Downloading resource pack {}.",
+                    info.getPackInfo().getPackId());
+
             info.requestChunk();
         } else {
             downloadQueue.add(info);
+
+            BreakingBedrock.getLogger().debug("Queued resource pack {} for download.",
+                    info.getPackInfo().getPackId());
         }
     }
 
@@ -116,12 +123,14 @@ public final class ResourcePackTranslator {
         info.getPackData().writeBytes(data);
 
         // Check if all data has been received.
-        if (info.getChunks() == info.getCurrentChunk()) {
+        if (!info.hasMore()) {
             info.completeDownload(); // Invoke completion handler.
 
             // Check if there are any queued downloads.
             if (downloadQueue.isEmpty()) {
                 currentDownload = null;
+
+                BreakingBedrock.getLogger().debug("All resource packs have been downloaded, loading now!");
 
                 var client = info.getClient();
                 // Send server resource pack packet.
@@ -134,6 +143,9 @@ public final class ResourcePackTranslator {
             } else {
                 currentDownload = downloadQueue.poll();
                 currentDownload.requestChunk();
+
+                BreakingBedrock.getLogger().debug("Queued resource pack {} is now downloading.",
+                        currentDownload.getPackInfo().getPackId());
             }
         } else {
             info.requestChunk(); // Request next chunk.
@@ -183,7 +195,8 @@ public final class ResourcePackTranslator {
 
         // Get the pack output directory.
         var outputDirectory = new File(packDirectory, "convert_output");
-        if (!outputDirectory.mkdirs()) throw new IOException("Failed to create output directory.");
+        if (!outputDirectory.exists() && !outputDirectory.mkdirs())
+            throw new IOException("Failed to create output directory.");
 
         // Convert the resource pack from Bedrock -> Java.
         // String resourcePackName;

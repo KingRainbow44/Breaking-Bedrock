@@ -63,7 +63,7 @@ public final class AddPlayerTranslator extends Translator<AddPlayerPacket> {
             if (networkHandler.getPlayerListEntry(identity) == null) {
                 // Create a player list entry.
                 var shortened = profile.getName();
-                if (shortened.length() > 16) {
+                if (shortened != null && shortened.length() > 16) {
                     shortened = shortened.substring(0, 16);
                 }
 
