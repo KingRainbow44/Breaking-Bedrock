@@ -44,8 +44,6 @@ public final class AddItemEntityTranslator extends Translator<AddItemEntityPacke
             var entries = entity.getDataTracker().getChangedEntries();
             if (entries != null) this.javaClient().processPacket(
                     new EntityTrackerUpdateS2CPacket(entity.getId(), entries));
-
-            this.javaClient().processPacket(entity.createSpawnPacket());
         });
     }
 }
