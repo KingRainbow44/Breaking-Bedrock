@@ -109,3 +109,13 @@ jar {
         rename { "${it}_${project.archivesBaseName}" }
     }
 }
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+    archiveClassifier = 'shadow-dev'
+}
+
+remapJar {
+    dependsOn shadowJar
+    inputFile = shadowJar.archiveFile.get()
+}
