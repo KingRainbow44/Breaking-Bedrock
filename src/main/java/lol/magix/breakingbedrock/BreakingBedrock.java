@@ -13,9 +13,9 @@ import lol.magix.breakingbedrock.objects.absolute.PacketVisualizer;
 import lol.magix.breakingbedrock.translators.ItemTranslator;
 import lol.magix.breakingbedrock.translators.blockstate.BlockPaletteTranslator;
 import lol.magix.breakingbedrock.translators.blockstate.BlockStateTranslator;
+import lol.magix.breakingbedrock.translators.blockstate.LegacyBlockPaletteTranslator;
 import lol.magix.breakingbedrock.translators.entity.EntityMetadataTranslator;
 import lol.magix.breakingbedrock.translators.entity.EntityTranslator;
-import lol.magix.breakingbedrock.translators.blockstate.LegacyBlockPaletteTranslator;
 import lol.magix.breakingbedrock.translators.blockentity.BlockEntityRegistry;
 import lol.magix.breakingbedrock.translators.pack.ResourcePackTranslator;
 import lol.magix.breakingbedrock.translators.screen.ScreenHandlerTranslator;
@@ -42,7 +42,7 @@ public final class BreakingBedrock {
             = new File(MinecraftClient.getInstance().runDirectory,
             "config/breakingbedrock");
     @Getter private static final boolean debugEnabled
-            = Objects.equals(System.getProperty("bedrockDebug"), "true");
+            = Objects.equals(System.getProperty("BedrockDebug"), "true");
     @Getter private static final EventLoopGroup eventGroup
             = new NioEventLoopGroup(0, ThreadFactoryBuilder.base());
 
@@ -81,7 +81,7 @@ public final class BreakingBedrock {
         var accessToken = System.getProperty("XboxAccessToken");
         if (accessToken == null || accessToken.isEmpty()) {
             System.setProperty("XboxAccessToken", XboxV2.getAccessToken()); // Attempt to get an access token.
-            logger.info("Xbox access token set. {}", System.getProperty("XboxAccessToken"));
+            logger.info("Xbox access token set from cache/authentication.");
         } else {
             logger.info("Xbox access token found. Xbox authentication is enabled.");
         }

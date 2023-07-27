@@ -1,58 +1,73 @@
 package lol.magix.breakingbedrock.translators.blockstate;
 
-import com.google.common.base.Preconditions;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import lol.magix.breakingbedrock.BreakingBedrock;
-import lol.magix.breakingbedrock.objects.absolute.GameConstants;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lol.magix.breakingbedrock.objects.absolute.Resources;
+import lol.magix.breakingbedrock.objects.game.GeneralBlockState;
 import lol.magix.breakingbedrock.utils.ResourceUtils;
 import lombok.Getter;
 import net.minecraft.block.BlockState;
-import org.cloudburstmc.nbt.NBTInputStream;
-import org.cloudburstmc.nbt.NbtList;
-import org.cloudburstmc.nbt.NbtMap;
-import org.cloudburstmc.nbt.NbtType;
-import org.cloudburstmc.nbt.util.stream.LittleEndianDataInputStream;
 
-import java.io.IOException;
-
-/**
- * Mappings for Bedrock (legacy blocks) to Java block palettes.
- */
 public final class LegacyBlockPaletteTranslator {
-    @Getter private static final Int2ObjectMap<BlockState> legacyToId = new Int2ObjectOpenHashMap<>();
+    @Getter private static final Int2ObjectMap<BlockState> legacyToId
+            = new Int2ObjectOpenHashMap<>();
+    @Getter private static final Object2IntMap<String> idToRuntime
+            = new Object2IntOpenHashMap<>();
 
     /**
      * Loads mappings from the mappings file.
      */
     public static void loadMappings() {
-        NbtList<NbtMap> legacyBlockStates = null;
+        {
+            // Load legacy block ID mappings.
+            var mappings = ResourceUtils.getResourceAsObject(
+                    Resources.LEGACY_BLOCK_IDS, JsonObject.class);
+            if (mappings == null) return;
 
-        // Read the legacy block states from the bindings file.
-        try (var mappings = ResourceUtils.getResourceAsStream(Resources.LEGACY_BLOCKS_BINDINGS)) {
-            try (var nbtStream = new NBTInputStream(new LittleEndianDataInputStream(mappings))) {
-                //noinspection unchecked
-                legacyBlockStates = (NbtList<NbtMap>) nbtStream.readTag();
-            }
-        } catch (IOException ignored) { }
+            // Load legacy block data mappings.
+            var data = ResourceUtils.getResourceAsObject(
+                    Resources.LEGACY_BLOCK_DATA, JsonArray.class);
+            if (data == null) return;
 
-        // Check if the legacy block states were loaded.
-        Preconditions.checkNotNull(legacyBlockStates, "Legacy block states could not be loaded.");
+            var blockRuntimeId = 0;
+            for (var element : data) {
+                var runtimeId = blockRuntimeId++; // Increment runtime ID.
 
-        // Parse the NBT map.
-        var runtimeId = -1;
-        for (var nbt : legacyBlockStates) {
-            runtimeId++; // Increment runtime ID.
+                var blockState = BlockPaletteTranslator.getRuntime2Bedrock().get(runtimeId);
+                var name = blockState.toString(false);
+                var mapping = mappings.get(name);
+                if (mapping == null) continue;
 
-            var states = nbt.getList("LegacyStates", NbtType.COMPOUND);
-            if (states != null) for (var state : states) {
-                var stateId = state.getInt("id") << 6 | state.getShort("val");
-                legacyToId.put(stateId, BlockStateTranslator.getRuntime2Java().getOrDefault(
-                                runtimeId, GameConstants.FALLBACK_BLOCK.getDefaultState()));
+                var id = mapping.getAsInt();
+                var metadata = element.getAsInt();
+
+                var legacyId = id << 6 | metadata;
+                legacyToId.put(legacyId, BlockStateTranslator.getRuntime2Java().get(runtimeId));
             }
         }
 
-        BreakingBedrock.getLogger().info("Loaded {} legacy block state palettes.", legacyToId.size());
+        {
+            // Load legacy block ID mappings.
+            var mappings = ResourceUtils.getResourceAsObject(
+                    Resources.LEGACY_JAVA, JsonObject.class);
+            if (mappings == null) return;
+
+            for (var entry : mappings.entrySet()) {
+                var legacy = entry.getKey();
+                var javaState = new GeneralBlockState(
+                        entry.getValue().getAsString());
+
+                // Look-up the Java state for the runtime ID.
+                var runtimeId = BlockStateTranslator.getJava2Runtime()
+                        .getInt(javaState.toJavaBlockState());
+                if (runtimeId <= 0) continue;
+
+                idToRuntime.put(legacy, runtimeId);
+            }
+        }
     }
 }

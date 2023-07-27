@@ -135,21 +135,33 @@ public final class GeneralBlockState {
 
     @Override
     public String toString() {
+        return this.toString(true);
+    }
+
+    /**
+     * Serializes the block state to a string.
+     *
+     * @param properties Whether to include properties.
+     * @return The serialized block state.
+     */
+    public String toString(boolean properties) {
         if (this.identifier == null)
             return null;
 
-        var hasProperties = this.properties.size() > 0;
+        var hasProperties = !this.properties.isEmpty() && properties;
         var builder = new StringBuilder(
                 this.namespace + ":" + this.identifier);
 
-        if (hasProperties) builder.append("[");
-        for (var entry : this.properties.entrySet()) {
-            builder.append(entry.getKey())
-                    .append("=")
-                    .append(entry.getValue())
-                    .append(",");
+        if (hasProperties) {
+            builder.append("[");
+            for (var entry : this.properties.entrySet()) {
+                builder.append(entry.getKey())
+                        .append("=")
+                        .append(entry.getValue())
+                        .append(",");
+            }
+            builder.deleteCharAt(builder.length() - 1);
         }
-        if (hasProperties) builder.deleteCharAt(builder.length() - 1);
 
         return builder + (hasProperties ? "]" : "");
     }

@@ -10,7 +10,6 @@ import lol.magix.breakingbedrock.objects.absolute.Resources;
 import lol.magix.breakingbedrock.objects.game.GeneralBlockState;
 import lol.magix.breakingbedrock.utils.ResourceUtils;
 import lombok.Getter;
-import net.minecraft.block.BlockState;
 import org.cloudburstmc.nbt.NBTInputStream;
 import org.cloudburstmc.nbt.NbtList;
 import org.cloudburstmc.nbt.NbtMap;
@@ -33,8 +32,6 @@ public final class BlockPaletteTranslator {
 
     @Getter private static final Object2IntMap<GeneralBlockState> bedrock2Runtime = new Object2IntOpenHashMap<>();
     @Getter private static final Int2ObjectMap<GeneralBlockState> runtime2Bedrock = new Int2ObjectOpenHashMap<>();
-
-    @Deprecated @Getter private static final Int2ObjectMap<BlockState> runtimeToState = new Int2ObjectOpenHashMap<>();
 
     /**
      * Loads mappings from the mappings file.

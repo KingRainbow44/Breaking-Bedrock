@@ -96,7 +96,17 @@ public final class DecodedPaletteStorage {
             var map = nbt.toBuilder();
 
             map.replace("name", "minecraft:" + map.get("name").toString());
-            return BlockPaletteTranslator.getBlockId(new GeneralBlockState(map.build()));
+
+            var state = new GeneralBlockState(map.build());
+            var id = BlockPaletteTranslator.getBlockId(state);
+            if (id == -1) {
+                id = LegacyBlockPaletteTranslator.getIdToRuntime()
+                        .getInt(state.toString());
+                BreakingBedrock.getLogger().warn(
+                        "Failed to find block ID for {}, using {} as a substitute.", state, id);
+            }
+
+            return id;
         } catch (IOException e) {
             BreakingBedrock.getLogger().warn("Failed to read block palette.", e);
         }
